@@ -2,11 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 
 import {
-  type Body_login_login_access_token as AccessToken,
-  LoginService,
+  type BodyLoginLoginAccessToken,
+  loginLoginAccessToken,
   type UserPublic,
   type UserRegister,
-  UsersService,
+  usersReadUserMe,
+  usersRegisterUser,
 } from "@/client"
 import { handleError } from "@/utils"
 import useCustomToast from "./useCustomToast"
@@ -22,13 +23,16 @@ const useAuth = () => {
 
   const { data: user } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
-    queryFn: UsersService.readUserMe,
+    queryFn: async () => {
+      const res = await usersReadUserMe()
+      return res.data ?? null
+    },
     enabled: isLoggedIn(),
   })
 
   const signUpMutation = useMutation({
     mutationFn: (data: UserRegister) =>
-      UsersService.registerUser({ requestBody: data }),
+      usersRegisterUser({ body: data }),
     onSuccess: () => {
       navigate({ to: "/login" })
     },
@@ -38,11 +42,9 @@ const useAuth = () => {
     },
   })
 
-  const login = async (data: AccessToken) => {
-    const response = await LoginService.loginAccessToken({
-      formData: data,
-    })
-    localStorage.setItem("access_token", response.access_token)
+  const login = async (data: BodyLoginLoginAccessToken) => {
+    const response = await loginLoginAccessToken({ body: data })
+    localStorage.setItem("access_token", response.data!.access_token)
   }
 
   const loginMutation = useMutation({

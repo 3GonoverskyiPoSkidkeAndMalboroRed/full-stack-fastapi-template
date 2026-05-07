@@ -15,6 +15,10 @@ const PendingItems = () => (
         <TableHead>ID</TableHead>
         <TableHead>Title</TableHead>
         <TableHead>Description</TableHead>
+        <TableHead>Category</TableHead>
+        <TableHead>Size</TableHead>
+        <TableHead>Brand</TableHead>
+        <TableHead>Cost</TableHead>
         <TableHead>
           <span className="sr-only">Actions</span>
         </TableHead>
@@ -31,6 +35,18 @@ const PendingItems = () => (
           </TableCell>
           <TableCell>
             <Skeleton className="h-4 w-48" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-16" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-20" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-16" />
           </TableCell>
           <TableCell>
             <div className="flex justify-end">

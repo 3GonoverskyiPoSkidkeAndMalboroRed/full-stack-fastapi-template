@@ -4,7 +4,16 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import (
+    Category,
+    CategoryCreate,
+    CategoryUpdate,
+    Item,
+    ItemCreate,
+    User,
+    UserCreate,
+    UserUpdate,
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -66,3 +75,27 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def create_category(*, session: Session, category_in: CategoryCreate) -> Category:
+    db_obj = Category.model_validate(category_in)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_category_by_name(*, session: Session, name: str) -> Category | None:
+    statement = select(Category).where(Category.name == name)
+    return session.exec(statement).first()
+
+
+def update_category(
+    *, session: Session, db_category: Category, category_in: CategoryUpdate
+) -> Category:
+    category_data = category_in.model_dump(exclude_unset=True)
+    db_category.sqlmodel_update(category_data)
+    session.add(db_category)
+    session.commit()
+    session.refresh(db_category)
+    return db_category

@@ -5,7 +5,15 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
+from app.models import (
+    Category,
+    Item,
+    ItemCreate,
+    ItemPublic,
+    ItemsPublic,
+    ItemUpdate,
+    Message,
+)
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -65,6 +73,10 @@ def create_item(
     """
     Create new item.
     """
+    if item_in.category_id is not None:
+        category = session.get(Category, item_in.category_id)
+        if not category:
+            raise HTTPException(status_code=404, detail="Category not found")
     item = Item.model_validate(item_in, update={"owner_id": current_user.id})
     session.add(item)
     session.commit()
@@ -89,6 +101,10 @@ def update_item(
     if not current_user.is_superuser and (item.owner_id != current_user.id):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     update_dict = item_in.model_dump(exclude_unset=True)
+    if "category_id" in update_dict and update_dict["category_id"] is not None:
+        category = session.get(Category, update_dict["category_id"])
+        if not category:
+            raise HTTPException(status_code=404, detail="Category not found")
     item.sqlmodel_update(update_dict)
     session.add(item)
     session.commit()

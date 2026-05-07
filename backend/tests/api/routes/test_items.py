@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.core.config import settings
+from tests.utils.category import create_random_category
 from tests.utils.item import create_random_item
 
 
@@ -162,3 +163,41 @@ def test_delete_item_not_enough_permissions(
     assert response.status_code == 403
     content = response.json()
     assert content["detail"] == "Not enough permissions"
+
+
+def test_create_item_with_new_fields(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    category = create_random_category(db)
+    data = {
+        "title": "Foo",
+        "description": "Fighters",
+        "size": "Large",
+        "brand": "TestBrand",
+        "cost": "19.99",
+        "category_id": str(category.id),
+    }
+    response = client.post(
+        f"{settings.API_V1_STR}/items/",
+        headers=superuser_token_headers,
+        json=data,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert content["title"] == data["title"]
+    assert content["size"] == data["size"]
+    assert content["brand"] == data["brand"]
+    assert content["cost"] == data["cost"]
+    assert content["category_id"] == data["category_id"]
+
+
+def test_create_item_with_invalid_category(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    data = {"title": "Foo", "category_id": str(uuid.uuid4())}
+    response = client.post(
+        f"{settings.API_V1_STR}/items/",
+        headers=superuser_token_headers,
+        json=data,
+    )
+    assert response.status_code == 404

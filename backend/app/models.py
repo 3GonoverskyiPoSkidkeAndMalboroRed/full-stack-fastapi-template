@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime, timezone
+from decimal import Decimal
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime
+from sqlalchemy import Column, DateTime, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -68,19 +69,59 @@ class UsersPublic(SQLModel):
 
 
 # Shared properties
+class CategoryBase(SQLModel):
+    name: str = Field(min_length=1, max_length=255)
+
+
+# Properties to receive via API on creation
+class CategoryCreate(CategoryBase):
+    pass
+
+
+# Properties to receive via API on update
+class CategoryUpdate(SQLModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+
+
+# Database model for Category
+class Category(CategoryBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    name: str = Field(unique=True, index=True, max_length=255)
+    items: list["Item"] = Relationship(back_populates="category")
+
+
+# Properties to return via API
+class CategoryPublic(CategoryBase):
+    id: uuid.UUID
+
+
+class CategoriesPublic(SQLModel):
+    data: list[CategoryPublic]
+    count: int
+
+
+# Shared properties
 class ItemBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=255)
+    size: str | None = Field(default=None, max_length=255)
+    brand: str | None = Field(default=None, max_length=255)
+    category_id: uuid.UUID | None = Field(default=None, foreign_key="category.id")
 
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
-    pass
+    cost: Decimal | None = Field(default=None)
 
 
 # Properties to receive on item update
-class ItemUpdate(ItemBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore[assignment]
+class ItemUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    size: str | None = Field(default=None, max_length=255)
+    brand: str | None = Field(default=None, max_length=255)
+    cost: Decimal | None = Field(default=None)
+    category_id: uuid.UUID | None = Field(default=None, foreign_key="category.id")
 
 
 # Database model, database table inferred from class name
@@ -93,13 +134,19 @@ class Item(ItemBase, table=True):
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
+    cost: Decimal | None = Field(
+        default=None,
+        sa_column=Column(Numeric(8, 2), nullable=True),
+    )
     owner: User | None = Relationship(back_populates="items")
+    category: Category | None = Relationship(back_populates="items")
 
 
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
     id: uuid.UUID
     owner_id: uuid.UUID
+    cost: Decimal | None = None
     created_at: datetime | None = None
 
 
