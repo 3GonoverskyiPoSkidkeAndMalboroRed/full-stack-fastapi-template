@@ -1,11 +1,23 @@
+import { useQuery } from "@tanstack/react-query"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Check, Copy } from "lucide-react"
 
-import type { ItemPublic } from "@/client"
+import { type ItemPublic, sizesReadSizes } from "@/client"
 import { Button } from "@/components/ui/button"
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard"
 import { cn } from "@/lib/utils"
 import { ItemActionsMenu } from "./ItemActionsMenu"
+
+function SizeCell({ id }: { id: string | null | undefined }) {
+  const { data: sizes = [] } = useQuery({
+    queryKey: ["sizes"],
+    queryFn: () => sizesReadSizes(),
+    select: (res) => res.data?.data ?? [],
+  })
+  if (!id) return <span className="italic text-muted-foreground">—</span>
+  const match = sizes.find((s) => s.id === id)
+  return <span>{match?.name ?? id}</span>
+}
 
 function CopyId({ id }: { id: string }) {
   const [copiedText, copy] = useCopyToClipboard()
@@ -66,8 +78,9 @@ export const columns: ColumnDef<ItemPublic>[] = [
     header: "Category",
   },
   {
-    accessorKey: "size",
+    accessorKey: "size_id",
     header: "Size",
+    cell: ({ row }) => <SizeCell id={row.original.size_id} />,
   },
   {
     accessorKey: "brand",

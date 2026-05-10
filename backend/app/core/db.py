@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 
 from sqlmodel import Session, create_engine, func, select
@@ -9,6 +10,7 @@ from app.models import (
     CategoryCreate,
     Item,
     ItemCreate,
+    Size,
     User,
     UserCreate,
 )
@@ -42,6 +44,7 @@ def init_db(session: Session) -> None:
         user = crud.create_user(session=session, user_create=user_in)
 
     _seed_categories(session)
+    _seed_sizes(session)
     _seed_items(session, user.id)
 
 
@@ -54,54 +57,77 @@ SEED_CATEGORIES = [
     "Дом и сад",
 ]
 
+SEED_SIZES = [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "42",
+    "43",
+    "One Size",
+]
+
 SEED_ITEMS = [
     {
         "title": "Кроссовки Air Max",
         "description": "Легкие беговые кроссовки",
-        "size": "42",
+        "size_name": "42",
         "brand": "Nike",
         "cost": Decimal("12999.00"),
         "category": "Обувь",
+        "image_url": "https://picsum.photos/seed/air-max/600/600",
+        "stock": 25,
     },
     {
         "title": "Футболка Classic",
         "description": "Хлопковая футболка",
-        "size": "M",
+        "size_name": "M",
         "brand": "Adidas",
         "cost": Decimal("2999.00"),
         "category": "Одежда",
+        "image_url": "https://picsum.photos/seed/classic-tee/600/600",
+        "stock": 50,
     },
     {
         "title": "Рюкзак Urban",
         "description": "Городской рюкзак для ноутбука",
-        "size": "One Size",
+        "size_name": "One Size",
         "brand": "Samsonite",
         "cost": Decimal("5499.00"),
         "category": "Аксессуары",
+        "image_url": "https://picsum.photos/seed/urban-bag/600/600",
+        "stock": 15,
     },
     {
         "title": "Наушники Pro Sound",
         "description": "Беспроводные наушники с шумоподавлением",
-        "size": "One Size",
+        "size_name": "One Size",
         "brand": "Sony",
         "cost": Decimal("15999.00"),
         "category": "Электроника",
+        "image_url": "https://picsum.photos/seed/pro-sound/600/600",
+        "stock": 10,
     },
     {
         "title": "Кеды Canvas",
         "description": "Повседневные кеды",
-        "size": "43",
+        "size_name": "43",
         "brand": "Converse",
         "cost": Decimal("6999.00"),
         "category": "Обувь",
+        "image_url": "https://picsum.photos/seed/canvas/600/600",
+        "stock": 30,
     },
     {
         "title": "Куртка Windbreaker",
         "description": "Легкая ветровка",
-        "size": "L",
+        "size_name": "L",
         "brand": "The North Face",
         "cost": Decimal("8999.00"),
         "category": "Одежда",
+        "image_url": "https://picsum.photos/seed/windbreaker/600/600",
+        "stock": 12,
     },
 ]
 
@@ -116,16 +142,37 @@ def _seed_categories(session: Session) -> None:
         crud.create_category(session=session, category_in=category_in)
 
 
-def _seed_items(session: Session, owner_id) -> None:
+def _seed_sizes(session: Session) -> None:
+    existing_count = session.exec(select(func.count()).select_from(Size)).one()
+    if existing_count > 0:
+        return
+
+    for name in SEED_SIZES:
+        session.add(Size(name=name))
+    session.commit()
+
+
+def _seed_items(session: Session, owner_id: uuid.UUID) -> None:
     existing_count = session.exec(select(func.count()).select_from(Item)).one()
     if existing_count > 0:
         return
 
     for item_data in SEED_ITEMS:
-        data = item_data.copy()
-        category_name = data.pop("category")
-        category = crud.get_category_by_name(session=session, name=category_name)
-        category_id = category.id if category else None
-
-        item_in = ItemCreate(category_id=category_id, **data)
+        category = crud.get_category_by_name(
+            session=session, name=str(item_data["category"])
+        )
+        size = crud.get_size_by_name(session=session, name=str(item_data["size_name"]))
+        cost_value = item_data["cost"]
+        stock_value = item_data.get("stock", 0)
+        image_url_value = item_data.get("image_url")
+        item_in = ItemCreate(
+            title=str(item_data["title"]),
+            description=str(item_data["description"]),
+            brand=str(item_data["brand"]),
+            cost=cost_value if isinstance(cost_value, Decimal) else None,
+            category_id=(category.id if category else None),
+            size_id=(size.id if size else None),
+            image_url=str(image_url_value) if image_url_value is not None else None,
+            stock=int(stock_value) if isinstance(stock_value, int) else 0,
+        )
         crud.create_item(session=session, item_in=item_in, owner_id=owner_id)

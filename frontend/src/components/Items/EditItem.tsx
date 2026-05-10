@@ -11,6 +11,7 @@ import {
   type ItemUpdate,
   itemsUpdateItem,
 } from "@/client"
+import { SizeCombobox } from "@/components/Common/SizeCombobox"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -45,7 +46,7 @@ import { handleError } from "@/utils"
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   description: z.string().optional(),
-  size: z.string().optional(),
+  size_id: z.string().optional(),
   brand: z.string().optional(),
   cost: z.string().optional(),
   category_id: z.string().optional(),
@@ -76,7 +77,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
     defaultValues: {
       title: item.title,
       description: item.description ?? undefined,
-      size: item.size ?? undefined,
+      size_id: item.size_id ?? undefined,
       brand: item.brand ?? undefined,
       cost: item.cost ?? undefined,
       category_id: item.category_id ?? undefined,
@@ -157,12 +158,15 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
 
               <FormField
                 control={form.control}
-                name="size"
+                name="size_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Size</FormLabel>
                     <FormControl>
-                      <Input placeholder="Size" type="text" {...field} />
+                      <SizeCombobox
+                        value={field.value}
+                        onChange={(id) => field.onChange(id ?? "")}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

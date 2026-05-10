@@ -1,7 +1,8 @@
 // Note: the `privateCreateUser` is only available when generating the client
 // for local environments
-import { client } from "../../src/client/client.gen"
+
 import { privateCreateUser } from "../../src/client"
+import { client } from "../../src/client/client.gen"
 
 client.setConfig({
   baseUrl: `${process.env.VITE_API_URL}`,

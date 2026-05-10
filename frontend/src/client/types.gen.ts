@@ -31,6 +31,71 @@ export type BodyLoginLoginAccessToken = {
 };
 
 /**
+ * CartItemCreate
+ */
+export type CartItemCreate = {
+    /**
+     * Item Id
+     */
+    item_id: string;
+    /**
+     * Quantity
+     */
+    quantity?: number;
+};
+
+/**
+ * CartItemPublic
+ */
+export type CartItemPublic = {
+    /**
+     * Quantity
+     */
+    quantity?: number;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Item Id
+     */
+    item_id: string;
+    item?: ItemPublic | null;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * CartItemUpdate
+ */
+export type CartItemUpdate = {
+    /**
+     * Quantity
+     */
+    quantity: number;
+};
+
+/**
+ * CartItemsPublic
+ */
+export type CartItemsPublic = {
+    /**
+     * Data
+     */
+    data: Array<CartItemPublic>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Subtotal
+     */
+    subtotal: string;
+};
+
+/**
  * CategoriesPublic
  */
 export type CategoriesPublic = {
@@ -101,9 +166,9 @@ export type ItemCreate = {
      */
     description?: string | null;
     /**
-     * Size
+     * Size Id
      */
-    size?: string | null;
+    size_id?: string | null;
     /**
      * Brand
      */
@@ -112,6 +177,14 @@ export type ItemCreate = {
      * Category Id
      */
     category_id?: string | null;
+    /**
+     * Image Url
+     */
+    image_url?: string | null;
+    /**
+     * Stock
+     */
+    stock?: number;
     /**
      * Cost
      */
@@ -131,9 +204,9 @@ export type ItemPublic = {
      */
     description?: string | null;
     /**
-     * Size
+     * Size Id
      */
-    size?: string | null;
+    size_id?: string | null;
     /**
      * Brand
      */
@@ -142,6 +215,14 @@ export type ItemPublic = {
      * Category Id
      */
     category_id?: string | null;
+    /**
+     * Image Url
+     */
+    image_url?: string | null;
+    /**
+     * Stock
+     */
+    stock?: number;
     /**
      * Id
      */
@@ -173,9 +254,9 @@ export type ItemUpdate = {
      */
     description?: string | null;
     /**
-     * Size
+     * Size Id
      */
-    size?: string | null;
+    size_id?: string | null;
     /**
      * Brand
      */
@@ -188,6 +269,14 @@ export type ItemUpdate = {
      * Category Id
      */
     category_id?: string | null;
+    /**
+     * Image Url
+     */
+    image_url?: string | null;
+    /**
+     * Stock
+     */
+    stock?: number | null;
 };
 
 /**
@@ -229,6 +318,123 @@ export type NewPassword = {
 };
 
 /**
+ * OrderCreate
+ */
+export type OrderCreate = {
+    /**
+     * Recipient Name
+     */
+    recipient_name: string;
+    /**
+     * Phone
+     */
+    phone: string;
+    /**
+     * Address
+     */
+    address: string;
+    /**
+     * Comment
+     */
+    comment?: string | null;
+};
+
+/**
+ * OrderItemPublic
+ */
+export type OrderItemPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Item Id
+     */
+    item_id: string | null;
+    /**
+     * Title Snapshot
+     */
+    title_snapshot: string;
+    /**
+     * Price Snapshot
+     */
+    price_snapshot: string;
+    /**
+     * Quantity
+     */
+    quantity: number;
+};
+
+/**
+ * OrderPublic
+ */
+export type OrderPublic = {
+    /**
+     * Recipient Name
+     */
+    recipient_name: string;
+    /**
+     * Phone
+     */
+    phone: string;
+    /**
+     * Address
+     */
+    address: string;
+    /**
+     * Comment
+     */
+    comment?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    status: OrderStatus;
+    /**
+     * Total
+     */
+    total: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Items
+     */
+    items?: Array<OrderItemPublic>;
+};
+
+/**
+ * OrderStatus
+ */
+export type OrderStatus = 'NEW' | 'PROCESSED' | 'PAID' | 'SHIPPED' | 'DELIVERED';
+
+/**
+ * OrderUpdate
+ */
+export type OrderUpdate = {
+    status?: OrderStatus | null;
+};
+
+/**
+ * OrdersPublic
+ */
+export type OrdersPublic = {
+    /**
+     * Data
+     */
+    data: Array<OrderPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * PrivateUserCreate
  */
 export type PrivateUserCreate = {
@@ -248,6 +454,54 @@ export type PrivateUserCreate = {
      * Is Verified
      */
     is_verified?: boolean;
+};
+
+/**
+ * SizeCreate
+ */
+export type SizeCreate = {
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * SizePublic
+ */
+export type SizePublic = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Id
+     */
+    id: string;
+};
+
+/**
+ * SizeUpdate
+ */
+export type SizeUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+};
+
+/**
+ * SizesPublic
+ */
+export type SizesPublic = {
+    /**
+     * Data
+     */
+    data: Array<SizePublic>;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**
@@ -432,6 +686,49 @@ export type ValidationError = {
     ctx?: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * WishlistItemCreate
+ */
+export type WishlistItemCreate = {
+    /**
+     * Item Id
+     */
+    item_id: string;
+};
+
+/**
+ * WishlistItemPublic
+ */
+export type WishlistItemPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Item Id
+     */
+    item_id: string;
+    item?: ItemPublic | null;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * WishlistItemsPublic
+ */
+export type WishlistItemsPublic = {
+    /**
+     * Data
+     */
+    data: Array<WishlistItemPublic>;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 export type LoginLoginAccessTokenData = {
@@ -863,6 +1160,78 @@ export type UtilsHealthCheckResponses = {
 
 export type UtilsHealthCheckResponse = UtilsHealthCheckResponses[keyof UtilsHealthCheckResponses];
 
+export type ItemsReadItemsPublicData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Category Id
+         */
+        category_id?: string | null;
+        /**
+         * Size Id
+         */
+        size_id?: string | null;
+    };
+    url: '/api/v1/items/public';
+};
+
+export type ItemsReadItemsPublicErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ItemsReadItemsPublicError = ItemsReadItemsPublicErrors[keyof ItemsReadItemsPublicErrors];
+
+export type ItemsReadItemsPublicResponses = {
+    /**
+     * Successful Response
+     */
+    200: ItemsPublic;
+};
+
+export type ItemsReadItemsPublicResponse = ItemsReadItemsPublicResponses[keyof ItemsReadItemsPublicResponses];
+
+export type ItemsReadItemPublicData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/items/public/{id}';
+};
+
+export type ItemsReadItemPublicErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ItemsReadItemPublicError = ItemsReadItemPublicErrors[keyof ItemsReadItemPublicErrors];
+
+export type ItemsReadItemPublicResponses = {
+    /**
+     * Successful Response
+     */
+    200: ItemPublic;
+};
+
+export type ItemsReadItemPublicResponse = ItemsReadItemPublicResponses[keyof ItemsReadItemPublicResponses];
+
 export type ItemsReadItemsData = {
     body?: never;
     path?: never;
@@ -1011,6 +1380,40 @@ export type ItemsUpdateItemResponses = {
 };
 
 export type ItemsUpdateItemResponse = ItemsUpdateItemResponses[keyof ItemsUpdateItemResponses];
+
+export type CategoriesReadCategoriesPublicData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/categories/public';
+};
+
+export type CategoriesReadCategoriesPublicErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CategoriesReadCategoriesPublicError = CategoriesReadCategoriesPublicErrors[keyof CategoriesReadCategoriesPublicErrors];
+
+export type CategoriesReadCategoriesPublicResponses = {
+    /**
+     * Successful Response
+     */
+    200: CategoriesPublic;
+};
+
+export type CategoriesReadCategoriesPublicResponse = CategoriesReadCategoriesPublicResponses[keyof CategoriesReadCategoriesPublicResponses];
 
 export type CategoriesReadCategoriesData = {
     body?: never;
@@ -1161,6 +1564,500 @@ export type CategoriesUpdateCategoryResponses = {
 
 export type CategoriesUpdateCategoryResponse = CategoriesUpdateCategoryResponses[keyof CategoriesUpdateCategoryResponses];
 
+export type SizesReadSizesPublicData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/sizes/public';
+};
+
+export type SizesReadSizesPublicErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SizesReadSizesPublicError = SizesReadSizesPublicErrors[keyof SizesReadSizesPublicErrors];
+
+export type SizesReadSizesPublicResponses = {
+    /**
+     * Successful Response
+     */
+    200: SizesPublic;
+};
+
+export type SizesReadSizesPublicResponse = SizesReadSizesPublicResponses[keyof SizesReadSizesPublicResponses];
+
+export type SizesReadSizesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/sizes/';
+};
+
+export type SizesReadSizesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SizesReadSizesError = SizesReadSizesErrors[keyof SizesReadSizesErrors];
+
+export type SizesReadSizesResponses = {
+    /**
+     * Successful Response
+     */
+    200: SizesPublic;
+};
+
+export type SizesReadSizesResponse = SizesReadSizesResponses[keyof SizesReadSizesResponses];
+
+export type SizesCreateSizeData = {
+    body: SizeCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/sizes/';
+};
+
+export type SizesCreateSizeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SizesCreateSizeError = SizesCreateSizeErrors[keyof SizesCreateSizeErrors];
+
+export type SizesCreateSizeResponses = {
+    /**
+     * Successful Response
+     */
+    200: SizePublic;
+};
+
+export type SizesCreateSizeResponse = SizesCreateSizeResponses[keyof SizesCreateSizeResponses];
+
+export type SizesDeleteSizeData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/sizes/{id}';
+};
+
+export type SizesDeleteSizeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SizesDeleteSizeError = SizesDeleteSizeErrors[keyof SizesDeleteSizeErrors];
+
+export type SizesDeleteSizeResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type SizesDeleteSizeResponse = SizesDeleteSizeResponses[keyof SizesDeleteSizeResponses];
+
+export type SizesReadSizeData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/sizes/{id}';
+};
+
+export type SizesReadSizeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SizesReadSizeError = SizesReadSizeErrors[keyof SizesReadSizeErrors];
+
+export type SizesReadSizeResponses = {
+    /**
+     * Successful Response
+     */
+    200: SizePublic;
+};
+
+export type SizesReadSizeResponse = SizesReadSizeResponses[keyof SizesReadSizeResponses];
+
+export type SizesUpdateSizeData = {
+    body: SizeUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/sizes/{id}';
+};
+
+export type SizesUpdateSizeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SizesUpdateSizeError = SizesUpdateSizeErrors[keyof SizesUpdateSizeErrors];
+
+export type SizesUpdateSizeResponses = {
+    /**
+     * Successful Response
+     */
+    200: SizePublic;
+};
+
+export type SizesUpdateSizeResponse = SizesUpdateSizeResponses[keyof SizesUpdateSizeResponses];
+
+export type CartClearCartData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/cart/';
+};
+
+export type CartClearCartResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type CartClearCartResponse = CartClearCartResponses[keyof CartClearCartResponses];
+
+export type CartReadCartData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/cart/';
+};
+
+export type CartReadCartResponses = {
+    /**
+     * Successful Response
+     */
+    200: CartItemsPublic;
+};
+
+export type CartReadCartResponse = CartReadCartResponses[keyof CartReadCartResponses];
+
+export type CartAddCartItemData = {
+    body: CartItemCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/cart/';
+};
+
+export type CartAddCartItemErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CartAddCartItemError = CartAddCartItemErrors[keyof CartAddCartItemErrors];
+
+export type CartAddCartItemResponses = {
+    /**
+     * Successful Response
+     */
+    200: CartItemPublic;
+};
+
+export type CartAddCartItemResponse = CartAddCartItemResponses[keyof CartAddCartItemResponses];
+
+export type CartDeleteCartItemData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/cart/{id}';
+};
+
+export type CartDeleteCartItemErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CartDeleteCartItemError = CartDeleteCartItemErrors[keyof CartDeleteCartItemErrors];
+
+export type CartDeleteCartItemResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type CartDeleteCartItemResponse = CartDeleteCartItemResponses[keyof CartDeleteCartItemResponses];
+
+export type CartUpdateCartItemData = {
+    body: CartItemUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/cart/{id}';
+};
+
+export type CartUpdateCartItemErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CartUpdateCartItemError = CartUpdateCartItemErrors[keyof CartUpdateCartItemErrors];
+
+export type CartUpdateCartItemResponses = {
+    /**
+     * Successful Response
+     */
+    200: CartItemPublic;
+};
+
+export type CartUpdateCartItemResponse = CartUpdateCartItemResponses[keyof CartUpdateCartItemResponses];
+
+export type WishlistReadWishlistData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/wishlist/';
+};
+
+export type WishlistReadWishlistResponses = {
+    /**
+     * Successful Response
+     */
+    200: WishlistItemsPublic;
+};
+
+export type WishlistReadWishlistResponse = WishlistReadWishlistResponses[keyof WishlistReadWishlistResponses];
+
+export type WishlistAddWishlistItemData = {
+    body: WishlistItemCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/wishlist/';
+};
+
+export type WishlistAddWishlistItemErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type WishlistAddWishlistItemError = WishlistAddWishlistItemErrors[keyof WishlistAddWishlistItemErrors];
+
+export type WishlistAddWishlistItemResponses = {
+    /**
+     * Successful Response
+     */
+    200: WishlistItemPublic;
+};
+
+export type WishlistAddWishlistItemResponse = WishlistAddWishlistItemResponses[keyof WishlistAddWishlistItemResponses];
+
+export type WishlistDeleteWishlistItemData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/wishlist/{id}';
+};
+
+export type WishlistDeleteWishlistItemErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type WishlistDeleteWishlistItemError = WishlistDeleteWishlistItemErrors[keyof WishlistDeleteWishlistItemErrors];
+
+export type WishlistDeleteWishlistItemResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type WishlistDeleteWishlistItemResponse = WishlistDeleteWishlistItemResponses[keyof WishlistDeleteWishlistItemResponses];
+
+export type OrdersReadOrdersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Status
+         */
+        status?: OrderStatus | null;
+    };
+    url: '/api/v1/orders/';
+};
+
+export type OrdersReadOrdersErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OrdersReadOrdersError = OrdersReadOrdersErrors[keyof OrdersReadOrdersErrors];
+
+export type OrdersReadOrdersResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrdersPublic;
+};
+
+export type OrdersReadOrdersResponse = OrdersReadOrdersResponses[keyof OrdersReadOrdersResponses];
+
+export type OrdersCreateOrderData = {
+    body: OrderCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/orders/';
+};
+
+export type OrdersCreateOrderErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OrdersCreateOrderError = OrdersCreateOrderErrors[keyof OrdersCreateOrderErrors];
+
+export type OrdersCreateOrderResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrderPublic;
+};
+
+export type OrdersCreateOrderResponse = OrdersCreateOrderResponses[keyof OrdersCreateOrderResponses];
+
+export type OrdersReadOrderData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/orders/{id}';
+};
+
+export type OrdersReadOrderErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OrdersReadOrderError = OrdersReadOrderErrors[keyof OrdersReadOrderErrors];
+
+export type OrdersReadOrderResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrderPublic;
+};
+
+export type OrdersReadOrderResponse = OrdersReadOrderResponses[keyof OrdersReadOrderResponses];
+
+export type OrdersUpdateOrderStatusData = {
+    body: OrderUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/orders/{id}/status';
+};
+
+export type OrdersUpdateOrderStatusErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OrdersUpdateOrderStatusError = OrdersUpdateOrderStatusErrors[keyof OrdersUpdateOrderStatusErrors];
+
+export type OrdersUpdateOrderStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrderPublic;
+};
+
+export type OrdersUpdateOrderStatusResponse = OrdersUpdateOrderStatusResponses[keyof OrdersUpdateOrderStatusResponses];
+
 export type PrivateCreateUserData = {
     body: PrivateUserCreate;
     path?: never;
@@ -1187,5 +2084,5 @@ export type PrivateCreateUserResponses = {
 export type PrivateCreateUserResponse = PrivateCreateUserResponses[keyof PrivateCreateUserResponses];
 
 export type ClientOptions = {
-    baseUrl: `${string}://openapi.json` | (string & {});
+    baseUrl: `${string}://${string}` | (string & {});
 };

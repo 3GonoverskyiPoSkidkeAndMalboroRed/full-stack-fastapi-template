@@ -3,7 +3,9 @@
     "allow": [
       "Bash(docker compose:*)",
       "Bash(curl -sv \"http://localhost:5173/api/v1/users/me\")",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npx:*)",
+      "Bash(bun run:*)"
     ]
   }
 }

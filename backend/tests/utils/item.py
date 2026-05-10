@@ -5,6 +5,7 @@ from sqlmodel import Session
 from app import crud
 from app.models import Item, ItemCreate
 from tests.utils.category import create_random_category
+from tests.utils.size import create_random_size
 from tests.utils.user import create_random_user
 from tests.utils.utils import random_lower_string
 
@@ -15,14 +16,14 @@ def create_random_item(db: Session) -> Item:
     assert owner_id is not None
     title = random_lower_string()
     description = random_lower_string()
-    size = random_lower_string()
+    size = create_random_size(db)
     brand = random_lower_string()
     cost = Decimal("19.99")
     category = create_random_category(db)
     item_in = ItemCreate(
         title=title,
         description=description,
-        size=size,
+        size_id=size.id,
         brand=brand,
         cost=cost,
         category_id=category.id,

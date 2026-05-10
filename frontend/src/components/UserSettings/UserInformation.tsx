@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { usersUpdateUserMe, type UserUpdateMe } from "@/client"
+import { type UserUpdateMe, usersUpdateUserMe } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -49,8 +49,7 @@ const UserInformation = () => {
   }
 
   const mutation = useMutation({
-    mutationFn: (data: UserUpdateMe) =>
-      usersUpdateUserMe({ body: data }),
+    mutationFn: (data: UserUpdateMe) => usersUpdateUserMe({ body: data }),
     onSuccess: () => {
       showSuccessToast("User updated successfully")
       toggleEditMode()

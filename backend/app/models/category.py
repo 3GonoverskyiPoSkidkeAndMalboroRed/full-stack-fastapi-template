@@ -1,8 +1,10 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
 
-from app.models.user import get_datetime_utc
+if TYPE_CHECKING:
+    from app.models.item import Item
 
 
 # Shared properties

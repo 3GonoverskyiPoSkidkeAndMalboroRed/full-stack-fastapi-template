@@ -1,7 +1,4 @@
-import {
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
@@ -18,7 +15,10 @@ client.setConfig({
 })
 
 client.interceptors.error.use((error, response) => {
-  if ([401, 403].includes(response.status)) {
+  if (
+    [401, 403].includes(response.status) &&
+    localStorage.getItem("access_token")
+  ) {
     localStorage.removeItem("access_token")
     window.location.href = "/login"
   }

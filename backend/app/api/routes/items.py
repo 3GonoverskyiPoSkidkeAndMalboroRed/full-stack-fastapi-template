@@ -13,9 +13,48 @@ from app.models import (
     ItemsPublic,
     ItemUpdate,
     Message,
+    Size,
 )
 
 router = APIRouter(prefix="/items", tags=["items"])
+
+
+@router.get("/public", response_model=ItemsPublic)
+def read_items_public(
+    session: SessionDep,
+    skip: int = 0,
+    limit: int = 100,
+    category_id: uuid.UUID | None = None,
+    size_id: uuid.UUID | None = None,
+) -> Any:
+    """
+    Public catalog listing — no authentication required.
+    """
+    count_statement = select(func.count()).select_from(Item)
+    statement = (
+        select(Item).order_by(col(Item.created_at).desc()).offset(skip).limit(limit)
+    )
+    if category_id is not None:
+        count_statement = count_statement.where(Item.category_id == category_id)
+        statement = statement.where(Item.category_id == category_id)
+    if size_id is not None:
+        count_statement = count_statement.where(Item.size_id == size_id)
+        statement = statement.where(Item.size_id == size_id)
+    count = session.exec(count_statement).one()
+    items = session.exec(statement).all()
+    items_public = [ItemPublic.model_validate(item) for item in items]
+    return ItemsPublic(data=items_public, count=count)
+
+
+@router.get("/public/{id}", response_model=ItemPublic)
+def read_item_public(session: SessionDep, id: uuid.UUID) -> Any:
+    """
+    Public product detail — no authentication required.
+    """
+    item = session.get(Item, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
 
 
 @router.get("/", response_model=ItemsPublic)
@@ -77,6 +116,10 @@ def create_item(
         category = session.get(Category, item_in.category_id)
         if not category:
             raise HTTPException(status_code=404, detail="Category not found")
+    if item_in.size_id is not None:
+        size = session.get(Size, item_in.size_id)
+        if not size:
+            raise HTTPException(status_code=404, detail="Size not found")
     item = Item.model_validate(item_in, update={"owner_id": current_user.id})
     session.add(item)
     session.commit()
@@ -105,6 +148,10 @@ def update_item(
         category = session.get(Category, update_dict["category_id"])
         if not category:
             raise HTTPException(status_code=404, detail="Category not found")
+    if "size_id" in update_dict and update_dict["size_id"] is not None:
+        size = session.get(Size, update_dict["size_id"])
+        if not size:
+            raise HTTPException(status_code=404, detail="Size not found")
     item.sqlmodel_update(update_dict)
     session.add(item)
     session.commit()

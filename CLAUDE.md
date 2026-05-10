@@ -2,154 +2,121 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Stack overview
 
-Full-stack web application template: FastAPI backend (Python) + React frontend (TypeScript) + PostgreSQL, all orchestrated with Docker Compose. Uses Traefik as reverse proxy in production.
+- **Backend** (`backend/`): FastAPI + SQLModel + Alembic + PostgreSQL, dependencies managed by `uv`.
+- **Frontend** (`frontend/`): React 19 + Vite + TypeScript with TanStack Router (file-based routing) and TanStack Query, shadcn/ui (style `new-york`, base color `neutral`) over Tailwind CSS v4. Linter/formatter: **Biome** (not ESLint/Prettier). Package manager: **Bun**.
+- **Dev orchestration**: `docker compose watch` brings up backend, frontend, Postgres, Adminer, Mailcatcher, Traefik. See `development.md` for ports and local-vs-Docker swap workflow (services share ports so you can stop one and run it natively).
 
-## Common Commands
+## Commands
 
-### Development (Docker Compose)
-
+### Run the stack
 ```bash
-docker compose watch          # Start full stack with live reload
-docker compose logs backend   # View backend logs
-docker compose exec backend bash  # Shell into running backend container
-docker compose down -v        # Stop and remove volumes
+docker compose watch                              # full stack with hot-reload
+docker compose exec backend bash                  # shell into backend container
 ```
 
-### Backend (from `backend/` directory)
-
+### Backend (run from `backend/`)
 ```bash
-uv sync                       # Install dependencies
-source .venv/bin/activate     # Activate virtualenv
-fastapi dev app/main.py       # Run local dev server (outside Docker)
+uv sync                                           # install deps
+fastapi dev app/main.py                           # dev server (after stopping the docker `backend` service)
+bash scripts/test.sh                              # full pytest + coverage (htmlcov/)
+bash scripts/tests-start.sh -x                    # run tests inside running container, stop on first error
+uv run pytest tests/api/routes/test_items.py::test_read_items -v   # single test
+bash scripts/lint.sh                              # mypy + ty + ruff check + ruff format --check
+bash scripts/format.sh                            # ruff fix + format
+alembic revision --autogenerate -m "..."          # new migration (run inside container)
+alembic upgrade head                              # apply migrations
 ```
 
-### Backend Tests
+`scripts/lint.sh` runs **both** `mypy` and `ty` (Astral's type checker, configured with `error-on-warning = true`). Both must pass; `ty` is stricter and frequently catches issues `mypy` misses.
 
+### Frontend (run from `frontend/`, or use root workspace scripts)
 ```bash
-# Full test cycle (builds, starts stack, runs tests, tears down):
-bash ./scripts/test.sh
-
-# If stack is already running:
-docker compose exec backend bash scripts/tests-start.sh
-
-# With pytest args (e.g., stop on first error):
-docker compose exec backend bash scripts/tests-start.sh -x
-
-# Run a single test file inside Docker:
-docker compose exec backend bash -c "cd backend && coverage run -m pytest tests/api/test_items.py -v"
+bun install
+bun run dev                                       # vite dev server on :5173
+bun run lint                                      # biome check --write
+bun run build                                     # tsc --build + vite build
+bunx playwright test                              # E2E (requires backend up: docker compose up -d --wait backend)
+bunx playwright test tests/auth.spec.ts           # single E2E test
 ```
 
-### Frontend (from `frontend/` directory)
-
+### Full integration tests (Docker)
 ```bash
-bun install                   # Install dependencies
-bun run dev                   # Run Vite dev server at localhost:5173
-bun run build                 # TypeScript check + production build
-bun run lint                  # Biome lint + format (auto-fix)
-bun run generate-client       # Regenerate OpenAPI client from openapi.json
+bash scripts/test.sh                              # builds, brings stack up, runs backend tests, tears down
 ```
 
-### Frontend E2E Tests (Playwright)
+## OpenAPI client generation — critical workflow
+
+The frontend SDK in `frontend/src/client/` is **fully auto-generated** by `@hey-api/openapi-ts` from the backend's OpenAPI schema. **Whenever you change backend routes, request/response models, or add a new router**, you must regenerate the client:
 
 ```bash
-docker compose up -d --wait backend   # Start backend first
-bunx playwright test                  # Run tests
-bunx playwright test --ui             # Interactive UI mode
+bash scripts/generate-client.sh                   # exports openapi.json from app.main.app, runs openapi-ts, then biome lint
 ```
 
-Tests use Chromium only. Auth state is set up once in `tests/auth.setup.ts`. CI runs sharded across 4 containers.
+Notes on the generated SDK:
+- `backend/app/main.py` defines `custom_generate_unique_id` → operation IDs are `{tag}-{route_name}`.
+- `frontend/openapi-ts.config.ts` strips the leading service/tag from method names. This is why the SDK exports flat functions like `itemsReadItems`, `itemsCreateItem`, `categoriesReadCategories`, `sizesReadSizes` rather than namespaced classes. Import them directly from `@/client`.
+- Generated files (`frontend/src/client/**`) and `frontend/src/components/ui/**` (shadcn) are **excluded from Biome** (`frontend/biome.json`) — do not hand-edit them; regenerate or use `bunx shadcn add` instead.
+- A `prek` (pre-commit) hook auto-regenerates the client when `backend/**` or `scripts/generate-client.sh` change.
 
-### Linting & Pre-commit
+## Backend architecture
 
-```bash
-# From backend/ — run all pre-commit hooks manually:
-uv run prek run --all-files
+### Models layout (`backend/app/models/`)
+Models are split per domain into separate files (`user.py`, `item.py`, `category.py`, `size.py`, `token.py`, `message.py`) and re-exported from `models/__init__.py`. Always import via the package: `from app.models import Item, ItemCreate, ...`.
 
-# Individual checks:
-uv run ruff check --fix app           # Lint
-uv run ruff format app                # Format
-uv run mypy app                       # Type check
-uv run bash scripts/lint.sh           # All: mypy + ty + ruff check + ruff format --check
-uv run bash scripts/format.sh         # ruff check --fix + ruff format
-```
+For each entity the SQLModel pattern is: `XxxBase` (shared fields) → `XxxCreate` / `XxxUpdate` (request bodies) → `Xxx` (DB table, `table=True`) → `XxxPublic` / `XxxsPublic` (response models with `count`). When adding a new entity, follow this five-class shape so both `crud.py` and the generated frontend types stay symmetric.
 
-### Database Migrations (inside backend container)
+Cross-model imports must use `if TYPE_CHECKING:` for type-only references and `Relationship(back_populates=...)` for runtime relations to avoid SQLModel relationship init bugs (`Item` ↔ `User`, `Category`, `Size` already do this).
 
-```bash
-docker compose exec backend bash
-alembic revision --autogenerate -m "description"
-alembic upgrade head
-```
+### Domain relationships
+`Item` has FKs to `User` (owner, `ondelete=CASCADE`), `Category`, and `Size` — all three optional except owner. `crud.py` validates referenced FK rows exist; `routes/items.py` re-validates them on `POST`/`PUT`.
 
-### Generate Frontend Client from OpenAPI
+### Routing & authorization
+- `app/api/main.py` mounts routers under `settings.API_V1_STR` (`/api/v1`). The `private` router is only mounted when `ENVIRONMENT == "local"`.
+- `app/api/deps.py` exposes `SessionDep`, `CurrentUser`, `get_current_active_superuser`. Use the `Annotated[..., Depends(...)]` aliases in route signatures.
+- **Owner-based access control**: in `items` routes, superusers see all items; normal users see only `Item.owner_id == current_user.id` and get `403` on others' items. Mirror this pattern when adding owned resources.
 
-```bash
-bash ./scripts/generate-client.sh     # Generates openapi.json then runs client generator
-```
+### Database lifecycle
+- `app/core/db.py::init_db` seeds the first superuser (from `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD`), then categories, sizes, items — all in Russian (`SEED_CATEGORIES`, `SEED_ITEMS`). Seeding is idempotent (skipped if rows exist).
+- `scripts/prestart.sh` runs `alembic upgrade head` then `init_db` on every container start.
+- Tests **share the live database**: `tests/conftest.py` calls `init_db` once per session and deletes `Item`/`Category`/`User` rows on teardown. There is no per-test rollback — design tests accordingly.
 
-## Architecture
+### Auth specifics
+- JWT bearer with `OAuth2PasswordBearer(tokenUrl=f"{API_V1_STR}/login/access-token")`.
+- `crud.authenticate` runs a dummy Argon2 verification when the user is missing to prevent timing attacks — keep this branch when refactoring login.
+- Password hashing uses `pwdlib` with Argon2 + bcrypt fallback.
 
-### Backend (`backend/app/`)
+### Settings
+`app/core/config.py` reads `../.env` (one level above `backend/`). Validators raise on `"changethis"` defaults outside `local` env. `SQLALCHEMY_DATABASE_URI` is computed; do not set it directly.
 
-- **Entry point**: `main.py` → FastAPI app with CORS, Sentry integration
-- **API routes**: `api/routes/` — split by domain: `login.py`, `users.py`, `items.py`, `utils.py`, `private.py` (local-only)
-- **Dependencies**: `api/deps.py` — injectable deps: `SessionDep`, `TokenDep`, `CurrentUser`, `get_current_active_superuser`
-- **Router registration**: `api/main.py` — all routers mounted under `/api/v1`
-- **Models**: `models.py` — SQLModel classes defining both DB tables and API schemas (User, Item with UUID PKs + all Create/Update/Public variants)
-- **CRUD**: `crud.py` — database operations for users and items, includes timing-attack prevention in auth
-- **Config**: `core/config.py` — Pydantic Settings reading from top-level `.env`
-- **Database**: `core/db.py` — SQLAlchemy engine, `init_db()` seeds first superuser
-- **Security**: `core/security.py` — JWT tokens (HS256), password hashing (Argon2+Bcrypt via pwdlib)
-- **Migrations**: `alembic/` — Alembic configured to auto-import models from `models.py`
-- **Startup**: `backend_pre_start.py` waits for DB, then `alembic upgrade head`, then `initial_data.py` seeds superuser
+## Frontend architecture
 
-### Frontend (`frontend/src/`)
+### Routing
+File-based via `@tanstack/router-plugin/vite`. Routes live in `frontend/src/routes/`; the generated `routeTree.gen.ts` is committed and updated automatically by Vite. The `_layout/` segment is the authenticated shell — its `beforeLoad` redirects to `/login` if `localStorage.access_token` is missing (`hooks/useAuth.ts::isLoggedIn`).
 
-- **Routes**: `routes/` — TanStack Router file-based routing (`__root.tsx`, `_layout.tsx`, page files)
-- **Components**: `components/` — Admin, Items, UserSettings, Common, Sidebar, Pending, UI (shadcn)
-- **API client**: `client/` — auto-generated from backend OpenAPI schema via `@hey-api/openapi-ts`
-- **Hooks**: `hooks/` — custom React hooks
-- **API connectivity**: Frontend does NOT proxy through nginx. Browser calls backend directly using `VITE_API_URL` (set at build time)
+### Data fetching pattern
+Pages use `useSuspenseQuery` wrapped in `<Suspense fallback={<PendingX />}>`. Mutations use `useMutation` with `onSettled` invalidating relevant query keys (e.g., `["items"]`). See `routes/_layout/items.tsx` and `components/Items/AddItem.tsx` as the canonical templates when adding new resources.
 
-### Docker Compose Structure
+### HTTP client config
+`frontend/src/main.tsx` calls `client.setConfig({ baseUrl: import.meta.env.VITE_API_URL, auth: () => localStorage.getItem("access_token") || "", throwOnError: true })` and registers an error interceptor that clears the token and redirects to `/login` on 401/403. All SDK functions inherit this config — do not create a second axios client.
 
-- `compose.yml` — production config (db, adminer, prestart, backend, frontend; uses external Traefik network)
-- `compose.override.yml` — dev overrides: adds Traefik proxy, mailcatcher, Playwright container, source volume mounts, `--reload` flag
-- `compose.traefik.yml` — standalone Traefik for production HTTPS
+### Forms
+`react-hook-form` + `zod` resolver, with shadcn `Form/FormField/FormItem/FormControl/FormMessage` wrappers. Toasts via `sonner` through `useCustomToast`; errors funneled through `utils.ts::handleError`.
 
-### Key Services & Ports (dev)
+### Path aliases & UI
+- `@/` → `frontend/src/` (set in `vite.config.ts` and `tsconfig.json`).
+- shadcn aliases: `@/components`, `@/components/ui`, `@/lib/utils`, `@/hooks`. Add new shadcn primitives with `bunx shadcn add <name>` rather than hand-coding them.
+- Tailwind v4 via `@tailwindcss/vite` plugin (no `tailwind.config.js`); theme tokens live in `src/index.css`.
 
-| Service | Port | URL |
-|---------|------|-----|
-| Frontend | 5173 | http://localhost:5173 |
-| Backend | 8000 | http://localhost:8000 |
-| Adminer | 8080 | http://localhost:8080 |
-| Traefik UI | 8090 | http://localhost:8090 |
-| Mailcatcher | 1080 | http://localhost:1080 |
+## Code style & tooling guardrails
 
-### Environment
+- **Ruff**: configured for Python 3.10+, excludes `alembic/`. Notable rules: `T201` forbids `print()`, `ARG001` forbids unused function args, `E501` (line length) is disabled.
+- **Biome**: 2-space indent, double quotes, semicolons as needed, organize imports on save. `noNonNullAssertion` and `noExplicitAny` are off; `useSelfClosingElements` and `noUselessElse` are errors.
+- **mypy**: `strict = true`, excludes `alembic/`, `venv/`, `.venv/`.
+- **ty**: `error-on-warning = true` — warnings will fail the lint step.
+- Pre-commit (`prek`) runs all of the above plus client regeneration before each commit. To install: `uv run prek install -f` from `backend/`.
 
-- Config via top-level `.env` file (required vars: `SECRET_KEY`, `POSTGRES_PASSWORD`, `FIRST_SUPERUSER_PASSWORD`, `POSTGRES_USER`, `POSTGRES_DB`, `FIRST_SUPERUSER`)
-- Backend reads `../.env` relative to `backend/` via Pydantic Settings
-- `ENVIRONMENT` controls behavior: `local` enables private routes and relaxes secret validation
+## Russian-language content
 
-### Pre-commit Hooks
-
-Runs via `prek` (installed via `uv run prek install -f` from `backend/`): ruff check, ruff format, mypy, ty, biome (frontend), OpenAPI client regeneration, release date stamping.
-
-### Backend Tooling
-
-- **Python**: 3.10+, managed by `uv`
-- **Linting**: ruff (with rules: E, W, F, I, B, C4, UP, ARG001, T201)
-- **Type checking**: mypy (strict), ty
-- **Testing**: pytest + coverage (90% threshold enforced in CI)
-- **Formatting**: ruff format
-
-### Frontend Tooling
-
-- **Runtime**: Bun (preferred) or Node.js
-- **Linting/Formatting**: Biome
-- **Framework**: React 19 + TypeScript + TanStack Query + TanStack Router + Tailwind CSS v4 + shadcn/ui
-- **E2E**: Playwright
+Seed data, default UI strings in Russian seeded data, and several recent commit messages are in Russian — preserve Russian content when editing existing seeds, fixtures, or comments unless explicitly asked to translate.

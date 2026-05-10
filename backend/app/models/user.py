@@ -1,9 +1,16 @@
 import uuid
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from app.models.cart import CartItem
+    from app.models.item import Item
+    from app.models.order import Order
+    from app.models.wishlist import WishlistItem
 
 
 def get_datetime_utc() -> datetime:
@@ -54,6 +61,13 @@ class User(UserBase, table=True):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    cart_items: list["CartItem"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
+    wishlist_items: list["WishlistItem"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
+    orders: list["Order"] = Relationship(back_populates="user", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
