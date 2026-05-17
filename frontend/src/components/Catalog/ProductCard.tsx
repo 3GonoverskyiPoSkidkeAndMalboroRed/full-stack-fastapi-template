@@ -53,7 +53,7 @@ export function ProductCard({ item }: ProductCardProps) {
             </Badge>
           )}
         </div>
-        <CardContent className="bg-card flex flex-1 flex-col gap-2 border px-4 py-3">
+        <CardContent className="bg-card flex flex-1 flex-col gap-2 px-4 py-3">
           {item.brand && (
             <span className="text-muted-foreground text-xs tracking-wide uppercase">
               {item.brand}
