@@ -4,7 +4,9 @@
       "Bash(grep -E \"\\\\.py$\")",
       "Bash(uv run *)",
       "Bash(docker compose *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npx prettier *)",
+      "Bash(npm run *)"
     ]
   }
 }
