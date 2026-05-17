@@ -1,8 +1,12 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { Heart } from "lucide-react"
 
-import { wishlistAddWishlistItem } from "@/client"
+import {
+  wishlistAddWishlistItem,
+  wishlistDeleteWishlistItem,
+  wishlistReadWishlist,
+} from "@/client"
 import { Button } from "@/components/ui/button"
 import { isLoggedIn } from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -20,26 +24,56 @@ export function AddToWishlistButton({
 }: AddToWishlistButtonProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showErrorToast } = useCustomToast()
+  const loggedIn = isLoggedIn()
 
-  const mutation = useMutation({
+  const { data: wishlist } = useQuery({
+    queryKey: ["wishlist"],
+    queryFn: async () => (await wishlistReadWishlist()).data!,
+    enabled: loggedIn,
+  })
+
+  const wishlistItem = wishlist?.data.find((w) => w.item_id === itemId)
+  const inWishlist = Boolean(wishlistItem)
+
+  const addMutation = useMutation({
     mutationFn: () => wishlistAddWishlistItem({ body: { item_id: itemId } }),
     onSuccess: () => {
-      showSuccessToast("Добавлено в избранное")
       queryClient.invalidateQueries({ queryKey: ["wishlist"] })
     },
     onError: handleError.bind(showErrorToast),
   })
 
+  const removeMutation = useMutation({
+    mutationFn: () => {
+      if (!wishlistItem) {
+        return Promise.reject(new Error("Запись не найдена"))
+      }
+      return wishlistDeleteWishlistItem({ path: { id: wishlistItem.id } })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] })
+    },
+    onError: handleError.bind(showErrorToast),
+  })
+
+  const isPending = addMutation.isPending || removeMutation.isPending
+
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!isLoggedIn()) {
+    if (!loggedIn) {
       navigate({ to: "/login" })
       return
     }
-    mutation.mutate()
+    if (inWishlist) {
+      removeMutation.mutate()
+    } else {
+      addMutation.mutate()
+    }
   }
+
+  const label = inWishlist ? "Убрать из избранного" : "В избранное"
 
   if (variant === "floating") {
     return (
@@ -49,10 +83,13 @@ export function AddToWishlistButton({
         variant="secondary"
         className={cn("size-8 rounded-full")}
         onClick={handleClick}
-        disabled={mutation.isPending}
-        aria-label="В избранное"
+        disabled={isPending}
+        aria-label={label}
+        aria-pressed={inWishlist}
       >
-        <Heart className="size-4" />
+        <Heart
+          className={cn("size-4", inWishlist && "fill-current text-red-500")}
+        />
       </Button>
     )
   }
@@ -60,11 +97,13 @@ export function AddToWishlistButton({
   return (
     <Button
       type="button"
-      variant="outline"
+      variant={inWishlist ? "default" : "outline"}
       onClick={handleClick}
-      disabled={mutation.isPending}
+      disabled={isPending}
+      aria-pressed={inWishlist}
     >
-      <Heart className="size-4" />В избранное
+      <Heart className={cn("size-4", inWishlist && "fill-current")} />
+      {inWishlist ? "В избранном" : "В избранное"}
     </Button>
   )
 }

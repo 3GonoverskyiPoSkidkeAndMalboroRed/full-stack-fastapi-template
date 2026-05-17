@@ -1,8 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { ShoppingCart } from "lucide-react"
+import { Check, ShoppingCart } from "lucide-react"
 
-import { cartAddCartItem } from "@/client"
+import { cartAddCartItem, cartReadCart } from "@/client"
 import { Button } from "@/components/ui/button"
 import { isLoggedIn } from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -21,19 +21,29 @@ export function AddToCartButton({
 }: AddToCartButtonProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showErrorToast } = useCustomToast()
+  const loggedIn = isLoggedIn()
+
+  const { data: cart } = useQuery({
+    queryKey: ["cart"],
+    queryFn: async () => (await cartReadCart()).data!,
+    enabled: loggedIn,
+  })
+
+  const inCart = Boolean(cart?.data.find((c) => c.item_id === itemId))
 
   const mutation = useMutation({
     mutationFn: () => cartAddCartItem({ body: { item_id: itemId, quantity } }),
     onSuccess: () => {
-      showSuccessToast("Добавлено в корзину")
       queryClient.invalidateQueries({ queryKey: ["cart"] })
     },
     onError: handleError.bind(showErrorToast),
   })
 
-  const handleClick = () => {
-    if (!isLoggedIn()) {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!loggedIn) {
       navigate({ to: "/login" })
       return
     }
@@ -43,10 +53,17 @@ export function AddToCartButton({
   return (
     <Button
       type="button"
+      variant={inCart ? "secondary" : "default"}
       onClick={handleClick}
       disabled={disabled || mutation.isPending}
+      aria-pressed={inCart}
     >
-      <ShoppingCart className="size-4" />В корзину
+      {inCart ? (
+        <Check className="size-4" />
+      ) : (
+        <ShoppingCart className="size-4" />
+      )}
+      {inCart ? "В корзине" : "В корзину"}
     </Button>
   )
 }

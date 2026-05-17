@@ -56,20 +56,21 @@ export function ProductLightbox({
           setApi={setApi}
           className="flex h-full w-full items-center"
         >
-          <CarouselContent className="h-screen">
+          <CarouselContent className="ml-0 h-screen">
             {images.map((src, index) => (
               <CarouselItem
                 key={src}
-                className="flex h-screen items-center justify-center"
+                className="flex h-screen items-center justify-center pl-0"
               >
                 <TransformWrapper
                   doubleClick={{ mode: "toggle" }}
                   wheel={{ step: 0.2 }}
                   panning={{ velocityDisabled: true }}
+                  centerOnInit
                 >
                   <TransformComponent
-                    wrapperClass="!h-screen !w-screen"
-                    contentClass="!h-screen !w-screen flex items-center justify-center"
+                    wrapperClass="!h-full !w-full"
+                    contentClass="!h-full !w-full flex items-center justify-center"
                   >
                     <img
                       src={getPhotoUrl(src)}
