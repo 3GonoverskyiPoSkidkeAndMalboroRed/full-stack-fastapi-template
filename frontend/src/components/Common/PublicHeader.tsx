@@ -10,14 +10,14 @@ export function PublicHeader() {
   const { logout } = useAuth()
 
   return (
-    <header className="sticky top-0 z-10 border-b bg-background">
+    <header className="bg-background sticky top-0 z-10 border-b">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
         <div className="flex items-center gap-6">
           <Logo variant="full" />
           <nav className="flex items-center gap-4">
             <Link
               to="/catalog"
-              className="text-sm font-medium hover:text-foreground/80"
+              className="hover:text-foreground/80 text-sm font-medium"
               activeProps={{ className: "text-foreground" }}
             >
               Каталог

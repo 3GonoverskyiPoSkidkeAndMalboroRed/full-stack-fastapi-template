@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Column, DateTime, Numeric
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.models.user import get_datetime_utc
@@ -26,7 +27,10 @@ class ItemBase(SQLModel):
     )
     brand: str | None = Field(default=None, max_length=255)
     category_id: uuid.UUID | None = Field(default=None, foreign_key="category.id")
-    image_url: str | None = Field(default=None, max_length=2048)
+    images: list[str] = Field(
+        default_factory=list,
+        sa_column=Column(JSONB, nullable=False, server_default="[]"),
+    )
     stock: int = Field(default=0, ge=0)
 
 
@@ -45,7 +49,6 @@ class ItemUpdate(SQLModel):
     brand: str | None = Field(default=None, max_length=255)
     cost: Decimal | None = Field(default=None)
     category_id: uuid.UUID | None = Field(default=None, foreign_key="category.id")
-    image_url: str | None = Field(default=None, max_length=2048)
     stock: int | None = Field(default=None, ge=0)
 
 

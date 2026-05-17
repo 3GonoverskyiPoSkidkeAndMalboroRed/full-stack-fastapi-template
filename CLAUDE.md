@@ -5,8 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Stack overview
 
 - **Backend** (`backend/`): FastAPI + SQLModel + Alembic + PostgreSQL, dependencies managed by `uv`.
-- **Frontend** (`frontend/`): React 19 + Vite + TypeScript with TanStack Router (file-based routing) and TanStack Query, shadcn/ui (style `new-york`, base color `neutral`) over Tailwind CSS v4. Linter/formatter: **Biome** (not ESLint/Prettier). Package manager: **Bun**.
-- **Dev orchestration**: `docker compose watch` brings up backend, frontend, Postgres, Adminer, Mailcatcher, Traefik. See `development.md` for ports and local-vs-Docker swap workflow (services share ports so you can stop one and run it natively).
+- **Frontend** (`frontend/`): React 19 + Vite + TypeScript with TanStack Router (file-based routing) and TanStack Query, shadcn/ui (style `new-york`, base color `neutral`) over Tailwind CSS v4. Linter: **ESLint 9 (flat config)**. Formatter: **Prettier 3** (with `prettier-plugin-tailwindcss`). Package manager: **npm** (Node.js ≥ 20).
+- **Dev orchestration**: `docker compose watch` brings up backend, frontend, Postgres, Mailcatcher, и nginx-proxy на `:8081` (`api.localhost`, `dashboard.localhost`, `mailcatcher.localhost`). See `development.md` for ports and local-vs-Docker swap workflow.
+- **Prod proxy**: `compose.nginx.yml` поднимает `nginxproxy/nginx-proxy` + `nginxproxy/acme-companion` (TLS через Let's Encrypt). Запуск: `docker compose -f compose.yml -f compose.nginx.yml up -d` (требуется внешняя сеть `proxy-net`).
 
 ## Commands
 
@@ -33,12 +34,13 @@ alembic upgrade head                              # apply migrations
 
 ### Frontend (run from `frontend/`, or use root workspace scripts)
 ```bash
-bun install
-bun run dev                                       # vite dev server on :5173
-bun run lint                                      # biome check --write
-bun run build                                     # tsc --build + vite build
-bunx playwright test                              # E2E (requires backend up: docker compose up -d --wait backend)
-bunx playwright test tests/auth.spec.ts           # single E2E test
+npm install
+npm run dev                                       # vite dev server on :5173
+npm run lint                                      # eslint . && prettier --check .
+npm run lint:fix                                  # eslint --fix + prettier --write
+npm run build                                     # tsc --build + vite build
+npx playwright test                               # E2E (requires backend up: docker compose up -d --wait backend)
+npx playwright test tests/auth.spec.ts            # single E2E test
 ```
 
 ### Full integration tests (Docker)
@@ -51,13 +53,13 @@ bash scripts/test.sh                              # builds, brings stack up, run
 The frontend SDK in `frontend/src/client/` is **fully auto-generated** by `@hey-api/openapi-ts` from the backend's OpenAPI schema. **Whenever you change backend routes, request/response models, or add a new router**, you must regenerate the client:
 
 ```bash
-bash scripts/generate-client.sh                   # exports openapi.json from app.main.app, runs openapi-ts, then biome lint
+bash scripts/generate-client.sh                   # exports openapi.json from app.main.app, runs openapi-ts, then ESLint+Prettier
 ```
 
 Notes on the generated SDK:
 - `backend/app/main.py` defines `custom_generate_unique_id` → operation IDs are `{tag}-{route_name}`.
 - `frontend/openapi-ts.config.ts` strips the leading service/tag from method names. This is why the SDK exports flat functions like `itemsReadItems`, `itemsCreateItem`, `categoriesReadCategories`, `sizesReadSizes` rather than namespaced classes. Import them directly from `@/client`.
-- Generated files (`frontend/src/client/**`) and `frontend/src/components/ui/**` (shadcn) are **excluded from Biome** (`frontend/biome.json`) — do not hand-edit them; regenerate or use `bunx shadcn add` instead.
+- Generated files (`frontend/src/client/**`) and `frontend/src/components/ui/**` (shadcn) are **excluded from ESLint and Prettier** (`frontend/eslint.config.js` ignores + `frontend/.prettierignore`) — do not hand-edit them; regenerate or use `npx shadcn add` instead.
 - A `prek` (pre-commit) hook auto-regenerates the client when `backend/**` or `scripts/generate-client.sh` change.
 
 ## Backend architecture
@@ -106,13 +108,13 @@ Pages use `useSuspenseQuery` wrapped in `<Suspense fallback={<PendingX />}>`. Mu
 
 ### Path aliases & UI
 - `@/` → `frontend/src/` (set in `vite.config.ts` and `tsconfig.json`).
-- shadcn aliases: `@/components`, `@/components/ui`, `@/lib/utils`, `@/hooks`. Add new shadcn primitives with `bunx shadcn add <name>` rather than hand-coding them.
+- shadcn aliases: `@/components`, `@/components/ui`, `@/lib/utils`, `@/hooks`. Add new shadcn primitives with `npx shadcn add <name>` rather than hand-coding them.
 - Tailwind v4 via `@tailwindcss/vite` plugin (no `tailwind.config.js`); theme tokens live in `src/index.css`.
 
 ## Code style & tooling guardrails
 
 - **Ruff**: configured for Python 3.10+, excludes `alembic/`. Notable rules: `T201` forbids `print()`, `ARG001` forbids unused function args, `E501` (line length) is disabled.
-- **Biome**: 2-space indent, double quotes, semicolons as needed, organize imports on save. `noNonNullAssertion` and `noExplicitAny` are off; `useSelfClosingElements` and `noUselessElse` are errors.
+- **ESLint** (flat config в `frontend/eslint.config.js`): `@typescript-eslint/no-explicit-any` и `no-non-null-assertion` отключены, `react/self-closing-comp` и `no-else-return` ошибки, `@typescript-eslint/no-unused-vars` warning с `_`-префиксом. **Prettier** (`frontend/.prettierrc.json`): 2-space indent, double quotes, no semi, `prettier-plugin-tailwindcss` для классов Tailwind.
 - **mypy**: `strict = true`, excludes `alembic/`, `venv/`, `.venv/`.
 - **ty**: `error-on-warning = true` — warnings will fail the lint step.
 - Pre-commit (`prek`) runs all of the above plus client regeneration before each commit. To install: `uv run prek install -f` from `backend/`.

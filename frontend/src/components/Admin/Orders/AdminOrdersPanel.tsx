@@ -39,7 +39,7 @@ function AdminOrdersTable() {
 
   if (data.count === 0) {
     return (
-      <p className="rounded-md border p-12 text-center text-muted-foreground">
+      <p className="text-muted-foreground rounded-md border p-12 text-center">
         Заказов пока нет.
       </p>
     )
@@ -71,7 +71,7 @@ function AdminOrdersTable() {
                 </TableCell>
                 <TableCell className="text-sm">
                   <div>{order.recipient_name}</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {order.phone}
                   </div>
                 </TableCell>
@@ -149,7 +149,7 @@ export function AdminOrdersPanel() {
     <div className="space-y-4">
       <div>
         <h2 className="text-xl font-semibold tracking-tight">Заказы</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Управление статусами заказов
         </p>
       </div>

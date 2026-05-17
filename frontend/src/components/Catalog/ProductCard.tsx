@@ -1,17 +1,16 @@
 import { Link } from "@tanstack/react-router"
-import { ShoppingCart } from "lucide-react"
+import { ImagesIcon, ShoppingCart } from "lucide-react"
 
 import type { ItemPublic } from "@/client"
 import { AddToWishlistButton } from "@/components/Catalog/AddToWishlistButton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { firstPhotoOrPlaceholder } from "@/lib/photo"
 
 interface ProductCardProps {
   item: ItemPublic
 }
-
-const PLACEHOLDER_IMAGE = "https://picsum.photos/seed/placeholder/600/600"
 
 function formatPrice(value?: string | number | null): string {
   if (value == null) return "—"
@@ -25,15 +24,16 @@ function formatPrice(value?: string | number | null): string {
 }
 
 export function ProductCard({ item }: ProductCardProps) {
-  const imgSrc = item.image_url || PLACEHOLDER_IMAGE
+  const imgSrc = firstPhotoOrPlaceholder(item.images)
   const outOfStock = (item.stock ?? 0) <= 0
+  const photoCount = item.images?.length ?? 0
 
   return (
     <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <Link
         to="/catalog/$id"
         params={{ id: item.id }}
-        className="relative block aspect-square overflow-hidden bg-muted"
+        className="bg-muted relative block aspect-square overflow-hidden"
       >
         <img
           src={imgSrc}
@@ -41,18 +41,24 @@ export function ProductCard({ item }: ProductCardProps) {
           loading="lazy"
           className="h-full w-full object-cover transition-transform group-hover:scale-105"
         />
-        <div className="absolute right-2 top-2">
+        <div className="absolute top-2 right-2">
           <AddToWishlistButton itemId={item.id} variant="floating" />
         </div>
         {outOfStock && (
-          <Badge variant="secondary" className="absolute left-2 top-2">
+          <Badge variant="secondary" className="absolute top-2 left-2">
             Нет в наличии
+          </Badge>
+        )}
+        {photoCount > 1 && (
+          <Badge variant="secondary" className="absolute bottom-2 left-2 gap-1">
+            <ImagesIcon className="size-3" />
+            {photoCount}
           </Badge>
         )}
       </Link>
       <CardContent className="flex flex-1 flex-col gap-2 px-4 py-3">
         {item.brand && (
-          <span className="text-xs uppercase tracking-wide text-muted-foreground">
+          <span className="text-muted-foreground text-xs tracking-wide uppercase">
             {item.brand}
           </span>
         )}

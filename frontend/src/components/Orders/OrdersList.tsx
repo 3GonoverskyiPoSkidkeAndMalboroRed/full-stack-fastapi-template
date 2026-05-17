@@ -15,7 +15,7 @@ export function OrdersList() {
 
   if (data.count === 0) {
     return (
-      <p className="rounded-md border p-12 text-center text-muted-foreground">
+      <p className="text-muted-foreground rounded-md border p-12 text-center">
         У вас пока нет заказов.
       </p>
     )

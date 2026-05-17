@@ -39,7 +39,7 @@ export function Logo({
           src={iconLogo}
           alt="FastAPI"
           className={cn(
-            "size-5 hidden group-data-[collapsible=icon]:block",
+            "hidden size-5 group-data-[collapsible=icon]:block",
             className,
           )}
         />

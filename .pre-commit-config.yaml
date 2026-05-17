@@ -19,8 +19,8 @@ repos:
         exclude: ^frontend/src/client/.*
   - repo: local
     hooks:
-      - id: local-biome-check
-        name: biome check
+      - id: local-eslint-prettier
+        name: eslint + prettier
         entry: npm run lint
         language: system
         types: [text]

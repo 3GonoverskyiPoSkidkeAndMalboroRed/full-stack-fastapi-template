@@ -44,7 +44,7 @@ export function UsersAdminPanel() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold tracking-tight">Пользователи</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Управление аккаунтами и правами доступа
           </p>
         </div>

@@ -72,7 +72,7 @@ function CatalogFilters() {
   return (
     <div className="flex flex-wrap items-end gap-4 pb-6">
       <div className="flex flex-col gap-1">
-        <span className="text-xs text-muted-foreground">Категория</span>
+        <span className="text-muted-foreground text-xs">Категория</span>
         <Select
           value={search.category_id ?? ALL_VALUE}
           onValueChange={(value) =>
@@ -98,7 +98,7 @@ function CatalogFilters() {
         </Select>
       </div>
       <div className="flex flex-col gap-1">
-        <span className="text-xs text-muted-foreground">Размер</span>
+        <span className="text-muted-foreground text-xs">Размер</span>
         <Select
           value={search.size_id ?? ALL_VALUE}
           onValueChange={(value) =>

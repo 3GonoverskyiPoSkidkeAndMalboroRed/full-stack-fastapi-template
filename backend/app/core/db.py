@@ -76,7 +76,6 @@ SEED_ITEMS = [
         "brand": "Nike",
         "cost": Decimal("12999.00"),
         "category": "Обувь",
-        "image_url": "https://picsum.photos/seed/air-max/600/600",
         "stock": 25,
     },
     {
@@ -86,7 +85,6 @@ SEED_ITEMS = [
         "brand": "Adidas",
         "cost": Decimal("2999.00"),
         "category": "Одежда",
-        "image_url": "https://picsum.photos/seed/classic-tee/600/600",
         "stock": 50,
     },
     {
@@ -96,7 +94,6 @@ SEED_ITEMS = [
         "brand": "Samsonite",
         "cost": Decimal("5499.00"),
         "category": "Аксессуары",
-        "image_url": "https://picsum.photos/seed/urban-bag/600/600",
         "stock": 15,
     },
     {
@@ -106,7 +103,6 @@ SEED_ITEMS = [
         "brand": "Sony",
         "cost": Decimal("15999.00"),
         "category": "Электроника",
-        "image_url": "https://picsum.photos/seed/pro-sound/600/600",
         "stock": 10,
     },
     {
@@ -116,7 +112,6 @@ SEED_ITEMS = [
         "brand": "Converse",
         "cost": Decimal("6999.00"),
         "category": "Обувь",
-        "image_url": "https://picsum.photos/seed/canvas/600/600",
         "stock": 30,
     },
     {
@@ -126,7 +121,6 @@ SEED_ITEMS = [
         "brand": "The North Face",
         "cost": Decimal("8999.00"),
         "category": "Одежда",
-        "image_url": "https://picsum.photos/seed/windbreaker/600/600",
         "stock": 12,
     },
 ]
@@ -164,7 +158,6 @@ def _seed_items(session: Session, owner_id: uuid.UUID) -> None:
         size = crud.get_size_by_name(session=session, name=str(item_data["size_name"]))
         cost_value = item_data["cost"]
         stock_value = item_data.get("stock", 0)
-        image_url_value = item_data.get("image_url")
         item_in = ItemCreate(
             title=str(item_data["title"]),
             description=str(item_data["description"]),
@@ -172,7 +165,6 @@ def _seed_items(session: Session, owner_id: uuid.UUID) -> None:
             cost=cost_value if isinstance(cost_value, Decimal) else None,
             category_id=(category.id if category else None),
             size_id=(size.id if size else None),
-            image_url=str(image_url_value) if image_url_value is not None else None,
             stock=int(stock_value) if isinstance(stock_value, int) else 0,
         )
         crud.create_item(session=session, item_in=item_in, owner_id=owner_id)

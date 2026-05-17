@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
@@ -14,6 +14,11 @@ from app.models import (
     ItemUpdate,
     Message,
     Size,
+)
+from app.utils_files import (
+    delete_item_directory,
+    delete_item_photo_file,
+    save_item_photos,
 )
 
 router = APIRouter(prefix="/items", tags=["items"])
@@ -159,6 +164,56 @@ def update_item(
     return item
 
 
+@router.post("/{id}/photos", response_model=ItemPublic)
+async def upload_item_photos(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+    files: list[UploadFile] = File(...),
+) -> Any:
+    """
+    Upload one or more photos for an item.
+    """
+    item = session.get(Item, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    new_paths = await save_item_photos(item, files)
+    item.images = list(item.images) + new_paths
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item
+
+
+@router.delete("/{id}/photos", response_model=ItemPublic)
+def delete_item_photo(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+    path: str,
+) -> Any:
+    """
+    Remove a single photo from an item by its relative path.
+    """
+    item = session.get(Item, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    if path not in item.images:
+        raise HTTPException(status_code=404, detail="Photo not found")
+    delete_item_photo_file(path)
+    item.images = [p for p in item.images if p != path]
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item
+
+
 @router.delete("/{id}")
 def delete_item(
     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
@@ -171,6 +226,7 @@ def delete_item(
         raise HTTPException(status_code=404, detail="Item not found")
     if not current_user.is_superuser and (item.owner_id != current_user.id):
         raise HTTPException(status_code=403, detail="Not enough permissions")
+    delete_item_directory(item)
     session.delete(item)
     session.commit()
     return Message(message="Item deleted successfully")

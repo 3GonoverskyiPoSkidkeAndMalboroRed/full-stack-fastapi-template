@@ -2,7 +2,7 @@
 
 You can deploy the project using Docker Compose to a remote server.
 
-This project expects you to have a Traefik proxy handling communication to the outside world and HTTPS certificates.
+Этот проект использует [`nginxproxy/nginx-proxy`](https://github.com/nginx-proxy/nginx-proxy) + [`nginxproxy/acme-companion`](https://github.com/nginx-proxy/acme-companion) в качестве reverse-proxy и автоматического выпуска TLS-сертификатов от Let's Encrypt.
 
 You can use CI/CD (continuous integration and continuous deployment) systems to deploy automatically, there are already configurations to do it with GitHub Actions.
 
@@ -12,100 +12,32 @@ But you have to configure a couple things first. 🤓
 
 * Have a remote server ready and available.
 * Configure the DNS records of your domain to point to the IP of the server you just created.
-* Configure a wildcard subdomain for your domain, so that you can have multiple subdomains for different services, e.g. `*.fastapi-project.example.com`. This will be useful for accessing different components, like `dashboard.fastapi-project.example.com`, `api.fastapi-project.example.com`, `traefik.fastapi-project.example.com`, `adminer.fastapi-project.example.com`, etc. And also for `staging`, like `dashboard.staging.fastapi-project.example.com`, `adminer.staging.fastapi-project.example.com`, etc.
+* Configure a wildcard subdomain for your domain, so that you can have multiple subdomains for different services, e.g. `*.fastapi-project.example.com`. This will be useful for `dashboard.fastapi-project.example.com`, `api.fastapi-project.example.com`, etc. And also for `staging`, like `dashboard.staging.fastapi-project.example.com`, etc.
 * Install and configure [Docker](https://docs.docker.com/engine/install/) on the remote server (Docker Engine, not Docker Desktop).
 
-## Public Traefik
+## Public proxy network
 
-We need a Traefik proxy to handle incoming connections and HTTPS certificates.
-
-You need to do these next steps only once.
-
-### Traefik Docker Compose
-
-* Create a remote directory to store your Traefik Docker Compose file:
+`nginx-proxy` + `acme-companion` слушают входящие соединения и снабжают сервисы TLS. Они подключаются к стеку через внешнюю Docker-сеть `proxy-net`, которую достаточно создать однократно:
 
 ```bash
-mkdir -p /root/code/traefik-public/
+docker network create proxy-net
 ```
 
-Copy the Traefik Docker Compose file to your server. You could do it by running the command `rsync` in your local terminal:
+В отличие от прежней схемы с Traefik, отдельный «прокси-стек» поднимать не нужно — `compose.nginx.yml` уже содержит сервисы `proxy` и `acme` и подмешивается поверх `compose.yml` при деплое (см. ниже).
 
-```bash
-rsync -a compose.traefik.yml root@your-server.example.com:/root/code/traefik-public/
-```
+### Required environment variables for the proxy
 
-### Traefik Public Network
-
-This Traefik will expect a Docker "public network" named `traefik-public` to communicate with your stack(s).
-
-This way, there will be a single public Traefik proxy that handles the communication (HTTP and HTTPS) with the outside world, and then behind that, you could have one or more stacks with different domains, even if they are on the same single server.
-
-To create a Docker "public network" named `traefik-public` run the following command in your remote server:
-
-```bash
-docker network create traefik-public
-```
-
-### Traefik Environment Variables
-
-The Traefik Docker Compose file expects some environment variables to be set in your terminal before starting it. You can do it by running the following commands in your remote server.
-
-* Create the username for HTTP Basic Auth, e.g.:
-
-```bash
-export USERNAME=admin
-```
-
-* Create an environment variable with the password for HTTP Basic Auth, e.g.:
-
-```bash
-export PASSWORD=changethis
-```
-
-* Use openssl to generate the "hashed" version of the password for HTTP Basic Auth and store it in an environment variable:
-
-```bash
-export HASHED_PASSWORD=$(openssl passwd -apr1 $PASSWORD)
-```
-
-To verify that the hashed password is correct, you can print it:
-
-```bash
-echo $HASHED_PASSWORD
-```
-
-* Create an environment variable with the domain name for your server, e.g.:
+* `DOMAIN` — базовый домен (например, `fastapi-project.example.com`). Сервисы будут опубликованы на `api.${DOMAIN}` и `dashboard.${DOMAIN}`.
+* `EMAIL` — реальный email для Let's Encrypt (нельзя использовать `@example.com`).
 
 ```bash
 export DOMAIN=fastapi-project.example.com
-```
-
-* Create an environment variable with the email for Let's Encrypt, e.g.:
-
-```bash
 export EMAIL=admin@example.com
-```
-
-**Note**: you need to set a different email, an email `@example.com` won't work.
-
-### Start the Traefik Docker Compose
-
-Go to the directory where you copied the Traefik Docker Compose file in your remote server:
-
-```bash
-cd /root/code/traefik-public/
-```
-
-Now with the environment variables set and the `compose.traefik.yml` in place, you can start the Traefik Docker Compose running the following command:
-
-```bash
-docker compose -f compose.traefik.yml up -d
 ```
 
 ## Deploy the FastAPI Project
 
-Now that you have Traefik in place you can deploy your FastAPI project with Docker Compose.
+Теперь можно развернуть стек с прокси одним вызовом Docker Compose.
 
 **Note**: You might want to jump ahead to the section about Continuous Deployment with GitHub Actions.
 
@@ -198,15 +130,17 @@ There are some environment variables only used by GitHub Actions that you can co
 
 ### Deploy with Docker Compose
 
-With the environment variables in place, you can deploy with Docker Compose:
+With the environment variables in place, you can deploy with Docker Compose. Для prod используется связка `compose.yml` + `compose.nginx.yml` (без `compose.override.yml`):
 
 ```bash
 cd /root/code/app/
-docker compose -f compose.yml build
-docker compose -f compose.yml up -d
+docker compose -f compose.yml -f compose.nginx.yml build
+docker compose -f compose.yml -f compose.nginx.yml up -d
 ```
 
-For production you wouldn't want to have the overrides in `compose.override.yml`, that's why we explicitly specify `compose.yml` as the file to use.
+Контейнер `nginxproxy/nginx-proxy` подхватит `VIRTUAL_HOST` у backend/frontend и сгенерирует конфиг, а `acme-companion` запросит сертификат у Let's Encrypt. Первый запуск может занять 1–2 минуты, пока выпускается сертификат.
+
+Для production не подключаем `compose.override.yml` — он содержит dev-only сервис `proxy` и открытые порты, которых в проде быть не должно.
 
 ## Continuous Deployment (CD)
 
@@ -319,10 +253,6 @@ If you need to add extra environments you could use those as a starting point.
 
 Replace `fastapi-project.example.com` with your domain.
 
-### Main Traefik Dashboard
-
-Traefik UI: `https://traefik.fastapi-project.example.com`
-
 ### Production
 
 Frontend: `https://dashboard.fastapi-project.example.com`
@@ -331,8 +261,6 @@ Backend API docs: `https://api.fastapi-project.example.com/docs`
 
 Backend API base URL: `https://api.fastapi-project.example.com`
 
-Adminer: `https://adminer.fastapi-project.example.com`
-
 ### Staging
 
 Frontend: `https://dashboard.staging.fastapi-project.example.com`
@@ -340,5 +268,3 @@ Frontend: `https://dashboard.staging.fastapi-project.example.com`
 Backend API docs: `https://api.staging.fastapi-project.example.com/docs`
 
 Backend API base URL: `https://api.staging.fastapi-project.example.com`
-
-Adminer: `https://adminer.staging.fastapi-project.example.com`

@@ -28,13 +28,13 @@ export function OrderRow({ order }: OrderRowProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-4 p-4 text-left hover:bg-muted/50"
+        className="hover:bg-muted/50 flex w-full items-center justify-between gap-4 p-4 text-left"
       >
         <div className="flex flex-1 flex-wrap items-center gap-3">
-          <span className="font-mono text-xs text-muted-foreground">
+          <span className="text-muted-foreground font-mono text-xs">
             №{order.id.slice(0, 8)}
           </span>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-muted-foreground text-sm">
             {formatDate(order.created_at)}
           </span>
           <OrderStatusBadge status={order.status} />

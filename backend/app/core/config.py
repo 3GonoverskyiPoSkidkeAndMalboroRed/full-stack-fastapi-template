@@ -1,5 +1,6 @@
 import secrets
 import warnings
+from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from pydantic import (
@@ -93,6 +94,15 @@ class Settings(BaseSettings):
     EMAIL_TEST_USER: EmailStr = "test@example.com"
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+
+    STATIC_DIR: Path = Path("/app/backend/static")
+    ITEM_PHOTO_DIR_NAME: str = "item-photo"
+    MAX_UPLOAD_SIZE_MB: int = 5
+    ALLOWED_IMAGE_MIME_TYPES: list[str] = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+    ]
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

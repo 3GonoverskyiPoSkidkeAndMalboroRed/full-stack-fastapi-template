@@ -19,7 +19,7 @@ export function CartList() {
   if (data.count === 0) {
     return (
       <div className="rounded-md border p-12 text-center">
-        <p className="mb-4 text-muted-foreground">Корзина пуста.</p>
+        <p className="text-muted-foreground mb-4">Корзина пуста.</p>
         <Button asChild>
           <Link to="/catalog">Перейти в каталог</Link>
         </Button>
@@ -34,7 +34,7 @@ export function CartList() {
           <CartItemRow key={ci.id} cartItem={ci} />
         ))}
       </div>
-      <div className="space-y-4 rounded-md border p-4 h-fit">
+      <div className="h-fit space-y-4 rounded-md border p-4">
         <h2 className="text-lg font-semibold">Итого</h2>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Товаров:</span>

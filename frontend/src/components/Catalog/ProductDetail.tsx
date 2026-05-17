@@ -4,13 +4,14 @@ import { ArrowLeft } from "lucide-react"
 import { useState } from "react"
 
 import {
-  type ItemPublic,
   categoriesReadCategoriesPublic,
+  type ItemPublic,
   sizesReadSizesPublic,
 } from "@/client"
 import { AddToCartButton } from "@/components/Catalog/AddToCartButton"
 import { AddToWishlistButton } from "@/components/Catalog/AddToWishlistButton"
 import { formatPrice } from "@/components/Catalog/ProductCard"
+import { ProductGallery } from "@/components/Catalog/ProductGallery"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
@@ -18,13 +19,10 @@ interface ProductDetailProps {
   item: ItemPublic
 }
 
-const PLACEHOLDER_IMAGE = "https://picsum.photos/seed/placeholder/600/600"
-
 export function ProductDetail({ item }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
   const stock = item.stock ?? 0
   const outOfStock = stock <= 0
-  const imgSrc = item.image_url || PLACEHOLDER_IMAGE
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", "public"],
@@ -51,22 +49,16 @@ export function ProductDetail({ item }: ProductDetailProps) {
         </Link>
       </Button>
       <div className="grid gap-8 lg:grid-cols-2">
-        <div className="aspect-square overflow-hidden rounded-lg bg-muted">
-          <img
-            src={imgSrc}
-            alt={item.title}
-            className="h-full w-full object-cover"
-          />
-        </div>
+        <ProductGallery images={item.images ?? []} title={item.title} />
         <div className="flex flex-col gap-4">
           {item.brand && (
-            <span className="text-sm uppercase tracking-wide text-muted-foreground">
+            <span className="text-muted-foreground text-sm tracking-wide uppercase">
               {item.brand}
             </span>
           )}
           <h1 className="text-3xl font-bold">{item.title}</h1>
           {(categoryName || sizeName) && (
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-sm">
               {categoryName && <span>Категория: {categoryName}</span>}
               {sizeName && <span>Размер: {sizeName}</span>}
             </div>
@@ -86,7 +78,7 @@ export function ProductDetail({ item }: ProductDetailProps) {
           )}
           {!outOfStock && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Количество</span>
+              <span className="text-muted-foreground text-sm">Количество</span>
               <div className="flex items-center gap-1 rounded-md border">
                 <Button
                   type="button"

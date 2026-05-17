@@ -7,20 +7,19 @@ import { QuantityControl } from "@/components/Cart/QuantityControl"
 import { formatPrice } from "@/components/Catalog/ProductCard"
 import { Button } from "@/components/ui/button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { firstPhotoOrPlaceholder } from "@/lib/photo"
 import { handleError } from "@/utils"
 
 interface CartItemRowProps {
   cartItem: CartItemPublic
 }
 
-const PLACEHOLDER_IMAGE = "https://picsum.photos/seed/placeholder/200/200"
-
 export function CartItemRow({ cartItem }: CartItemRowProps) {
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   const item = cartItem.item ?? null
-  const imgSrc = item?.image_url || PLACEHOLDER_IMAGE
+  const imgSrc = firstPhotoOrPlaceholder(item?.images)
   const cost = item?.cost != null ? Number(item.cost) : 0
   const quantity = cartItem.quantity ?? 1
   const lineTotal = cost * quantity
@@ -39,7 +38,7 @@ export function CartItemRow({ cartItem }: CartItemRowProps) {
       <Link
         to="/catalog/$id"
         params={{ id: item?.id ?? cartItem.item_id }}
-        className="flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted sm:size-20"
+        className="bg-muted flex shrink-0 items-center justify-center overflow-hidden rounded-md sm:size-20"
       >
         <img
           src={imgSrc}
@@ -49,7 +48,7 @@ export function CartItemRow({ cartItem }: CartItemRowProps) {
       </Link>
       <div className="flex-1 space-y-1">
         {item?.brand && (
-          <span className="text-xs uppercase text-muted-foreground">
+          <span className="text-muted-foreground text-xs uppercase">
             {item.brand}
           </span>
         )}
@@ -60,7 +59,7 @@ export function CartItemRow({ cartItem }: CartItemRowProps) {
         >
           {item?.title ?? "Товар недоступен"}
         </Link>
-        <span className="block text-sm text-muted-foreground">
+        <span className="text-muted-foreground block text-sm">
           {formatPrice(cost)} × {quantity}
         </span>
       </div>

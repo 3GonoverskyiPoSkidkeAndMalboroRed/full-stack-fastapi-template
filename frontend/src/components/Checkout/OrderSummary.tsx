@@ -6,7 +6,7 @@ export function OrderSummary() {
   const { data } = useSuspenseQuery(getCartQueryOptions())
 
   return (
-    <div className="rounded-md border p-4 space-y-3 h-fit">
+    <div className="h-fit space-y-3 rounded-md border p-4">
       <h2 className="text-lg font-semibold">Ваш заказ</h2>
       <div className="space-y-2">
         {data.data.map((ci) => {
@@ -18,7 +18,7 @@ export function OrderSummary() {
               className="flex items-start justify-between gap-3 text-sm"
             >
               <div className="flex-1">
-                <p className="font-medium line-clamp-1">
+                <p className="line-clamp-1 font-medium">
                   {ci.item?.title ?? "—"}
                 </p>
                 <p className="text-muted-foreground">

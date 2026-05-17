@@ -12,6 +12,7 @@ import {
   itemsUpdateItem,
 } from "@/client"
 import { SizeCombobox } from "@/components/Common/SizeCombobox"
+import { ImageUploader } from "@/components/Items/ImageUploader"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -118,6 +119,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
           <DialogTitle>Edit Item</DialogTitle>
           <DialogDescription>Update the details of the item.</DialogDescription>
         </DialogHeader>
+        <ImageUploader itemId={item.id} currentImages={item.images ?? []} />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4 py-4">

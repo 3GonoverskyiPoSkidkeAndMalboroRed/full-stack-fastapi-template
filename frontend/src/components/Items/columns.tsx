@@ -14,7 +14,7 @@ function SizeCell({ id }: { id: string | null | undefined }) {
     queryFn: () => sizesReadSizes(),
     select: (res) => res.data?.data ?? [],
   })
-  if (!id) return <span className="italic text-muted-foreground">—</span>
+  if (!id) return <span className="text-muted-foreground italic">—</span>
   const match = sizes.find((s) => s.id === id)
   return <span>{match?.name ?? id}</span>
 }
@@ -24,12 +24,12 @@ function CopyId({ id }: { id: string }) {
   const isCopied = copiedText === id
 
   return (
-    <div className="flex items-center gap-1.5 group">
-      <span className="font-mono text-xs text-muted-foreground">{id}</span>
+    <div className="group flex items-center gap-1.5">
+      <span className="text-muted-foreground font-mono text-xs">{id}</span>
       <Button
         variant="ghost"
         size="icon"
-        className="size-6 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="size-6 opacity-0 transition-opacity group-hover:opacity-100"
         onClick={() => copy(id)}
       >
         {isCopied ? (
@@ -64,7 +64,7 @@ export const columns: ColumnDef<ItemPublic>[] = [
       return (
         <span
           className={cn(
-            "max-w-xs truncate block text-muted-foreground",
+            "text-muted-foreground block max-w-xs truncate",
             !description && "italic",
           )}
         >

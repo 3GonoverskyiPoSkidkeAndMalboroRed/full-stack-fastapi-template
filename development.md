@@ -16,9 +16,13 @@ Backend, JSON based web API based on OpenAPI: <http://localhost:8000>
 
 Automatic interactive documentation with Swagger UI (from the OpenAPI backend): <http://localhost:8000/docs>
 
-Adminer, database web administration: <http://localhost:8080>
+Локальный nginx-прокси (порт 8081) маршрутизирует:
 
-Traefik UI, to see how the routes are being handled by the proxy: <http://localhost:8090>
+* `http://api.localhost:8081` → backend
+* `http://dashboard.localhost:8081` → frontend
+* `http://mailcatcher.localhost:8081` → MailCatcher
+
+Чтобы подключиться к БД, используйте любой Postgres-клиент (DBeaver, TablePlus, psql) на `localhost:5432` с кредами из `.env`.
 
 **Note**: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.
 
@@ -63,7 +67,7 @@ docker compose stop frontend
 And then start the local frontend development server:
 
 ```bash
-bun run dev
+npm run dev
 ```
 
 Or you could stop the `backend` Docker Compose service:
@@ -79,33 +83,17 @@ cd backend
 fastapi dev app/main.py
 ```
 
-## Docker Compose in `localhost.tiangolo.com`
+## Subdomain routing in dev
 
-When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, frontend, adminer, etc).
+Локальный nginx (`compose.override.yml`, конфиг `nginx/dev.conf`) слушает на порту `8081` и маршрутизирует поддомены `*.localhost` на нужные сервисы — `api.localhost`, `dashboard.localhost`, `mailcatcher.localhost`. Все они автоматически указывают на `127.0.0.1` в современных ОС, так что `/etc/hosts` править не нужно.
 
-When you deploy it to production (or staging), it will deploy each service in a different subdomain, like `api.example.com` for the backend and `dashboard.example.com` for the frontend.
-
-In the guide about [deployment](deployment.md) you can read about Traefik, the configured proxy. That's the component in charge of transmitting traffic to each service based on the subdomain.
-
-If you want to test that it's all working locally, you can edit the local `.env` file, and change:
-
-```dotenv
-DOMAIN=localhost.tiangolo.com
-```
-
-That will be used by the Docker Compose files to configure the base domain for the services.
-
-Traefik will use this to transmit traffic at `api.localhost.tiangolo.com` to the backend, and traffic at `dashboard.localhost.tiangolo.com` to the frontend.
-
-The domain `localhost.tiangolo.com` is a special domain that is configured (with all its subdomains) to point to `127.0.0.1`. This way you can use that for your local development.
-
-After you update it, run again:
+Если хотите изменить набор доменов или добавить ещё один сервис, отредактируйте `nginx/dev.conf` и перезапустите контейнер `proxy`:
 
 ```bash
-docker compose watch
+docker compose restart proxy
 ```
 
-When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `compose.override.yml`, just to let you test that the domains work as expected, for example with `api.localhost.tiangolo.com` and `dashboard.localhost.tiangolo.com`.
+В prod конфигурация другая (см. [deployment.md](deployment.md)) — там используется `nginxproxy/nginx-proxy` + `nginxproxy/acme-companion` для автоматического выпуска TLS-сертификатов от Let's Encrypt.
 
 ## Docker Compose files and env vars
 
@@ -177,7 +165,7 @@ fix end of files.........................................................Passed
 trim trailing whitespace.................................................Passed
 ruff.....................................................................Passed
 ruff-format..............................................................Passed
-biome check..............................................................Passed
+eslint + prettier........................................................Passed
 ```
 
 ## URLs
@@ -196,26 +184,18 @@ Automatic Interactive Docs (Swagger UI): <http://localhost:8000/docs>
 
 Automatic Alternative Docs (ReDoc): <http://localhost:8000/redoc>
 
-Adminer: <http://localhost:8080>
-
-Traefik UI: <http://localhost:8090>
-
 MailCatcher: <http://localhost:1080>
 
-### Development URLs with `localhost.tiangolo.com` Configured
+### Development URLs via nginx (`*.localhost:8081`)
 
-Development URLs, for local development.
+Через локальный nginx-прокси на порту `8081`:
 
-Frontend: <http://dashboard.localhost.tiangolo.com>
+Frontend: <http://dashboard.localhost:8081>
 
-Backend: <http://api.localhost.tiangolo.com>
+Backend: <http://api.localhost:8081>
 
-Automatic Interactive Docs (Swagger UI): <http://api.localhost.tiangolo.com/docs>
+Automatic Interactive Docs (Swagger UI): <http://api.localhost:8081/docs>
 
-Automatic Alternative Docs (ReDoc): <http://api.localhost.tiangolo.com/redoc>
+Automatic Alternative Docs (ReDoc): <http://api.localhost:8081/redoc>
 
-Adminer: <http://localhost.tiangolo.com:8080>
-
-Traefik UI: <http://localhost.tiangolo.com:8090>
-
-MailCatcher: <http://localhost.tiangolo.com:1080>
+MailCatcher: <http://mailcatcher.localhost:8081>

@@ -49,7 +49,7 @@ export function OrderStatusSelect({
 
   if (!next) {
     return (
-      <span className="text-sm text-muted-foreground">Финальный статус</span>
+      <span className="text-muted-foreground text-sm">Финальный статус</span>
     )
   }
 

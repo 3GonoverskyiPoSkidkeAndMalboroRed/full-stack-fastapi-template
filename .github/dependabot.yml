@@ -16,8 +16,8 @@ updates:
     commit-message:
       prefix: ⬆
     labels: [dependencies, internal]
-  # bun
-  - package-ecosystem: bun
+  # npm
+  - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly

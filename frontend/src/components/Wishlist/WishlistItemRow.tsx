@@ -10,19 +10,18 @@ import {
 import { formatPrice } from "@/components/Catalog/ProductCard"
 import { Button } from "@/components/ui/button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { firstPhotoOrPlaceholder } from "@/lib/photo"
 import { handleError } from "@/utils"
 
 interface WishlistItemRowProps {
   wishlistItem: WishlistItemPublic
 }
 
-const PLACEHOLDER_IMAGE = "https://picsum.photos/seed/placeholder/200/200"
-
 export function WishlistItemRow({ wishlistItem }: WishlistItemRowProps) {
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const item = wishlistItem.item ?? null
-  const imgSrc = item?.image_url || PLACEHOLDER_IMAGE
+  const imgSrc = firstPhotoOrPlaceholder(item?.images)
   const outOfStock = (item?.stock ?? 0) <= 0
 
   const removeMutation = useMutation({
@@ -52,7 +51,7 @@ export function WishlistItemRow({ wishlistItem }: WishlistItemRowProps) {
       <Link
         to="/catalog/$id"
         params={{ id: wishlistItem.item_id }}
-        className="overflow-hidden rounded-md bg-muted"
+        className="bg-muted overflow-hidden rounded-md"
       >
         <img
           src={imgSrc}
@@ -62,7 +61,7 @@ export function WishlistItemRow({ wishlistItem }: WishlistItemRowProps) {
       </Link>
       <div className="flex-1 space-y-1">
         {item?.brand && (
-          <span className="text-xs uppercase text-muted-foreground">
+          <span className="text-muted-foreground text-xs uppercase">
             {item.brand}
           </span>
         )}

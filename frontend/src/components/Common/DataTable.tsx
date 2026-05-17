@@ -81,7 +81,7 @@ export function DataTable<TData, TValue>({
             <TableRow className="hover:bg-transparent">
               <TableCell
                 colSpan={columns.length}
-                className="h-32 text-center text-muted-foreground"
+                className="text-muted-foreground h-32 text-center"
               >
                 No results found.
               </TableCell>
@@ -91,9 +91,9 @@ export function DataTable<TData, TValue>({
       </Table>
 
       {table.getPageCount() > 1 && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-t bg-muted/20">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="text-sm text-muted-foreground">
+        <div className="bg-muted/20 flex flex-col items-start justify-between gap-4 border-t p-4 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="text-muted-foreground text-sm">
               Showing{" "}
               {table.getState().pagination.pageIndex *
                 table.getState().pagination.pageSize +
@@ -105,11 +105,11 @@ export function DataTable<TData, TValue>({
                 data.length,
               )}{" "}
               of{" "}
-              <span className="font-medium text-foreground">{data.length}</span>{" "}
+              <span className="text-foreground font-medium">{data.length}</span>{" "}
               entries
             </div>
             <div className="flex items-center gap-x-2">
-              <p className="text-sm text-muted-foreground">Rows per page</p>
+              <p className="text-muted-foreground text-sm">Rows per page</p>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
                 onValueChange={(value) => {
@@ -133,13 +133,13 @@ export function DataTable<TData, TValue>({
           </div>
 
           <div className="flex items-center gap-x-6">
-            <div className="flex items-center gap-x-1 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-x-1 text-sm">
               <span>Page</span>
-              <span className="font-medium text-foreground">
+              <span className="text-foreground font-medium">
                 {table.getState().pagination.pageIndex + 1}
               </span>
               <span>of</span>
-              <span className="font-medium text-foreground">
+              <span className="text-foreground font-medium">
                 {table.getPageCount()}
               </span>
             </div>

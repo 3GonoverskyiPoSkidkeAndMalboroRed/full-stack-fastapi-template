@@ -1,0 +1,66 @@
+# Production proxy stack: nginx-proxy + acme-companion (Let's Encrypt автообновление).
+# Запуск:  docker compose -f compose.yml -f compose.nginx.yml up -d
+# Перед первым запуском один раз создать внешнюю сеть:
+#   docker network create proxy-net
+
+services:
+
+  proxy:
+    image: nginxproxy/nginx-proxy:1.6
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    networks:
+      - proxy-net
+
+  acme:
+    image: nginxproxy/acme-companion:2.6
+    restart: always
+    depends_on:
+      - proxy
+    environment:
+      DEFAULT_EMAIL: ${EMAIL?Variable not set}
+      NGINX_PROXY_CONTAINER: full-stack-fastapi-template-proxy-1
+    volumes_from:
+      - proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/acme.sh
+    networks:
+      - proxy-net
+
+  backend:
+    environment:
+      VIRTUAL_HOST: api.${DOMAIN?Variable not set}
+      VIRTUAL_PORT: "8000"
+      LETSENCRYPT_HOST: api.${DOMAIN?Variable not set}
+      LETSENCRYPT_EMAIL: ${EMAIL?Variable not set}
+    networks:
+      - proxy-net
+      - default
+
+  frontend:
+    environment:
+      VIRTUAL_HOST: dashboard.${DOMAIN?Variable not set}
+      VIRTUAL_PORT: "80"
+      LETSENCRYPT_HOST: dashboard.${DOMAIN?Variable not set}
+      LETSENCRYPT_EMAIL: ${EMAIL?Variable not set}
+    networks:
+      - proxy-net
+      - default
+
+volumes:
+  certs:
+  vhost:
+  html:
+  acme:
+
+networks:
+  proxy-net:
+    external: true

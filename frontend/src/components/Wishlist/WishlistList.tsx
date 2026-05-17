@@ -18,7 +18,7 @@ export function WishlistList() {
   if (data.count === 0) {
     return (
       <div className="rounded-md border p-12 text-center">
-        <p className="mb-4 text-muted-foreground">В избранном пока пусто.</p>
+        <p className="text-muted-foreground mb-4">В избранном пока пусто.</p>
         <Button asChild>
           <Link to="/catalog">Перейти в каталог</Link>
         </Button>

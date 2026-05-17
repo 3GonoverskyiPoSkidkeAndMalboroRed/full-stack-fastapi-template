@@ -36,9 +36,9 @@ function ItemsTableContent() {
 
   if (items.data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center text-center py-12">
-        <div className="rounded-full bg-muted p-4 mb-4">
-          <Search className="h-8 w-8 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="bg-muted mb-4 rounded-full p-4">
+          <Search className="text-muted-foreground h-8 w-8" />
         </div>
         <h3 className="text-lg font-semibold">Нет товаров</h3>
         <p className="text-muted-foreground">Добавьте первый товар</p>
@@ -62,9 +62,9 @@ function SizesTableContent() {
 
   if (sizes.data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center text-center py-12">
-        <div className="rounded-full bg-muted p-4 mb-4">
-          <Search className="h-8 w-8 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="bg-muted mb-4 rounded-full p-4">
+          <Search className="text-muted-foreground h-8 w-8" />
         </div>
         <h3 className="text-lg font-semibold">Нет размеров</h3>
         <p className="text-muted-foreground">Добавьте размер</p>
@@ -88,7 +88,7 @@ export function ItemsAdminPanel() {
     <div className="space-y-4">
       <div>
         <h2 className="text-xl font-semibold tracking-tight">Товары</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Управление товарами и каталогом размеров
         </p>
       </div>
