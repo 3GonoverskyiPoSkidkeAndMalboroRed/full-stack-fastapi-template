@@ -4,7 +4,7 @@ import { Suspense } from "react"
 import { CartList } from "@/components/Cart/CartList"
 import { PendingCart } from "@/components/Pending/PendingCart"
 
-export const Route = createFileRoute("/_layout/cart")({
+export const Route = createFileRoute("/_authed/cart")({
   component: Cart,
 })
 

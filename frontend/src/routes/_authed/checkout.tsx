@@ -5,7 +5,7 @@ import { CheckoutForm } from "@/components/Checkout/CheckoutForm"
 import { OrderSummary } from "@/components/Checkout/OrderSummary"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export const Route = createFileRoute("/_layout/checkout")({
+export const Route = createFileRoute("/_authed/checkout")({
   component: Checkout,
 })
 

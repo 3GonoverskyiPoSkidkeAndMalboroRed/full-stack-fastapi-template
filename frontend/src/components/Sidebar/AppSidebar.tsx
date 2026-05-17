@@ -27,13 +27,12 @@ const baseItems: Item[] = [
     icon: Heart,
     title: "Избранное",
     path: "/account",
-    search: { tab: "wishlist" },
+    hash: "wishlist",
   },
   {
     icon: User2,
     title: "Кабинет",
     path: "/account",
-    search: { tab: "orders" },
   },
 ]
 

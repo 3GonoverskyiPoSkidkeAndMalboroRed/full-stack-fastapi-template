@@ -15,7 +15,7 @@ const adminSearchSchema = z
 
 type AdminSearch = z.infer<typeof adminSearchSchema>
 
-export const Route = createFileRoute("/_layout/admin")({
+export const Route = createFileRoute("/_admin/admin")({
   component: Admin,
   beforeLoad: async () => {
     const res = await usersReadUserMe()

@@ -14,7 +14,7 @@ export type Item = {
   icon: LucideIcon
   title: string
   path: string
-  search?: Record<string, string>
+  hash?: string
 }
 
 interface MainProps {
@@ -48,7 +48,7 @@ export function Main({ items }: MainProps) {
                 >
                   <RouterLink
                     to={item.path}
-                    search={item.search}
+                    hash={item.hash}
                     onClick={handleMenuClick}
                   >
                     <item.icon />

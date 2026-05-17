@@ -9,18 +9,16 @@ import {
 } from "@/components/ui/sidebar"
 import { isLoggedIn } from "@/hooks/useAuth"
 
-export const Route = createFileRoute("/_layout")({
-  component: Layout,
+export const Route = createFileRoute("/_admin")({
+  component: AdminLayout,
   beforeLoad: async () => {
     if (!isLoggedIn()) {
-      throw redirect({
-        to: "/login",
-      })
+      throw redirect({ to: "/login" })
     }
   },
 })
 
-function Layout() {
+function AdminLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -38,5 +36,3 @@ function Layout() {
     </SidebarProvider>
   )
 }
-
-export default Layout

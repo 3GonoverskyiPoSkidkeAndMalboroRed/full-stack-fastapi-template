@@ -61,7 +61,7 @@ export function CheckoutForm() {
       showSuccessToast("Заказ оформлен")
       queryClient.invalidateQueries({ queryKey: ["cart"] })
       queryClient.invalidateQueries({ queryKey: ["orders"] })
-      navigate({ to: "/account", search: { tab: "orders" } })
+      navigate({ to: "/account" })
     },
     onError: handleError.bind(showErrorToast),
   })

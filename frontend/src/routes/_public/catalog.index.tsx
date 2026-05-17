@@ -25,7 +25,7 @@ const catalogSearchSchema = z.object({
 
 type CatalogSearch = z.infer<typeof catalogSearchSchema>
 
-export const Route = createFileRoute("/_public/catalog")({
+export const Route = createFileRoute("/_public/catalog/")({
   component: Catalog,
   validateSearch: (search): CatalogSearch =>
     catalogSearchSchema.parse(search ?? {}),

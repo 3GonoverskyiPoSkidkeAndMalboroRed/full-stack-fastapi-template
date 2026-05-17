@@ -1,157 +1,180 @@
-# План: Смена цветовой темы сайта на тёплую землистую палитру
+# План: Разделение навигации — navbar для обычных пользователей, sidebar только для /admin
 
 ## Context
 
-Текущая тема (`frontend/src/index.css`) — нейтрально-серая, со стандартным shadcn-палитрой (oklch с нулевой хроматичностью) и единственным «выпадающим» бирюзовым `--primary` (`oklch(0.5982 0.10687 182.4689)`). Юзер хочет переключить сайт на тёплую землистую палитру из 5 цветов:
+Сейчас у фронтенда два layout-обёртки. `_layout.tsx` использует `SidebarProvider` + `AppSidebar` и требует логина — под ним лежат **все** авторизованные страницы: `account`, `cart`, `checkout`, `admin`, `settings`, `index` (Dashboard). `_public.tsx` без sidebar содержит только каталог. AppSidebar дублирует навигацию из PublicHeader (Главная/Каталог/Корзина/Избранное/Кабинет), плюс пункт «Админка» для `is_superuser`.
 
-| HEX       | OKLCH (≈)                  | Роль                          |
-|-----------|----------------------------|-------------------------------|
-| `#D9B89C` | `oklch(0.795 0.045 65)`    | Светлый бежевый — secondary/accent (light), muted-foreground (dark) |
-| `#8C4B26` | `oklch(0.428 0.099 47)`    | Тёмно-коричневый — secondary/accent (dark) |
-| `#A64826` | `oklch(0.491 0.141 39)`    | Терракотовый — **primary** на обеих темах |
-| `#F2F2F2` | `oklch(0.961 0 0)`         | Светлый фон / foreground в dark |
-| `#262626` | `oklch(0.247 0 0)`         | Тёмный текст / фон в dark |
+Юзер хочет, чтобы обычный пользователь (даже залогиненный) видел только верхний горизонтальный navbar (`PublicHeader`) — никакого sidebar. Sidebar остаётся только на админских страницах (`/admin`), на остальных страницах админ тоже видит navbar, как обычный юзер. Корневой `/` нужно сделать публичной главной — сейчас там Dashboard за логином.
 
-Тема в проекте задаётся через CSS-переменные в `:root` и `.dark` блоках `frontend/src/index.css` (Tailwind v4 + shadcn pattern). Почти все компоненты уже используют семантические токены (`bg-background`, `bg-card`, `text-primary`, `border`, и т.д.), поэтому смена цветов сводится в основном к правке `index.css`.
-
-По решениям юзера: красное сердечко в `AddToWishlistButton` (`text-red-500`) остаётся как есть; chart-* токены переводятся в оттенки палитры.
+Бонус-требования:
+- Ссылка «Каталог» в navbar становится `<Button>` и переезжает в правую часть header'а.
+- «Избранное» — это таб внутри `/account` (`?tab=wishlist`). Это **уже так**: маршрут `/wishlist` не существует, в `account.tsx:39-52` уже два таба (`orders`, `wishlist`). Менять ничего не нужно — просто подтверждаем через ссылку в navbar.
 
 ## Изменения
 
-### Единственный файл: `frontend/src/index.css`
+### 1. Перетасовка layout-файлов
 
-Переписать содержимое блоков `:root` и `.dark`, оставив структуру `@theme inline { ... }` нетронутой.
+Создаём два новых pathless-layout, удаляем старый `_layout.tsx`:
 
-#### Light (`:root`)
+- **`frontend/src/routes/_authed.tsx`** (NEW) — приватный navbar-layout.
+  ```tsx
+  import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+  import { Footer } from "@/components/Common/Footer"
+  import { PublicHeader } from "@/components/Common/PublicHeader"
+  import { isLoggedIn } from "@/hooks/useAuth"
 
-```css
-:root {
-  --radius: 0.625rem;
+  export const Route = createFileRoute("/_authed")({
+    component: AuthedLayout,
+    beforeLoad: async () => {
+      if (!isLoggedIn()) {
+        throw redirect({ to: "/login" })
+      }
+    },
+  })
 
-  /* Surface */
-  --background: oklch(0.961 0 0);        /* #F2F2F2 */
-  --foreground: oklch(0.247 0 0);        /* #262626 */
-  --card: oklch(1 0 0);                  /* white — выделяется поверх #F2F2F2 */
-  --card-foreground: oklch(0.247 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.247 0 0);
+  function AuthedLayout() {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PublicHeader />
+        <main className="flex-1 px-4 py-8 md:px-6 md:py-10">
+          <div className="mx-auto max-w-7xl">
+            <Outlet />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+  ```
 
-  /* Brand */
-  --primary: oklch(0.491 0.141 39);              /* #A64826 терракот */
-  --primary-foreground: oklch(0.961 0 0);        /* #F2F2F2 */
+- **`frontend/src/routes/_admin.tsx`** (NEW, замена `_layout.tsx`) — sidebar-layout с проверкой `is_superuser`. Идентичен текущему `_layout.tsx`, плюс защита роли.
+  ```tsx
+  export const Route = createFileRoute("/_admin")({
+    component: AdminLayout,
+    beforeLoad: async () => {
+      if (!isLoggedIn()) throw redirect({ to: "/login" })
+      // Доп. проверку is_superuser оставим внутри admin.tsx (там уже есть, см. ниже)
+    },
+  })
 
-  /* Secondary / accent — тёплый беж */
-  --secondary: oklch(0.795 0.045 65);            /* #D9B89C */
-  --secondary-foreground: oklch(0.247 0 0);
-  --accent: oklch(0.795 0.045 65);               /* #D9B89C */
-  --accent-foreground: oklch(0.247 0 0);
+  function AdminLayout() {
+    return (
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="text-muted-foreground -ml-1" />
+          </header>
+          <main className="flex-1 p-6 md:p-8">
+            <div className="mx-auto max-w-7xl">
+              <Outlet />
+            </div>
+          </main>
+          <Footer />
+        </SidebarInset>
+      </SidebarProvider>
+    )
+  }
+  ```
 
-  /* Muted — приглушённый тёплый нейтрал */
-  --muted: oklch(0.90 0.018 65);
-  --muted-foreground: oklch(0.50 0.04 50);
+- **`frontend/src/routes/_layout.tsx`** — **DELETE**.
 
-  /* Status */
-  --destructive: oklch(0.577 0.245 27.325);      /* оставляем красный */
+### 2. Перенос страниц по новым layout-ам
 
-  /* Lines / focus */
-  --border: oklch(0.85 0.02 60);
-  --input: oklch(0.85 0.02 60);
-  --ring: oklch(0.491 0.141 39);                 /* primary */
+| Откуда | Куда | Изменения |
+|---|---|---|
+| `_layout/index.tsx` (Dashboard) | **DELETE** | Маршрут `/` теперь публичный (см. п.3) |
+| `_layout/account.tsx` | `_authed/account.tsx` | Только `createFileRoute("/_authed/account")` |
+| `_layout/cart.tsx` | `_authed/cart.tsx` | `createFileRoute("/_authed/cart")` |
+| `_layout/checkout.tsx` | `_authed/checkout.tsx` | `createFileRoute("/_authed/checkout")` |
+| `_layout/settings.tsx` | `_authed/settings.tsx` | `createFileRoute("/_authed/settings")` |
+| `_layout/admin.tsx` | `_admin/admin.tsx` | `createFileRoute("/_admin/admin")`. `beforeLoad` с проверкой `is_superuser` уже есть внутри файла — оставляем |
 
-  /* Charts — 5 оттенков палитры */
-  --chart-1: oklch(0.491 0.141 39);              /* #A64826 */
-  --chart-2: oklch(0.428 0.099 47);              /* #8C4B26 */
-  --chart-3: oklch(0.795 0.045 65);              /* #D9B89C */
-  --chart-4: oklch(0.65 0.13 40);                /* осветлённый терракот */
-  --chart-5: oklch(0.35 0.08 47);                /* затемнённый коричневый */
+После перемещений папка `_layout/` пустая → удалить.
 
-  /* Sidebar */
-  --sidebar: oklch(0.961 0 0);
-  --sidebar-foreground: oklch(0.247 0 0);
-  --sidebar-primary: oklch(0.491 0.141 39);
-  --sidebar-primary-foreground: oklch(0.961 0 0);
-  --sidebar-accent: oklch(0.795 0.045 65);
-  --sidebar-accent-foreground: oklch(0.247 0 0);
-  --sidebar-border: oklch(0.85 0.02 60);
-  --sidebar-ring: oklch(0.491 0.141 39);
-}
-```
+Пути для пользователя остаются те же: `/account`, `/cart`, `/checkout`, `/settings`, `/admin` (pathless layouts `_authed`/`_admin` не добавляют сегмент к URL).
 
-#### Dark (`.dark`)
+### 3. Публичная главная
 
-```css
-.dark {
-  --background: oklch(0.247 0 0);                /* #262626 */
-  --foreground: oklch(0.961 0 0);                /* #F2F2F2 */
-  --card: oklch(0.30 0 0);                       /* чуть светлее фона */
-  --card-foreground: oklch(0.961 0 0);
-  --popover: oklch(0.30 0 0);
-  --popover-foreground: oklch(0.961 0 0);
+- **`frontend/src/routes/_public/index.tsx`** (NEW) — простая публичная главная с hero-фото и CTA в каталог. Содержание минимальное: фоновое изображение, заголовок, описание, кнопка «Перейти в каталог». Без длинных секций — чтобы не разрастаться.
 
-  --primary: oklch(0.491 0.141 39);              /* #A64826 */
-  --primary-foreground: oklch(0.961 0 0);
+  Тестовое содержание (фото через `picsum.photos/seed/.../1600/700`):
+  ```tsx
+  export const Route = createFileRoute("/_public/")({
+    component: HomePage,
+    head: () => ({ meta: [{ title: "Главная — FastAPI Template" }] }),
+  })
 
-  --secondary: oklch(0.428 0.099 47);            /* #8C4B26 — тёмно-коричневый */
-  --secondary-foreground: oklch(0.961 0 0);
-  --accent: oklch(0.428 0.099 47);
-  --accent-foreground: oklch(0.961 0 0);
+  function HomePage() {
+    return (
+      <section className="relative overflow-hidden rounded-xl">
+        <img src="https://picsum.photos/seed/storefront/1600/700"
+             alt="Витрина" className="h-[420px] w-full object-cover" />
+        <div className="absolute inset-0 flex items-center bg-gradient-to-r from-black/70 via-black/40 to-transparent">
+          <div className="max-w-xl space-y-5 px-6 text-white md:px-12">
+            <h1 className="text-4xl font-bold md:text-5xl">
+              Добро пожаловать
+            </h1>
+            <p className="text-white/90">…короткое описание магазина…</p>
+            <Button asChild size="lg">
+              <Link to="/catalog">Перейти в каталог</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+    )
+  }
+  ```
 
-  --muted: oklch(0.32 0.015 60);
-  --muted-foreground: oklch(0.78 0.03 65);       /* светлый бежевый текст */
+### 4. PublicHeader: «Каталог» как кнопка справа
 
-  --destructive: oklch(0.704 0.191 22.216);      /* оставляем красный */
+`frontend/src/components/Common/PublicHeader.tsx`:
 
-  --border: oklch(0.40 0.02 55);
-  --input: oklch(0.40 0.02 55);
-  --ring: oklch(0.491 0.141 39);
+- Удалить блок `<nav>` слева (он содержит только ссылку «Каталог»). Остаётся только `<Logo variant="full" />` слева.
+- В правой части перед иконками `loggedIn`/`!loggedIn` добавить **первым элементом**:
+  ```tsx
+  <Button asChild size="sm">
+    <Link to="/catalog" activeProps={{ className: "ring-2 ring-primary/30" }}>
+      <ShoppingBag className="size-4" />
+      <span className="hidden sm:inline">Каталог</span>
+    </Link>
+  </Button>
+  ```
+  Иконка `ShoppingBag` из `lucide-react` (уже используется в AppSidebar). `variant="default"` — заливка primary, согласно палитре.
 
-  --chart-1: oklch(0.65 0.13 40);
-  --chart-2: oklch(0.491 0.141 39);
-  --chart-3: oklch(0.795 0.045 65);
-  --chart-4: oklch(0.428 0.099 47);
-  --chart-5: oklch(0.55 0.10 50);
+Остальные пункты (Корзина / Избранное / Кабинет / Выйти / Войти / Регистрация) сохраняются как есть. Ссылка «Избранное» уже идёт в `/account?tab=wishlist` — это и есть требование «перенести Избранное в /account как tab».
 
-  --sidebar: oklch(0.30 0 0);
-  --sidebar-foreground: oklch(0.961 0 0);
-  --sidebar-primary: oklch(0.491 0.141 39);
-  --sidebar-primary-foreground: oklch(0.961 0 0);
-  --sidebar-accent: oklch(0.428 0.099 47);
-  --sidebar-accent-foreground: oklch(0.961 0 0);
-  --sidebar-border: oklch(0.40 0.02 55);
-  --sidebar-ring: oklch(0.491 0.141 39);
-}
-```
+### 5. AppSidebar — без изменений
 
-### Что НЕ меняется
+Файл `frontend/src/components/Sidebar/AppSidebar.tsx` остаётся как есть. Он теперь рендерится только в `_admin.tsx`, то есть на админских страницах. Ссылки «Главная / Каталог / Корзина / Избранное / Кабинет» в сайдбаре дают админу способ вернуться к обычной части сайта; «Админка» — фокус на админ-разделе.
 
-- Структура `@theme inline { ... }` сверху файла — она лишь маппит `--color-*` на CSS-переменные, без правок.
-- `@layer base { ... }` блок снизу — `border-border`, `bg-background`, `text-foreground` уже идут через токены.
-- `AddToWishlistButton.tsx` — `text-red-500` для активного сердечка остаётся (решение юзера).
-- Чёрные градиенты-оверлеи поверх фото (`from-black/70 ...` в hero на `_public/index.tsx`, в категориях, в лайтбоксе) — не палитра, а оверлей картинок; оставляю.
-- Компоненты shadcn (`ui/button.tsx`, `ui/card.tsx` и т.д.) — без правок, они уже семантические.
+### 6. Редиректы на «/»
 
-### Места, где новая палитра проявится автоматически (для справки)
+Несколько мест редиректят на `/` после успешных операций (`useAuth.ts:52`, `login.tsx:40`, `signup.tsx:47`, `recover-password.tsx:38`, `reset-password.tsx:54`, `admin.tsx:24`). Все они остаются как есть — теперь `/` это публичная главная, что нормально. Если позже хочется направлять залогиненных пользователей в `/account` — это отдельная задача, в этом плане не делаем.
 
-- `Card` / `CardContent` (например в `ProductCard.tsx:59`, `_public/about.tsx`) — `bg-card border` → белые карточки на бежевом фоне.
-- Hero на главной (`_public/index.tsx`) — бейдж `bg-primary/90` станет терракотовым.
-- About-страница (`_public/about.tsx`) — `bg-primary/10 text-primary` для иконок-кружков, бейдж «О компании».
-- `ThemeSwitcher` — `bg-background/95 border` пилюля; активная кнопка `variant="default"` будет терракотовой.
-- `Button` `variant="default"` (включая `AddToCartButton`) — заливка primary (`#A64826`).
-- `Button` `variant="secondary"` (включая `AddToCartButton` в состоянии «В корзине», floating-сердечко) — заливка `#D9B89C`.
-- `Skeleton`, focus-ring, `Tabs`, `Sidebar` — всё подхватится через `--muted`, `--ring`, `--sidebar-*`.
+### 7. Прочее
+
+- `__root.tsx` уже глобально подключает `ThemeSwitcher` (слева снизу) — без изменений.
+- `frontend/src/routes/routeTree.gen.ts` пересоберётся автоматически при `npx vite build` / `npm run dev`.
 
 ## Критические файлы
 
-- `frontend/src/index.css` — единственный файл правок.
+- `frontend/src/routes/_layout.tsx` — удалить.
+- `frontend/src/routes/_layout/*` — перенести в `_authed/` / `_admin/`, папку удалить.
+- `frontend/src/routes/_authed.tsx` — создать.
+- `frontend/src/routes/_admin.tsx` — создать.
+- `frontend/src/routes/_public/index.tsx` — создать.
+- `frontend/src/components/Common/PublicHeader.tsx` — переоформить навигацию.
 
 ## Verification
 
-1. `cd frontend && npm run lint` — sanity-check (никаких изменений в TS/TSX не делаем, но проверим Prettier для CSS).
-2. `cd frontend && npx tsc -p tsconfig.build.json --noEmit` — для надёжности.
-3. `docker compose watch` → `http://dashboard.localhost:8081/`:
-   - **Light theme** (Sun в ThemeSwitcher): фон сайта `#F2F2F2`, кнопки primary и focus-ring терракотовые `#A64826`, secondary/accent бежевый `#D9B89C`, текст почти чёрный.
-   - **Dark theme** (Moon): фон `#262626`, текст `#F2F2F2`, primary остался терракотовый, secondary/accent — коричневый `#8C4B26`.
-   - **System theme** (Monitor): подхватывает системную предпочтительность.
-4. Пройти ключевые экраны: `/` (главная, hero + категории), `/catalog`, `/catalog/$id`, `/about`, `/account`, `/admin` (через `/dashboard`) — убедиться, что нигде нет «сломанного» контраста (например тёмный текст на тёмном фоне).
-5. Проверить ThemeSwitcher слева снизу: активная иконка терракотовая.
-6. Сердечко в избранном — остаётся красным (`text-red-500`).
+1. `cd frontend && npx vite build` — пересборка `routeTree.gen.ts` и проверка, что нет конфликтов маршрутов.
+2. `npm run lint` и `npx tsc -p tsconfig.build.json --noEmit` — чисто.
+3. `docker compose watch` → проверки:
+   - **Незалогиненный**: открыть `/` → публичная главная с фото и кнопкой; в navbar — Logo, кнопка «Каталог» справа, «Войти», «Регистрация». Sidebar нигде не появляется.
+   - **Залогиненный обычный**: `/cart`, `/account`, `/account?tab=wishlist`, `/account?tab=orders`, `/checkout`, `/settings` — всё открывается, в navbar справа: Каталог, Корзина, Избранное, Кабинет, Выйти. Sidebar отсутствует.
+   - **Залогиненный обычный пытается зайти на `/admin`**: редирект на `/` (защита внутри `admin.tsx`).
+   - **Залогиненный superuser**: на `/admin` появляется sidebar (AppSidebar) с пунктами + админкой. На `/`, `/cart`, `/account` — обычный navbar без sidebar.
+   - **Логин flow**: после `/login` юзер попадает на `/` (публичная главная).
+4. Кнопка «Каталог» в правой части navbar: variant=default (терракотовый primary), `ShoppingBag` иконка + текст «Каталог» на ≥sm.
+5. Активный таб «Избранное» в `/account?tab=wishlist` отрабатывает корректно (без отдельного маршрута `/wishlist`).

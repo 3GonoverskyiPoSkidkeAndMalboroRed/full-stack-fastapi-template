@@ -14,14 +14,15 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PublicRouteImport } from './routes/_public'
-import { Route as LayoutRouteImport } from './routes/_layout'
-import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
-import { Route as PublicCatalogRouteImport } from './routes/_public/catalog'
-import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
-import { Route as LayoutCheckoutRouteImport } from './routes/_layout/checkout'
-import { Route as LayoutCartRouteImport } from './routes/_layout/cart'
-import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
-import { Route as LayoutAccountRouteImport } from './routes/_layout/account'
+import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as AdminRouteImport } from './routes/_admin'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
+import { Route as AuthedCheckoutRouteImport } from './routes/_authed/checkout'
+import { Route as AuthedCartRouteImport } from './routes/_authed/cart'
+import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
+import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
+import { Route as PublicCatalogIndexRouteImport } from './routes/_public/catalog.index'
 import { Route as PublicCatalogIdRouteImport } from './routes/_public/catalog.$id'
 
 const SignupRoute = SignupRouteImport.update({
@@ -48,95 +49,100 @@ const PublicRoute = PublicRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutRoute = LayoutRouteImport.update({
-  id: '/_layout',
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutIndexRoute = LayoutIndexRouteImport.update({
+const AdminRoute = AdminRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const PublicCatalogRoute = PublicCatalogRouteImport.update({
-  id: '/catalog',
-  path: '/catalog',
   getParentRoute: () => PublicRoute,
 } as any)
-const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
+const AuthedSettingsRoute = AuthedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => AuthedRoute,
 } as any)
-const LayoutCheckoutRoute = LayoutCheckoutRouteImport.update({
+const AuthedCheckoutRoute = AuthedCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => AuthedRoute,
 } as any)
-const LayoutCartRoute = LayoutCartRouteImport.update({
+const AuthedCartRoute = AuthedCartRouteImport.update({
   id: '/cart',
   path: '/cart',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => AuthedRoute,
 } as any)
-const LayoutAdminRoute = LayoutAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutAccountRoute = LayoutAccountRouteImport.update({
+const AuthedAccountRoute = AuthedAccountRouteImport.update({
   id: '/account',
   path: '/account',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AdminAdminRoute = AdminAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AdminRoute,
+} as any)
+const PublicCatalogIndexRoute = PublicCatalogIndexRouteImport.update({
+  id: '/catalog/',
+  path: '/catalog/',
+  getParentRoute: () => PublicRoute,
 } as any)
 const PublicCatalogIdRoute = PublicCatalogIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => PublicCatalogRoute,
+  id: '/catalog/$id',
+  path: '/catalog/$id',
+  getParentRoute: () => PublicRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof LayoutIndexRoute
+  '/': typeof PublicIndexRoute
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/account': typeof LayoutAccountRoute
-  '/admin': typeof LayoutAdminRoute
-  '/cart': typeof LayoutCartRoute
-  '/checkout': typeof LayoutCheckoutRoute
-  '/settings': typeof LayoutSettingsRoute
-  '/catalog': typeof PublicCatalogRouteWithChildren
+  '/admin': typeof AdminAdminRoute
+  '/account': typeof AuthedAccountRoute
+  '/cart': typeof AuthedCartRoute
+  '/checkout': typeof AuthedCheckoutRoute
+  '/settings': typeof AuthedSettingsRoute
   '/catalog/$id': typeof PublicCatalogIdRoute
+  '/catalog/': typeof PublicCatalogIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof LayoutIndexRoute
+  '/': typeof PublicIndexRoute
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/account': typeof LayoutAccountRoute
-  '/admin': typeof LayoutAdminRoute
-  '/cart': typeof LayoutCartRoute
-  '/checkout': typeof LayoutCheckoutRoute
-  '/settings': typeof LayoutSettingsRoute
-  '/catalog': typeof PublicCatalogRouteWithChildren
+  '/admin': typeof AdminAdminRoute
+  '/account': typeof AuthedAccountRoute
+  '/cart': typeof AuthedCartRoute
+  '/checkout': typeof AuthedCheckoutRoute
+  '/settings': typeof AuthedSettingsRoute
   '/catalog/$id': typeof PublicCatalogIdRoute
+  '/catalog': typeof PublicCatalogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_layout': typeof LayoutRouteWithChildren
+  '/_admin': typeof AdminRouteWithChildren
+  '/_authed': typeof AuthedRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/_layout/account': typeof LayoutAccountRoute
-  '/_layout/admin': typeof LayoutAdminRoute
-  '/_layout/cart': typeof LayoutCartRoute
-  '/_layout/checkout': typeof LayoutCheckoutRoute
-  '/_layout/settings': typeof LayoutSettingsRoute
-  '/_public/catalog': typeof PublicCatalogRouteWithChildren
-  '/_layout/': typeof LayoutIndexRoute
+  '/_admin/admin': typeof AdminAdminRoute
+  '/_authed/account': typeof AuthedAccountRoute
+  '/_authed/cart': typeof AuthedCartRoute
+  '/_authed/checkout': typeof AuthedCheckoutRoute
+  '/_authed/settings': typeof AuthedSettingsRoute
+  '/_public/': typeof PublicIndexRoute
   '/_public/catalog/$id': typeof PublicCatalogIdRoute
+  '/_public/catalog/': typeof PublicCatalogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -146,13 +152,13 @@ export interface FileRouteTypes {
     | '/recover-password'
     | '/reset-password'
     | '/signup'
-    | '/account'
     | '/admin'
+    | '/account'
     | '/cart'
     | '/checkout'
     | '/settings'
-    | '/catalog'
     | '/catalog/$id'
+    | '/catalog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -160,33 +166,35 @@ export interface FileRouteTypes {
     | '/recover-password'
     | '/reset-password'
     | '/signup'
-    | '/account'
     | '/admin'
+    | '/account'
     | '/cart'
     | '/checkout'
     | '/settings'
-    | '/catalog'
     | '/catalog/$id'
+    | '/catalog'
   id:
     | '__root__'
-    | '/_layout'
+    | '/_admin'
+    | '/_authed'
     | '/_public'
     | '/login'
     | '/recover-password'
     | '/reset-password'
     | '/signup'
-    | '/_layout/account'
-    | '/_layout/admin'
-    | '/_layout/cart'
-    | '/_layout/checkout'
-    | '/_layout/settings'
-    | '/_public/catalog'
-    | '/_layout/'
+    | '/_admin/admin'
+    | '/_authed/account'
+    | '/_authed/cart'
+    | '/_authed/checkout'
+    | '/_authed/settings'
+    | '/_public/'
     | '/_public/catalog/$id'
+    | '/_public/catalog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  LayoutRoute: typeof LayoutRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
+  AuthedRoute: typeof AuthedRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   LoginRoute: typeof LoginRoute
   RecoverPasswordRoute: typeof RecoverPasswordRoute
@@ -231,118 +239,124 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout': {
-      id: '/_layout'
+    '/_authed': {
+      id: '/_authed'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof LayoutRouteImport
+      preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout/': {
-      id: '/_layout/'
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/': {
+      id: '/_public/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof LayoutIndexRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_public/catalog': {
-      id: '/_public/catalog'
-      path: '/catalog'
-      fullPath: '/catalog'
-      preLoaderRoute: typeof PublicCatalogRouteImport
+      preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_layout/settings': {
-      id: '/_layout/settings'
+    '/_authed/settings': {
+      id: '/_authed/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof LayoutSettingsRouteImport
-      parentRoute: typeof LayoutRoute
+      preLoaderRoute: typeof AuthedSettingsRouteImport
+      parentRoute: typeof AuthedRoute
     }
-    '/_layout/checkout': {
-      id: '/_layout/checkout'
+    '/_authed/checkout': {
+      id: '/_authed/checkout'
       path: '/checkout'
       fullPath: '/checkout'
-      preLoaderRoute: typeof LayoutCheckoutRouteImport
-      parentRoute: typeof LayoutRoute
+      preLoaderRoute: typeof AuthedCheckoutRouteImport
+      parentRoute: typeof AuthedRoute
     }
-    '/_layout/cart': {
-      id: '/_layout/cart'
+    '/_authed/cart': {
+      id: '/_authed/cart'
       path: '/cart'
       fullPath: '/cart'
-      preLoaderRoute: typeof LayoutCartRouteImport
-      parentRoute: typeof LayoutRoute
+      preLoaderRoute: typeof AuthedCartRouteImport
+      parentRoute: typeof AuthedRoute
     }
-    '/_layout/admin': {
-      id: '/_layout/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof LayoutAdminRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/account': {
-      id: '/_layout/account'
+    '/_authed/account': {
+      id: '/_authed/account'
       path: '/account'
       fullPath: '/account'
-      preLoaderRoute: typeof LayoutAccountRouteImport
-      parentRoute: typeof LayoutRoute
+      preLoaderRoute: typeof AuthedAccountRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_admin/admin': {
+      id: '/_admin/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAdminRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_public/catalog/': {
+      id: '/_public/catalog/'
+      path: '/catalog'
+      fullPath: '/catalog/'
+      preLoaderRoute: typeof PublicCatalogIndexRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/_public/catalog/$id': {
       id: '/_public/catalog/$id'
-      path: '/$id'
+      path: '/catalog/$id'
       fullPath: '/catalog/$id'
       preLoaderRoute: typeof PublicCatalogIdRouteImport
-      parentRoute: typeof PublicCatalogRoute
+      parentRoute: typeof PublicRoute
     }
   }
 }
 
-interface LayoutRouteChildren {
-  LayoutAccountRoute: typeof LayoutAccountRoute
-  LayoutAdminRoute: typeof LayoutAdminRoute
-  LayoutCartRoute: typeof LayoutCartRoute
-  LayoutCheckoutRoute: typeof LayoutCheckoutRoute
-  LayoutSettingsRoute: typeof LayoutSettingsRoute
-  LayoutIndexRoute: typeof LayoutIndexRoute
+interface AdminRouteChildren {
+  AdminAdminRoute: typeof AdminAdminRoute
 }
 
-const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutAccountRoute: LayoutAccountRoute,
-  LayoutAdminRoute: LayoutAdminRoute,
-  LayoutCartRoute: LayoutCartRoute,
-  LayoutCheckoutRoute: LayoutCheckoutRoute,
-  LayoutSettingsRoute: LayoutSettingsRoute,
-  LayoutIndexRoute: LayoutIndexRoute,
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdminRoute: AdminAdminRoute,
 }
 
-const LayoutRouteWithChildren =
-  LayoutRoute._addFileChildren(LayoutRouteChildren)
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface PublicCatalogRouteChildren {
-  PublicCatalogIdRoute: typeof PublicCatalogIdRoute
+interface AuthedRouteChildren {
+  AuthedAccountRoute: typeof AuthedAccountRoute
+  AuthedCartRoute: typeof AuthedCartRoute
+  AuthedCheckoutRoute: typeof AuthedCheckoutRoute
+  AuthedSettingsRoute: typeof AuthedSettingsRoute
 }
 
-const PublicCatalogRouteChildren: PublicCatalogRouteChildren = {
-  PublicCatalogIdRoute: PublicCatalogIdRoute,
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedAccountRoute: AuthedAccountRoute,
+  AuthedCartRoute: AuthedCartRoute,
+  AuthedCheckoutRoute: AuthedCheckoutRoute,
+  AuthedSettingsRoute: AuthedSettingsRoute,
 }
 
-const PublicCatalogRouteWithChildren = PublicCatalogRoute._addFileChildren(
-  PublicCatalogRouteChildren,
-)
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
 
 interface PublicRouteChildren {
-  PublicCatalogRoute: typeof PublicCatalogRouteWithChildren
+  PublicIndexRoute: typeof PublicIndexRoute
+  PublicCatalogIdRoute: typeof PublicCatalogIdRoute
+  PublicCatalogIndexRoute: typeof PublicCatalogIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
-  PublicCatalogRoute: PublicCatalogRouteWithChildren,
+  PublicIndexRoute: PublicIndexRoute,
+  PublicCatalogIdRoute: PublicCatalogIdRoute,
+  PublicCatalogIndexRoute: PublicCatalogIndexRoute,
 }
 
 const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  LayoutRoute: LayoutRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
+  AuthedRoute: AuthedRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   LoginRoute: LoginRoute,
   RecoverPasswordRoute: RecoverPasswordRoute,

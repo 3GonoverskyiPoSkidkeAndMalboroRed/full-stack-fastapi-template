@@ -36,7 +36,7 @@ export function ProductCard({ item }: ProductCardProps) {
             src={imgSrc}
             alt={item.title}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform group-hover:scale-105 border"
+            className="h-full w-full border object-cover transition-transform group-hover:scale-105"
           />
           {outOfStock && (
             <Badge variant="secondary" className="absolute top-2 left-2">
