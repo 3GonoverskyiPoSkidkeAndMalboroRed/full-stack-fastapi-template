@@ -30,7 +30,7 @@ export function ProductCard({ item }: ProductCardProps) {
 
   return (
     <Link to="/catalog/$id" params={{ id: item.id }} className="group block">
-      <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
+      <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-lg border">
         <div className="bg-muted relative block aspect-square overflow-hidden">
           <img
             src={imgSrc}
@@ -53,7 +53,7 @@ export function ProductCard({ item }: ProductCardProps) {
             </Badge>
           )}
         </div>
-        <CardContent className="bg-card flex flex-1 flex-col gap-2 px-4 py-3">
+        <CardContent className="flex flex-1 flex-col gap-2 px-4 py-3">
           {item.brand && (
             <span className="text-muted-foreground text-xs tracking-wide uppercase">
               {item.brand}

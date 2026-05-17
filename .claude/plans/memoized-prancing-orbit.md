@@ -1,107 +1,157 @@
-# План: ProductCard как ссылка + фон/border у CardContent + фикс zoom в лайтбоксе
+# План: Смена цветовой темы сайта на тёплую землистую палитру
 
 ## Context
 
-В каталоге (`/catalog`) карточка товара (`ProductCard`) сейчас имеет три отдельных кликабельных области (`<Link>` на картинке, на названии, на кнопке «Купить»), а остальное «мёртвое» пространство (бренд, цена) не реагирует на клик. Это снижает удобство навигации.
+Текущая тема (`frontend/src/index.css`) — нейтрально-серая, со стандартным shadcn-палитрой (oklch с нулевой хроматичностью) и единственным «выпадающим» бирюзовым `--primary` (`oklch(0.5982 0.10687 182.4689)`). Юзер хочет переключить сайт на тёплую землистую палитру из 5 цветов:
 
-Параллельно карточка стилистически «плоская» — у `CardContent` нет ни границы, ни фона, из-за чего блок текстового описания визуально не отделён от страницы.
+| HEX       | OKLCH (≈)                  | Роль                          |
+|-----------|----------------------------|-------------------------------|
+| `#D9B89C` | `oklch(0.795 0.045 65)`    | Светлый бежевый — secondary/accent (light), muted-foreground (dark) |
+| `#8C4B26` | `oklch(0.428 0.099 47)`    | Тёмно-коричневый — secondary/accent (dark) |
+| `#A64826` | `oklch(0.491 0.141 39)`    | Терракотовый — **primary** на обеих темах |
+| `#F2F2F2` | `oklch(0.961 0 0)`         | Светлый фон / foreground в dark |
+| `#262626` | `oklch(0.247 0 0)`         | Тёмный текст / фон в dark |
 
-На странице товара (`ProductDetail`) лайтбокс с зумом (`ProductLightbox` на базе `react-zoom-pan-pinch` + `embla-carousel`) даёт некорректное смещение изображения вправо, из-за чего увеличенное фото перекрывает кнопку «×» в правом верхнем углу. Корень бага — взаимодействие `embla` (`CarouselContent` имеет дефолтный `-ml-4`, `CarouselItem` — `pl-4`) с принудительными `!w-screen / !h-screen` на `TransformComponent`: внутренний контейнер шире доступной области, поэтому центрирование `flex justify-center` происходит относительно сдвинутого вправо родителя.
+Тема в проекте задаётся через CSS-переменные в `:root` и `.dark` блоках `frontend/src/index.css` (Tailwind v4 + shadcn pattern). Почти все компоненты уже используют семантические токены (`bg-background`, `bg-card`, `text-primary`, `border`, и т.д.), поэтому смена цветов сводится в основном к правке `index.css`.
 
-Цель: сделать всю карточку единой ссылкой (кроме кнопок «В вишлист» и «В корзину»), оформить `CardContent` (border + `bg-card`) и устранить смещение в зуме.
+По решениям юзера: красное сердечко в `AddToWishlistButton` (`text-red-500`) остаётся как есть; chart-* токены переводятся в оттенки палитры.
 
 ## Изменения
 
-### 1. `frontend/src/components/Catalog/ProductCard.tsx` — карточка-ссылка
+### Единственный файл: `frontend/src/index.css`
 
-- Удалить три внутренних `<Link>` (строки 33-58, 65-71, 77-82) и обернуть всю `Card` одним внешним `<Link to="/catalog/$id" params={{ id: item.id }} className="group block">`.
-- Сохранить относительное позиционирование (`relative`) у обёртки картинки внутри `<Link>` — нужно для `absolute` бейджей и floating-кнопки вишлиста.
-- Заменить блок кнопки «Купить» (`<Button asChild><Link>…</Link></Button>` на строках 77-82) на компонент `<AddToCartButton itemId={item.id} disabled={outOfStock} />` — пользователь подтвердил, что в карточке должен быть полноценный add-to-cart.
-- `AddToWishlistButton` уже корректно гасит всплытие (`e.preventDefault()` + `e.stopPropagation()` в `AddToWishlistButton.tsx:34-42`) — менять не нужно.
+Переписать содержимое блоков `:root` и `.dark`, оставив структуру `@theme inline { ... }` нетронутой.
 
-### 2. `frontend/src/components/Catalog/AddToCartButton.tsx` — гасить всплытие
+#### Light (`:root`)
 
-В `handleClick` (строки 35-41) сейчас нет `preventDefault/stopPropagation`. Когда кнопка окажется внутри `<Link>`-карточки, без этого клик уйдёт по ссылке. Меняем сигнатуру:
+```css
+:root {
+  --radius: 0.625rem;
 
-```tsx
-const handleClick = (e: React.MouseEvent) => {
-  e.preventDefault()
-  e.stopPropagation()
-  // …остальное без изменений
+  /* Surface */
+  --background: oklch(0.961 0 0);        /* #F2F2F2 */
+  --foreground: oklch(0.247 0 0);        /* #262626 */
+  --card: oklch(1 0 0);                  /* white — выделяется поверх #F2F2F2 */
+  --card-foreground: oklch(0.247 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.247 0 0);
+
+  /* Brand */
+  --primary: oklch(0.491 0.141 39);              /* #A64826 терракот */
+  --primary-foreground: oklch(0.961 0 0);        /* #F2F2F2 */
+
+  /* Secondary / accent — тёплый беж */
+  --secondary: oklch(0.795 0.045 65);            /* #D9B89C */
+  --secondary-foreground: oklch(0.247 0 0);
+  --accent: oklch(0.795 0.045 65);               /* #D9B89C */
+  --accent-foreground: oklch(0.247 0 0);
+
+  /* Muted — приглушённый тёплый нейтрал */
+  --muted: oklch(0.90 0.018 65);
+  --muted-foreground: oklch(0.50 0.04 50);
+
+  /* Status */
+  --destructive: oklch(0.577 0.245 27.325);      /* оставляем красный */
+
+  /* Lines / focus */
+  --border: oklch(0.85 0.02 60);
+  --input: oklch(0.85 0.02 60);
+  --ring: oklch(0.491 0.141 39);                 /* primary */
+
+  /* Charts — 5 оттенков палитры */
+  --chart-1: oklch(0.491 0.141 39);              /* #A64826 */
+  --chart-2: oklch(0.428 0.099 47);              /* #8C4B26 */
+  --chart-3: oklch(0.795 0.045 65);              /* #D9B89C */
+  --chart-4: oklch(0.65 0.13 40);                /* осветлённый терракот */
+  --chart-5: oklch(0.35 0.08 47);                /* затемнённый коричневый */
+
+  /* Sidebar */
+  --sidebar: oklch(0.961 0 0);
+  --sidebar-foreground: oklch(0.247 0 0);
+  --sidebar-primary: oklch(0.491 0.141 39);
+  --sidebar-primary-foreground: oklch(0.961 0 0);
+  --sidebar-accent: oklch(0.795 0.045 65);
+  --sidebar-accent-foreground: oklch(0.247 0 0);
+  --sidebar-border: oklch(0.85 0.02 60);
+  --sidebar-ring: oklch(0.491 0.141 39);
 }
 ```
 
-В `ProductDetail` (`frontend/src/components/Catalog/ProductDetail.tsx:106-110`) `AddToCartButton` используется вне ссылки — `preventDefault` там безвреден (Button is `type="button"`, формы вокруг нет).
+#### Dark (`.dark`)
 
-### 3. `frontend/src/components/Catalog/ProductCard.tsx` — border + bg-card на CardContent
+```css
+.dark {
+  --background: oklch(0.247 0 0);                /* #262626 */
+  --foreground: oklch(0.961 0 0);                /* #F2F2F2 */
+  --card: oklch(0.30 0 0);                       /* чуть светлее фона */
+  --card-foreground: oklch(0.961 0 0);
+  --popover: oklch(0.30 0 0);
+  --popover-foreground: oklch(0.961 0 0);
 
-`CardContent` в shadcn (`frontend/src/components/ui/card.tsx:64-71`) по умолчанию имеет только `px-6` — границы и фона нет. У `Card` (строка 10) тоже нет ни `border`, ни `bg-card`, только `shadow-sm`. Поэтому добавляем нужные классы прямо на использование `CardContent` в `ProductCard.tsx`:
+  --primary: oklch(0.491 0.141 39);              /* #A64826 */
+  --primary-foreground: oklch(0.961 0 0);
 
-```tsx
-<CardContent className="flex flex-1 flex-col gap-2 border bg-card px-4 py-3">
+  --secondary: oklch(0.428 0.099 47);            /* #8C4B26 — тёмно-коричневый */
+  --secondary-foreground: oklch(0.961 0 0);
+  --accent: oklch(0.428 0.099 47);
+  --accent-foreground: oklch(0.961 0 0);
+
+  --muted: oklch(0.32 0.015 60);
+  --muted-foreground: oklch(0.78 0.03 65);       /* светлый бежевый текст */
+
+  --destructive: oklch(0.704 0.191 22.216);      /* оставляем красный */
+
+  --border: oklch(0.40 0.02 55);
+  --input: oklch(0.40 0.02 55);
+  --ring: oklch(0.491 0.141 39);
+
+  --chart-1: oklch(0.65 0.13 40);
+  --chart-2: oklch(0.491 0.141 39);
+  --chart-3: oklch(0.795 0.045 65);
+  --chart-4: oklch(0.428 0.099 47);
+  --chart-5: oklch(0.55 0.10 50);
+
+  --sidebar: oklch(0.30 0 0);
+  --sidebar-foreground: oklch(0.961 0 0);
+  --sidebar-primary: oklch(0.491 0.141 39);
+  --sidebar-primary-foreground: oklch(0.961 0 0);
+  --sidebar-accent: oklch(0.428 0.099 47);
+  --sidebar-accent-foreground: oklch(0.961 0 0);
+  --sidebar-border: oklch(0.40 0.02 55);
+  --sidebar-ring: oklch(0.491 0.141 39);
+}
 ```
 
-`CardFooter` оставляем как есть.
+### Что НЕ меняется
 
-### 4. `frontend/src/components/Catalog/ProductLightbox.tsx` — фикс смещения зума
+- Структура `@theme inline { ... }` сверху файла — она лишь маппит `--color-*` на CSS-переменные, без правок.
+- `@layer base { ... }` блок снизу — `border-border`, `bg-background`, `text-foreground` уже идут через токены.
+- `AddToWishlistButton.tsx` — `text-red-500` для активного сердечка остаётся (решение юзера).
+- Чёрные градиенты-оверлеи поверх фото (`from-black/70 ...` в hero на `_public/index.tsx`, в категориях, в лайтбоксе) — не палитра, а оверлей картинок; оставляю.
+- Компоненты shadcn (`ui/button.tsx`, `ui/card.tsx` и т.д.) — без правок, они уже семантические.
 
-Три точечные правки внутри `ProductLightbox.tsx` (строки 54-91):
+### Места, где новая палитра проявится автоматически (для справки)
 
-1. **Убрать сдвиг `embla`**: на `CarouselContent` добавить `ml-0`, на `CarouselItem` — `pl-0`. По умолчанию shadcn-обёртка применяет `-ml-4 / pl-4`, и именно это «съезжание на 16 px» нарушает центрирование внутри `TransformComponent`.
-
-   ```tsx
-   <CarouselContent className="ml-0 h-screen">
-     {images.map((src, index) => (
-       <CarouselItem
-         key={src}
-         className="flex h-screen items-center justify-center pl-0"
-       >
-   ```
-
-2. **`TransformComponent` растягивать по родителю, а не по `screen`**: вместо `!h-screen !w-screen` использовать `!h-full !w-full`, чтобы трансформируемая область совпадала с `CarouselItem` (тот уже `h-screen w-full` по факту, т.к. лежит во flex-родителе на полный экран).
-
-   ```tsx
-   <TransformComponent
-     wrapperClass="!h-full !w-full"
-     contentClass="!h-full !w-full flex items-center justify-center"
-   >
-   ```
-
-3. **Добавить `centerOnInit` к `TransformWrapper`** — даёт библиотеке явно центрировать содержимое при первом маунте каждой картинки карусели, страхует от остаточных смещений после смены слайда:
-
-   ```tsx
-   <TransformWrapper
-     doubleClick={{ mode: "toggle" }}
-     wheel={{ step: 0.2 }}
-     panning={{ velocityDisabled: true }}
-     centerOnInit
-   >
-   ```
-
-Кнопку закрытия (`absolute top-4 right-4 z-50`, строки 46-53) трогать не нужно — после устранения горизонтального оверфлоу она перестанет перекрываться.
+- `Card` / `CardContent` (например в `ProductCard.tsx:59`, `_public/about.tsx`) — `bg-card border` → белые карточки на бежевом фоне.
+- Hero на главной (`_public/index.tsx`) — бейдж `bg-primary/90` станет терракотовым.
+- About-страница (`_public/about.tsx`) — `bg-primary/10 text-primary` для иконок-кружков, бейдж «О компании».
+- `ThemeSwitcher` — `bg-background/95 border` пилюля; активная кнопка `variant="default"` будет терракотовой.
+- `Button` `variant="default"` (включая `AddToCartButton`) — заливка primary (`#A64826`).
+- `Button` `variant="secondary"` (включая `AddToCartButton` в состоянии «В корзине», floating-сердечко) — заливка `#D9B89C`.
+- `Skeleton`, focus-ring, `Tabs`, `Sidebar` — всё подхватится через `--muted`, `--ring`, `--sidebar-*`.
 
 ## Критические файлы
 
-- `frontend/src/components/Catalog/ProductCard.tsx` — основная переработка
-- `frontend/src/components/Catalog/AddToCartButton.tsx` — добавить stop/prevent в `handleClick`
-- `frontend/src/components/Catalog/ProductLightbox.tsx` — фикс зума
-
-Без правок:
-- `frontend/src/components/Catalog/ProductGrid.tsx` — продолжает использовать `ProductCard` без изменений API
-- `frontend/src/components/Catalog/AddToWishlistButton.tsx` — уже гасит события
-- `frontend/src/components/ui/card.tsx` — общие классы трогать не будем, локально расширяем через `className`
+- `frontend/src/index.css` — единственный файл правок.
 
 ## Verification
 
-1. `cd frontend && npm run lint` — eslint + prettier должны пройти без ошибок.
-2. `cd frontend && npm run build` — `tsc --build` + `vite build` без TS-ошибок (особенно проверка сигнатуры `handleClick(e: React.MouseEvent)` в `AddToCartButton`).
-3. Поднять стек: `docker compose watch`, открыть `http://dashboard.localhost:8081/catalog`:
-   - Клик в любую «пустую» зону карточки (бренд, цена, фон) → переход на `/catalog/$id`.
-   - Клик по иконке «сердце» (вишлист) → добавление в вишлист, **без** перехода на товар (проверить тост и URL).
-   - Клик по «В корзину» → добавление в корзину, **без** перехода на товар.
-   - `CardContent` визуально с границей и фоном `bg-card`.
-4. Открыть карточку товара → клик по фото открывает лайтбокс:
-   - Изображение центрировано по экрану (не съезжает вправо).
-   - Кнопка «×» в правом верхнем углу не перекрывается ни в стартовом состоянии, ни после двойного клика / зума колесом.
-   - Переключение между фото через стрелки сохраняет центрирование.
-5. Smoke: убедиться, что страница `/catalog/$id` (где `AddToCartButton` используется отдельно) по-прежнему добавляет в корзину после правки `handleClick`.
+1. `cd frontend && npm run lint` — sanity-check (никаких изменений в TS/TSX не делаем, но проверим Prettier для CSS).
+2. `cd frontend && npx tsc -p tsconfig.build.json --noEmit` — для надёжности.
+3. `docker compose watch` → `http://dashboard.localhost:8081/`:
+   - **Light theme** (Sun в ThemeSwitcher): фон сайта `#F2F2F2`, кнопки primary и focus-ring терракотовые `#A64826`, secondary/accent бежевый `#D9B89C`, текст почти чёрный.
+   - **Dark theme** (Moon): фон `#262626`, текст `#F2F2F2`, primary остался терракотовый, secondary/accent — коричневый `#8C4B26`.
+   - **System theme** (Monitor): подхватывает системную предпочтительность.
+4. Пройти ключевые экраны: `/` (главная, hero + категории), `/catalog`, `/catalog/$id`, `/about`, `/account`, `/admin` (через `/dashboard`) — убедиться, что нигде нет «сломанного» контраста (например тёмный текст на тёмном фоне).
+5. Проверить ThemeSwitcher слева снизу: активная иконка терракотовая.
+6. Сердечко в избранном — остаётся красным (`text-red-500`).

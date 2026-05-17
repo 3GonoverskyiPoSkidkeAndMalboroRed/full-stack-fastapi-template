@@ -3,7 +3,8 @@
     "allow": [
       "Bash(grep -E \"\\\\.py$\")",
       "Bash(uv run *)",
-      "Bash(docker compose *)"
+      "Bash(docker compose *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
