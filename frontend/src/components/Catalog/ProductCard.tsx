@@ -30,13 +30,13 @@ export function ProductCard({ item }: ProductCardProps) {
 
   return (
     <Link to="/catalog/$id" params={{ id: item.id }} className="group block">
-      <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-lg border">
+      <Card className="flex flex-col overflow-hidden border transition-shadow hover:shadow-lg">
         <div className="bg-muted relative block aspect-square overflow-hidden">
           <img
             src={imgSrc}
             alt={item.title}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform group-hover:scale-105 border"
           />
           {outOfStock && (
             <Badge variant="secondary" className="absolute top-2 left-2">
