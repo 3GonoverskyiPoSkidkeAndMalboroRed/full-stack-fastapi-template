@@ -32,3 +32,12 @@ class SizePublic(SizeBase):
 class SizesPublic(SQLModel):
     data: list[SizePublic]
     count: int
+
+
+class SizeCount(SQLModel):
+    size_id: uuid.UUID
+    count: int
+
+
+class SizeCountsPublic(SQLModel):
+    data: list[SizeCount]

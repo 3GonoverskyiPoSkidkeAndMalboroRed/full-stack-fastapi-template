@@ -12,16 +12,16 @@ const NotFound = () => {
           <span className="mb-4 text-6xl leading-none font-bold md:text-8xl">
             404
           </span>
-          <span className="mb-2 text-2xl font-bold">Oops!</span>
+          <span className="mb-2 text-2xl font-bold">Упс!</span>
         </div>
       </div>
 
       <p className="text-muted-foreground z-10 mb-4 text-center text-lg">
-        The page you are looking for was not found.
+        Запрошенная страница не найдена.
       </p>
       <div className="z-10">
         <Link to="/">
-          <Button className="mt-4">Go Back</Button>
+          <Button className="mt-4">Назад</Button>
         </Link>
       </div>
     </div>

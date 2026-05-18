@@ -37,7 +37,7 @@ function CopyId({ id }: { id: string }) {
         ) : (
           <Copy className="size-3" />
         )}
-        <span className="sr-only">Copy ID</span>
+        <span className="sr-only">Скопировать ID</span>
       </Button>
     </div>
   )
@@ -51,14 +51,14 @@ export const columns: ColumnDef<ItemPublic>[] = [
   },
   {
     accessorKey: "title",
-    header: "Title",
+    header: "Название",
     cell: ({ row }) => (
       <span className="font-medium">{row.original.title}</span>
     ),
   },
   {
     accessorKey: "description",
-    header: "Description",
+    header: "Описание",
     cell: ({ row }) => {
       const description = row.original.description
       return (
@@ -68,31 +68,31 @@ export const columns: ColumnDef<ItemPublic>[] = [
             !description && "italic",
           )}
         >
-          {description || "No description"}
+          {description || "Без описания"}
         </span>
       )
     },
   },
   {
     accessorKey: "category_id",
-    header: "Category",
+    header: "Категория",
   },
   {
     accessorKey: "size_id",
-    header: "Size",
+    header: "Размер",
     cell: ({ row }) => <SizeCell id={row.original.size_id} />,
   },
   {
     accessorKey: "brand",
-    header: "Brand",
+    header: "Бренд",
   },
   {
     accessorKey: "cost",
-    header: "Cost",
+    header: "Цена",
   },
   {
     id: "actions",
-    header: () => <span className="sr-only">Actions</span>,
+    header: () => <span className="sr-only">Действия</span>,
     cell: ({ row }) => (
       <div className="flex justify-end">
         <ItemActionsMenu item={row.original} />

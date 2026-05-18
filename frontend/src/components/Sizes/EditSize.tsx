@@ -31,7 +31,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
+  name: z.string().min(1, { message: "Введите название" }),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -57,7 +57,7 @@ const EditSize = ({ size, onSuccess }: EditSizeProps) => {
     mutationFn: (data: SizeUpdate) =>
       sizesUpdateSize({ path: { id: size.id }, body: data }),
     onSuccess: () => {
-      showSuccessToast("Size updated successfully")
+      showSuccessToast("Размер обновлён")
       setIsOpen(false)
       onSuccess()
     },
@@ -81,12 +81,12 @@ const EditSize = ({ size, onSuccess }: EditSizeProps) => {
         }}
       >
         <Pencil className="mr-2 h-4 w-4" />
-        Edit
+        Редактировать
       </DropdownMenuItem>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Size</DialogTitle>
-          <DialogDescription>Update the size name.</DialogDescription>
+          <DialogTitle>Редактировать размер</DialogTitle>
+          <DialogDescription>Измените название размера.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -97,11 +97,11 @@ const EditSize = ({ size, onSuccess }: EditSizeProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Name <span className="text-destructive">*</span>
+                      Название <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Size name"
+                        placeholder="Название размера"
                         type="text"
                         {...field}
                         required
@@ -115,11 +115,11 @@ const EditSize = ({ size, onSuccess }: EditSizeProps) => {
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline" disabled={mutation.isPending}>
-                  Cancel
+                  Отмена
                 </Button>
               </DialogClose>
               <LoadingButton type="submit" loading={mutation.isPending}>
-                Save
+                Сохранить
               </LoadingButton>
             </DialogFooter>
           </form>

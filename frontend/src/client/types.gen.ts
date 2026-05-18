@@ -463,6 +463,30 @@ export type PrivateUserCreate = {
 };
 
 /**
+ * SizeCount
+ */
+export type SizeCount = {
+    /**
+     * Size Id
+     */
+    size_id: string;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * SizeCountsPublic
+ */
+export type SizeCountsPublic = {
+    /**
+     * Data
+     */
+    data: Array<SizeCount>;
+};
+
+/**
  * SizeCreate
  */
 export type SizeCreate = {
@@ -559,6 +583,14 @@ export type UserCreate = {
      */
     full_name?: string | null;
     /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Delivery Address
+     */
+    delivery_address?: string | null;
+    /**
      * Password
      */
     password: string;
@@ -584,6 +616,14 @@ export type UserPublic = {
      * Full Name
      */
     full_name?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Delivery Address
+     */
+    delivery_address?: string | null;
     /**
      * Id
      */
@@ -633,6 +673,14 @@ export type UserUpdate = {
      */
     full_name?: string | null;
     /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Delivery Address
+     */
+    delivery_address?: string | null;
+    /**
      * Password
      */
     password?: string | null;
@@ -650,6 +698,14 @@ export type UserUpdateMe = {
      * Email
      */
     email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Delivery Address
+     */
+    delivery_address?: string | null;
 };
 
 /**
@@ -1668,6 +1724,36 @@ export type SizesReadSizesPublicResponses = {
 };
 
 export type SizesReadSizesPublicResponse = SizesReadSizesPublicResponses[keyof SizesReadSizesPublicResponses];
+
+export type SizesReadSizeCountsPublicData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Category Id
+         */
+        category_id?: string | null;
+    };
+    url: '/api/v1/sizes/counts/public';
+};
+
+export type SizesReadSizeCountsPublicErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SizesReadSizeCountsPublicError = SizesReadSizeCountsPublicErrors[keyof SizesReadSizeCountsPublicErrors];
+
+export type SizesReadSizeCountsPublicResponses = {
+    /**
+     * Successful Response
+     */
+    200: SizeCountsPublic;
+};
+
+export type SizesReadSizeCountsPublicResponse = SizesReadSizeCountsPublicResponses[keyof SizesReadSizeCountsPublicResponses];
 
 export type SizesReadSizesData = {
     body?: never;

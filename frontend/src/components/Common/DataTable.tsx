@@ -83,7 +83,7 @@ export function DataTable<TData, TValue>({
                 colSpan={columns.length}
                 className="text-muted-foreground h-32 text-center"
               >
-                No results found.
+                Ничего не найдено.
               </TableCell>
             </TableRow>
           )}
@@ -94,22 +94,21 @@ export function DataTable<TData, TValue>({
         <div className="bg-muted/20 flex flex-col items-start justify-between gap-4 border-t p-4 sm:flex-row sm:items-center">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="text-muted-foreground text-sm">
-              Showing{" "}
+              Показано{" "}
               {table.getState().pagination.pageIndex *
                 table.getState().pagination.pageSize +
-                1}{" "}
-              to{" "}
+                1}
+              –
               {Math.min(
                 (table.getState().pagination.pageIndex + 1) *
                   table.getState().pagination.pageSize,
                 data.length,
               )}{" "}
-              of{" "}
-              <span className="text-foreground font-medium">{data.length}</span>{" "}
-              entries
+              из{" "}
+              <span className="text-foreground font-medium">{data.length}</span>
             </div>
             <div className="flex items-center gap-x-2">
-              <p className="text-muted-foreground text-sm">Rows per page</p>
+              <p className="text-muted-foreground text-sm">Строк на странице</p>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
                 onValueChange={(value) => {
@@ -134,11 +133,11 @@ export function DataTable<TData, TValue>({
 
           <div className="flex items-center gap-x-6">
             <div className="text-muted-foreground flex items-center gap-x-1 text-sm">
-              <span>Page</span>
+              <span>Страница</span>
               <span className="text-foreground font-medium">
                 {table.getState().pagination.pageIndex + 1}
               </span>
-              <span>of</span>
+              <span>из</span>
               <span className="text-foreground font-medium">
                 {table.getPageCount()}
               </span>
@@ -152,7 +151,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
-                <span className="sr-only">Go to first page</span>
+                <span className="sr-only">На первую страницу</span>
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
               <Button
@@ -162,7 +161,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
               >
-                <span className="sr-only">Go to previous page</span>
+                <span className="sr-only">На предыдущую страницу</span>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button
@@ -172,7 +171,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
               >
-                <span className="sr-only">Go to next page</span>
+                <span className="sr-only">На следующую страницу</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
               <Button
@@ -182,7 +181,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
               >
-                <span className="sr-only">Go to last page</span>
+                <span className="sr-only">На последнюю страницу</span>
                 <ChevronsRight className="h-4 w-4" />
               </Button>
             </div>

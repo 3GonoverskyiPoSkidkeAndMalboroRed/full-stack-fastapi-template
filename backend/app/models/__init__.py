@@ -36,6 +36,8 @@ from app.models.order import (
 from app.models.order_item import OrderItem
 from app.models.size import (
     Size,
+    SizeCount,
+    SizeCountsPublic,
     SizeCreate,
     SizePublic,
     SizesPublic,
@@ -90,6 +92,8 @@ __all__ = [
     "OrdersPublic",
     "SQLModel",
     "Size",
+    "SizeCount",
+    "SizeCountsPublic",
     "SizeCreate",
     "SizePublic",
     "SizeUpdate",

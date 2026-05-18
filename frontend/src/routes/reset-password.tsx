@@ -33,14 +33,12 @@ const formSchema = z
   .object({
     new_password: z
       .string()
-      .min(1, { message: "Password is required" })
-      .min(8, { message: "Password must be at least 8 characters" }),
-    confirm_password: z
-      .string()
-      .min(1, { message: "Password confirmation is required" }),
+      .min(1, { message: "Введите пароль" })
+      .min(8, { message: "Пароль должен быть не короче 8 символов" }),
+    confirm_password: z.string().min(1, { message: "Подтвердите пароль" }),
   })
   .refine((data) => data.new_password === data.confirm_password, {
-    message: "The passwords don't match",
+    message: "Пароли не совпадают",
     path: ["confirm_password"],
   })
 
@@ -60,7 +58,7 @@ export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
       {
-        title: "Reset Password - FastAPI Template",
+        title: "Сброс пароля — FastAPI Template",
       },
     ],
   }),
@@ -85,7 +83,7 @@ function ResetPassword() {
     mutationFn: (data: { new_password: string; token: string }) =>
       loginResetPassword({ body: data }),
     onSuccess: () => {
-      showSuccessToast("Password updated successfully")
+      showSuccessToast("Пароль успешно обновлён")
       form.reset()
       navigate({ to: "/login" })
     },
@@ -104,7 +102,7 @@ function ResetPassword() {
           className="flex flex-col gap-6"
         >
           <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">Reset Password</h1>
+            <h1 className="text-2xl font-bold">Сброс пароля</h1>
           </div>
 
           <div className="grid gap-4">
@@ -113,11 +111,11 @@ function ResetPassword() {
               name="new_password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>New Password</FormLabel>
+                  <FormLabel>Новый пароль</FormLabel>
                   <FormControl>
                     <PasswordInput
                       data-testid="new-password-input"
-                      placeholder="New Password"
+                      placeholder="Новый пароль"
                       {...field}
                     />
                   </FormControl>
@@ -131,11 +129,11 @@ function ResetPassword() {
               name="confirm_password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel>Подтвердите пароль</FormLabel>
                   <FormControl>
                     <PasswordInput
                       data-testid="confirm-password-input"
-                      placeholder="Confirm Password"
+                      placeholder="Подтвердите пароль"
                       {...field}
                     />
                   </FormControl>
@@ -149,14 +147,14 @@ function ResetPassword() {
               className="w-full"
               loading={mutation.isPending}
             >
-              Reset Password
+              Сбросить пароль
             </LoadingButton>
           </div>
 
           <div className="text-center text-sm">
-            Remember your password?{" "}
+            Вспомнили пароль?{" "}
             <RouterLink to="/login" className="underline underline-offset-4">
-              Log in
+              Войти
             </RouterLink>
           </div>
         </form>

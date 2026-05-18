@@ -1,11 +1,12 @@
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { Suspense } from "react"
+import { Suspense, useMemo } from "react"
 import { z } from "zod"
 
 import {
   categoriesReadCategoriesPublic,
   itemsReadItemsPublic,
+  sizesReadSizeCountsPublic,
   sizesReadSizesPublic,
 } from "@/client"
 import { ProductGrid } from "@/components/Catalog/ProductGrid"
@@ -56,6 +57,22 @@ function CatalogContent() {
 
 const ALL_VALUE = "__all__"
 
+const LETTER_SIZE = /^[A-Za-z]+$/
+const NUMERIC_SIZE = /^\d+$/
+
+function filterSizesByCategoryName<T extends { name: string }>(
+  sizes: T[],
+  categoryName: string | undefined,
+): T[] {
+  if (categoryName === "Одежда") {
+    return sizes.filter((s) => LETTER_SIZE.test(s.name))
+  }
+  if (categoryName === "Обувь") {
+    return sizes.filter((s) => NUMERIC_SIZE.test(s.name))
+  }
+  return sizes
+}
+
 function CatalogFilters() {
   const navigate = useNavigate({ from: Route.fullPath })
   const search = Route.useSearch()
@@ -68,6 +85,59 @@ function CatalogFilters() {
     queryKey: ["sizes", "public"],
     queryFn: async () => (await sizesReadSizesPublic()).data!,
   })
+  const sizeCountsQuery = useQuery({
+    queryKey: ["sizes", "counts", search.category_id ?? null],
+    queryFn: async () =>
+      (
+        await sizesReadSizeCountsPublic({
+          query: search.category_id
+            ? { category_id: search.category_id }
+            : undefined,
+        })
+      ).data!,
+  })
+
+  const selectedCategoryName = useMemo(() => {
+    if (!search.category_id) return undefined
+    return categoriesQuery.data?.data.find((c) => c.id === search.category_id)
+      ?.name
+  }, [categoriesQuery.data, search.category_id])
+
+  const countsBySize = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const row of sizeCountsQuery.data?.data ?? []) {
+      map.set(row.size_id, row.count)
+    }
+    return map
+  }, [sizeCountsQuery.data])
+
+  const visibleSizes = useMemo(() => {
+    const all = sizesQuery.data?.data ?? []
+    return filterSizesByCategoryName(all, selectedCategoryName)
+  }, [sizesQuery.data, selectedCategoryName])
+
+  const handleCategoryChange = (value: string) => {
+    const nextCategoryId = value === ALL_VALUE ? undefined : value
+    const nextCategoryName = nextCategoryId
+      ? categoriesQuery.data?.data.find((c) => c.id === nextCategoryId)?.name
+      : undefined
+
+    const allowedSizes = filterSizesByCategoryName(
+      sizesQuery.data?.data ?? [],
+      nextCategoryName,
+    )
+    const sizeStillValid =
+      search.size_id !== undefined &&
+      allowedSizes.some((s) => s.id === search.size_id)
+
+    navigate({
+      search: (prev: CatalogSearch) => ({
+        ...prev,
+        category_id: nextCategoryId,
+        size_id: sizeStillValid ? prev.size_id : undefined,
+      }),
+    })
+  }
 
   return (
     <div className="flex flex-wrap items-end gap-4 pb-6">
@@ -75,14 +145,7 @@ function CatalogFilters() {
         <span className="text-muted-foreground text-xs">Категория</span>
         <Select
           value={search.category_id ?? ALL_VALUE}
-          onValueChange={(value) =>
-            navigate({
-              search: (prev: CatalogSearch) => ({
-                ...prev,
-                category_id: value === ALL_VALUE ? undefined : value,
-              }),
-            })
-          }
+          onValueChange={handleCategoryChange}
         >
           <SelectTrigger className="w-48">
             <SelectValue placeholder="Все категории" />
@@ -115,11 +178,19 @@ function CatalogFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_VALUE}>Все размеры</SelectItem>
-            {sizesQuery.data?.data.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.name}
-              </SelectItem>
-            ))}
+            {visibleSizes.map((s) => {
+              const count = countsBySize.get(s.id) ?? 0
+              return (
+                <SelectItem key={s.id} value={s.id}>
+                  <span className="flex w-full items-center justify-between gap-3">
+                    <span>{s.name}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {count}
+                    </span>
+                  </span>
+                </SelectItem>
+              )
+            })}
           </SelectContent>
         </Select>
       </div>

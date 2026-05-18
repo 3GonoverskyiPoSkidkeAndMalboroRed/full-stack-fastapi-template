@@ -2,13 +2,16 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import func, select
+from sqlmodel import col, func, select
 
 from app import crud
 from app.api.deps import SessionDep, get_current_user
 from app.models import (
+    Item,
     Message,
     Size,
+    SizeCount,
+    SizeCountsPublic,
     SizeCreate,
     SizePublic,
     SizesPublic,
@@ -29,6 +32,30 @@ def read_sizes_public(session: SessionDep, skip: int = 0, limit: int = 100) -> A
     sizes = session.exec(statement).all()
     sizes_public = [SizePublic.model_validate(s) for s in sizes]
     return SizesPublic(data=sizes_public, count=count)
+
+
+@router.get("/counts/public", response_model=SizeCountsPublic)
+def read_size_counts_public(
+    session: SessionDep,
+    category_id: uuid.UUID | None = None,
+) -> Any:
+    """
+    Public size counts: number of items per size, optionally filtered by category.
+    """
+    statement = (
+        select(Item.size_id, func.count(col(Item.id)))
+        .where(col(Item.size_id).is_not(None))
+        .group_by(col(Item.size_id))
+    )
+    if category_id is not None:
+        statement = statement.where(Item.category_id == category_id)
+    rows = session.exec(statement).all()
+    data = [
+        SizeCount(size_id=size_id, count=count)
+        for size_id, count in rows
+        if size_id is not None
+    ]
+    return SizeCountsPublic(data=data)
 
 
 @router.get(

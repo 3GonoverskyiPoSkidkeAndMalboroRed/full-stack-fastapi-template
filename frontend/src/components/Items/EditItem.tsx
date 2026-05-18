@@ -45,7 +45,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
+  title: z.string().min(1, { message: "Введите название" }),
   description: z.string().optional(),
   size_id: z.string().optional(),
   brand: z.string().optional(),
@@ -89,7 +89,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
     mutationFn: (data: ItemUpdate) =>
       itemsUpdateItem({ path: { id: item.id }, body: data }),
     onSuccess: () => {
-      showSuccessToast("Item updated successfully")
+      showSuccessToast("Товар обновлён")
       setIsOpen(false)
       onSuccess()
     },
@@ -112,12 +112,12 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
         }}
       >
         <Pencil className="mr-2 h-4 w-4" />
-        Edit
+        Редактировать
       </DropdownMenuItem>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Item</DialogTitle>
-          <DialogDescription>Update the details of the item.</DialogDescription>
+          <DialogTitle>Редактировать товар</DialogTitle>
+          <DialogDescription>Обновите данные товара.</DialogDescription>
         </DialogHeader>
         <ImageUploader itemId={item.id} currentImages={item.images ?? []} />
         <Form {...form}>
@@ -129,11 +129,11 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Title <span className="text-destructive">*</span>
+                      Название <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Title"
+                        placeholder="Название товара"
                         type="text"
                         {...field}
                         required
@@ -149,9 +149,9 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Описание</FormLabel>
                     <FormControl>
-                      <Input placeholder="Description" type="text" {...field} />
+                      <Input placeholder="Описание" type="text" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -163,7 +163,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                 name="size_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Size</FormLabel>
+                    <FormLabel>Размер</FormLabel>
                     <FormControl>
                       <SizeCombobox
                         value={field.value}
@@ -180,9 +180,9 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                 name="brand"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brand</FormLabel>
+                    <FormLabel>Бренд</FormLabel>
                     <FormControl>
-                      <Input placeholder="Brand" type="text" {...field} />
+                      <Input placeholder="Бренд" type="text" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -194,7 +194,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                 name="cost"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cost</FormLabel>
+                    <FormLabel>Цена</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="0.00"
@@ -213,11 +213,11 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                 name="category_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>Категория</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
+                          <SelectValue placeholder="Выберите категорию" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -237,11 +237,11 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline" disabled={mutation.isPending}>
-                  Cancel
+                  Отмена
                 </Button>
               </DialogClose>
               <LoadingButton type="submit" loading={mutation.isPending}>
-                Save
+                Сохранить
               </LoadingButton>
             </DialogFooter>
           </form>

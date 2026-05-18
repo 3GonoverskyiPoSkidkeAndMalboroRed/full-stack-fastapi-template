@@ -31,7 +31,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
+  name: z.string().min(1, { message: "Введите название" }),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -51,7 +51,7 @@ const AddSize = () => {
   const mutation = useMutation({
     mutationFn: (data: SizeCreate) => sizesCreateSize({ body: data }),
     onSuccess: () => {
-      showSuccessToast("Size created successfully")
+      showSuccessToast("Размер создан")
       form.reset()
       setIsOpen(false)
     },
@@ -70,14 +70,14 @@ const AddSize = () => {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2" />
-          Add Size
+          Добавить размер
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Size</DialogTitle>
+          <DialogTitle>Добавить размер</DialogTitle>
           <DialogDescription>
-            Add a new size to the catalog (e.g. M, 42, One Size).
+            Добавьте новый размер в каталог (например M, 42, One Size).
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -89,11 +89,11 @@ const AddSize = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Name <span className="text-destructive">*</span>
+                      Название <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Size name"
+                        placeholder="Название размера"
                         type="text"
                         {...field}
                         required
@@ -107,11 +107,11 @@ const AddSize = () => {
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline" disabled={mutation.isPending}>
-                  Cancel
+                  Отмена
                 </Button>
               </DialogClose>
               <LoadingButton type="submit" loading={mutation.isPending}>
-                Save
+                Сохранить
               </LoadingButton>
             </DialogFooter>
           </form>

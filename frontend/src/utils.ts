@@ -5,7 +5,7 @@ function extractErrorMessage(err: unknown): string {
     return (errDetail[0] as { msg: string }).msg
   }
   if (typeof errDetail === "string") return errDetail
-  return "Something went wrong."
+  return "Что-то пошло не так."
 }
 
 export const handleError = function (

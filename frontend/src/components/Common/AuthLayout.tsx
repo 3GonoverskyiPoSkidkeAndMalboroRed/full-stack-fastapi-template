@@ -4,9 +4,13 @@ import { Footer } from "./Footer"
 
 interface AuthLayoutProps {
   children: React.ReactNode
+  showThemeToggle?: boolean
 }
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+export function AuthLayout({
+  children,
+  showThemeToggle = true,
+}: AuthLayoutProps) {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="bg-muted relative hidden lg:flex lg:items-center lg:justify-center dark:bg-zinc-900">
@@ -14,7 +18,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       </div>
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-end">
-          <Appearance />
+          {showThemeToggle ? <Appearance /> : null}
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">{children}</div>

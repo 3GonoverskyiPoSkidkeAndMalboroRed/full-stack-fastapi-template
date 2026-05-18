@@ -15,10 +15,7 @@ export function PublicHeader() {
         <Logo variant="full" />
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link
-              to="/catalog"
-              activeProps={{ className: "bg-accent text-accent-foreground" }}
-            >
+            <Link to="/catalog">
               <ShoppingBag className="size-4" />
               <span className="hidden sm:inline">Каталог</span>
             </Link>

@@ -44,7 +44,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
+  title: z.string().min(1, { message: "Введите название" }),
   description: z.string().optional(),
   size_id: z.string().optional(),
   brand: z.string().optional(),
@@ -91,7 +91,7 @@ const AddItem = () => {
   const mutation = useMutation({
     mutationFn: (data: ItemCreate) => itemsCreateItem({ body: data }),
     onSuccess: (res) => {
-      showSuccessToast("Item created successfully")
+      showSuccessToast("Товар создан")
       const newId = res.data?.id
       if (newId) {
         setCreatedItemId(newId)
@@ -121,18 +121,18 @@ const AddItem = () => {
       <DialogTrigger asChild>
         <Button className="my-4">
           <Plus className="mr-2" />
-          Add Item
+          Добавить товар
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {createdItemId ? "Загрузите фото" : "Add Item"}
+            {createdItemId ? "Загрузите фото" : "Добавить товар"}
           </DialogTitle>
           <DialogDescription>
             {createdItemId
               ? "Товар создан. Добавьте изображения или закройте окно."
-              : "Fill in the details to add a new item."}
+              : "Заполните данные для добавления нового товара."}
           </DialogDescription>
         </DialogHeader>
         {createdItemId ? (
@@ -156,11 +156,11 @@ const AddItem = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Title <span className="text-destructive">*</span>
+                        Название <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Title"
+                          placeholder="Название товара"
                           type="text"
                           {...field}
                           required
@@ -176,13 +176,9 @@ const AddItem = () => {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Описание</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Description"
-                          type="text"
-                          {...field}
-                        />
+                        <Input placeholder="Описание" type="text" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -194,7 +190,7 @@ const AddItem = () => {
                   name="size_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Size</FormLabel>
+                      <FormLabel>Размер</FormLabel>
                       <FormControl>
                         <SizeCombobox
                           value={field.value}
@@ -211,9 +207,9 @@ const AddItem = () => {
                   name="brand"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Brand</FormLabel>
+                      <FormLabel>Бренд</FormLabel>
                       <FormControl>
-                        <Input placeholder="Brand" type="text" {...field} />
+                        <Input placeholder="Бренд" type="text" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -225,7 +221,7 @@ const AddItem = () => {
                   name="cost"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cost</FormLabel>
+                      <FormLabel>Цена</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="0.00"
@@ -244,14 +240,14 @@ const AddItem = () => {
                   name="category_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel>Категория</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
+                            <SelectValue placeholder="Выберите категорию" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -271,11 +267,11 @@ const AddItem = () => {
               <DialogFooter>
                 <DialogClose asChild>
                   <Button variant="outline" disabled={mutation.isPending}>
-                    Cancel
+                    Отмена
                   </Button>
                 </DialogClose>
                 <LoadingButton type="submit" loading={mutation.isPending}>
-                  Save
+                  Сохранить
                 </LoadingButton>
               </DialogFooter>
             </form>

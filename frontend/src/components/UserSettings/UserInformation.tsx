@@ -23,7 +23,7 @@ import { handleError } from "@/utils"
 
 const formSchema = z.object({
   full_name: z.string().max(30).optional(),
-  email: z.email({ message: "Invalid email address" }),
+  email: z.email({ message: "Некорректный email" }),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -51,7 +51,7 @@ const UserInformation = () => {
   const mutation = useMutation({
     mutationFn: (data: UserUpdateMe) => usersUpdateUserMe({ body: data }),
     onSuccess: () => {
-      showSuccessToast("User updated successfully")
+      showSuccessToast("Данные обновлены")
       toggleEditMode()
     },
     onError: handleError.bind(showErrorToast),
@@ -81,7 +81,7 @@ const UserInformation = () => {
 
   return (
     <div className="max-w-md">
-      <h3 className="py-4 text-lg font-semibold">User Information</h3>
+      <h3 className="py-4 text-lg font-semibold">Информация о пользователе</h3>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -93,7 +93,7 @@ const UserInformation = () => {
             render={({ field }) =>
               editMode ? (
                 <FormItem>
-                  <FormLabel>Full name</FormLabel>
+                  <FormLabel>ФИО</FormLabel>
                   <FormControl>
                     <Input type="text" {...field} />
                   </FormControl>
@@ -101,14 +101,14 @@ const UserInformation = () => {
                 </FormItem>
               ) : (
                 <FormItem>
-                  <FormLabel>Full name</FormLabel>
+                  <FormLabel>ФИО</FormLabel>
                   <p
                     className={cn(
                       "max-w-sm truncate py-2",
                       !field.value && "text-muted-foreground",
                     )}
                   >
-                    {field.value || "N/A"}
+                    {field.value || "—"}
                   </p>
                 </FormItem>
               )
@@ -144,7 +144,7 @@ const UserInformation = () => {
                   loading={mutation.isPending}
                   disabled={!form.formState.isDirty}
                 >
-                  Save
+                  Сохранить
                 </LoadingButton>
                 <Button
                   type="button"
@@ -152,12 +152,12 @@ const UserInformation = () => {
                   onClick={onCancel}
                   disabled={mutation.isPending}
                 >
-                  Cancel
+                  Отменить
                 </Button>
               </>
             ) : (
               <Button type="button" onClick={toggleEditMode}>
-                Edit
+                Редактировать
               </Button>
             )}
           </div>

@@ -37,7 +37,7 @@ const DeleteSize = ({ id, onSuccess }: DeleteSizeProps) => {
   const mutation = useMutation({
     mutationFn: deleteSize,
     onSuccess: () => {
-      showSuccessToast("The size was deleted successfully")
+      showSuccessToast("Размер удалён")
       setIsOpen(false)
       onSuccess()
     },
@@ -60,22 +60,22 @@ const DeleteSize = ({ id, onSuccess }: DeleteSizeProps) => {
         onClick={() => setIsOpen(true)}
       >
         <Trash2 />
-        Delete Size
+        Удалить
       </DropdownMenuItem>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Delete Size</DialogTitle>
+            <DialogTitle>Удалить размер</DialogTitle>
             <DialogDescription>
-              This size will be permanently deleted. Items currently using it
-              will keep their data but lose the size reference. Are you sure?
+              Этот размер будет безвозвратно удалён. Товары с этим размером
+              сохранят данные, но потеряют ссылку на размер. Вы уверены?
             </DialogDescription>
           </DialogHeader>
 
           <DialogFooter className="mt-4">
             <DialogClose asChild>
               <Button variant="outline" disabled={mutation.isPending}>
-                Cancel
+                Отмена
               </Button>
             </DialogClose>
             <LoadingButton
@@ -83,7 +83,7 @@ const DeleteSize = ({ id, onSuccess }: DeleteSizeProps) => {
               type="submit"
               loading={mutation.isPending}
             >
-              Delete
+              Удалить
             </LoadingButton>
           </DialogFooter>
         </form>

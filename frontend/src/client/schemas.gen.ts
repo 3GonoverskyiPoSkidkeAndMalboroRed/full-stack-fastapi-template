@@ -826,6 +826,38 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
+export const SizeCountSchema = {
+    properties: {
+        size_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Size Id'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['size_id', 'count'],
+    title: 'SizeCount'
+} as const;
+
+export const SizeCountsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/SizeCount'
+            },
+            type: 'array',
+            title: 'Data'
+        }
+    },
+    type: 'object',
+    required: ['data'],
+    title: 'SizeCountsPublic'
+} as const;
+
 export const SizeCreateSchema = {
     properties: {
         name: {
@@ -965,6 +997,30 @@ export const UserCreateSchema = {
             ],
             title: 'Full Name'
         },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 32
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        delivery_address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Address'
+        },
         password: {
             type: 'string',
             maxLength: 128,
@@ -1006,6 +1062,30 @@ export const UserPublicSchema = {
                 }
             ],
             title: 'Full Name'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 32
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        delivery_address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Address'
         },
         id: {
             type: 'string',
@@ -1099,6 +1179,30 @@ export const UserUpdateSchema = {
             ],
             title: 'Full Name'
         },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 32
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        delivery_address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Address'
+        },
         password: {
             anyOf: [
                 {
@@ -1143,6 +1247,30 @@ export const UserUpdateMeSchema = {
                 }
             ],
             title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 32
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        delivery_address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Address'
         }
     },
     type: 'object',

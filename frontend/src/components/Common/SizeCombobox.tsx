@@ -16,7 +16,7 @@ interface SizeComboboxProps {
 export function SizeCombobox({
   value,
   onChange,
-  placeholder = "Select size",
+  placeholder = "Выбрать размер",
 }: SizeComboboxProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
@@ -72,7 +72,7 @@ export function SizeCombobox({
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <Input
               autoFocus
-              placeholder="Search size..."
+              placeholder="Поиск размера…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="h-9 border-0 px-0 shadow-none focus-visible:ring-0"
@@ -81,7 +81,7 @@ export function SizeCombobox({
           <div className="max-h-60 overflow-y-auto p-1">
             {filtered.length === 0 ? (
               <div className="text-muted-foreground py-6 text-center text-sm">
-                No size found.
+                Размер не найден.
               </div>
             ) : (
               filtered.map((s) => (

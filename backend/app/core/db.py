@@ -63,8 +63,18 @@ SEED_SIZES = [
     "M",
     "L",
     "XL",
+    "35",
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "41",
     "42",
     "43",
+    "44",
+    "45",
+    "46",
     "One Size",
 ]
 
@@ -137,13 +147,14 @@ def _seed_categories(session: Session) -> None:
 
 
 def _seed_sizes(session: Session) -> None:
-    existing_count = session.exec(select(func.count()).select_from(Size)).one()
-    if existing_count > 0:
-        return
-
+    added = False
     for name in SEED_SIZES:
-        session.add(Size(name=name))
-    session.commit()
+        existing = session.exec(select(Size).where(Size.name == name)).first()
+        if existing is None:
+            session.add(Size(name=name))
+            added = True
+    if added:
+        session.commit()
 
 
 def _seed_items(session: Session, owner_id: uuid.UUID) -> None:

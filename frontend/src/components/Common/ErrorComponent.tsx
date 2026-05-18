@@ -10,17 +10,17 @@ const ErrorComponent = () => {
       <div className="z-10 flex items-center">
         <div className="ml-4 flex flex-col items-center justify-center p-4">
           <span className="mb-4 text-6xl leading-none font-bold md:text-8xl">
-            Error
+            Ошибка
           </span>
-          <span className="mb-2 text-2xl font-bold">Oops!</span>
+          <span className="mb-2 text-2xl font-bold">Упс!</span>
         </div>
       </div>
 
       <p className="text-muted-foreground z-10 mb-4 text-center text-lg">
-        Something went wrong. Please try again.
+        Что-то пошло не так. Попробуйте ещё раз.
       </p>
       <Link to="/">
-        <Button>Go Home</Button>
+        <Button>На главную</Button>
       </Link>
     </div>
   )

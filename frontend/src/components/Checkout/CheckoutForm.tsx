@@ -1,10 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { ordersCreateOrder } from "@/client"
+import {
+  ordersCreateOrder,
+  type UserUpdateMe,
+  usersUpdateUserMe,
+} from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -15,16 +20,18 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { MaskedInput } from "@/components/ui/masked-input"
+import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
+
+const PHONE_MASK_RE = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/
 
 const formSchema = z.object({
   recipient_name: z.string().min(2, "Минимум 2 символа").max(255),
   phone: z
     .string()
-    .min(6, "Минимум 6 символов")
-    .max(32)
-    .regex(/^\+?[\d\s\-()]{6,32}$/, "Неверный формат телефона"),
+    .regex(PHONE_MASK_RE, "Введите телефон в формате +7 (XXX) XXX-XX-XX"),
   address: z.string().min(5, "Минимум 5 символов").max(1024),
   comment: z.string().max(2000).optional(),
 })
@@ -35,28 +42,65 @@ export function CheckoutForm() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { user } = useAuth()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
     defaultValues: {
-      recipient_name: "",
-      phone: "",
-      address: "",
+      recipient_name: user?.full_name ?? "",
+      phone: user?.phone ?? "",
+      address: user?.delivery_address ?? "",
       comment: "",
     },
   })
 
+  useEffect(() => {
+    if (!user) return
+    const isPristine = !form.formState.isDirty
+    if (!isPristine) return
+    form.reset({
+      recipient_name: user.full_name ?? "",
+      phone: user.phone ?? "",
+      address: user.delivery_address ?? "",
+      comment: "",
+    })
+  }, [user, form])
+
+  const syncUserProfile = async (data: FormValues) => {
+    if (!user) return
+    const patch: UserUpdateMe = {}
+    if ((user.full_name ?? "") !== data.recipient_name) {
+      patch.full_name = data.recipient_name
+    }
+    if ((user.phone ?? "") !== data.phone) {
+      patch.phone = data.phone
+    }
+    if ((user.delivery_address ?? "") !== data.address) {
+      patch.delivery_address = data.address
+    }
+    if (Object.keys(patch).length === 0) return
+    try {
+      await usersUpdateUserMe({ body: patch })
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] })
+    } catch (error) {
+      console.error("Не удалось сохранить данные доставки в профиль", error)
+    }
+  }
+
   const mutation = useMutation({
-    mutationFn: (data: FormValues) =>
-      ordersCreateOrder({
+    mutationFn: async (data: FormValues) => {
+      const response = await ordersCreateOrder({
         body: {
           recipient_name: data.recipient_name,
           phone: data.phone,
           address: data.address,
           comment: data.comment ? data.comment : null,
         },
-      }),
+      })
+      await syncUserProfile(data)
+      return response
+    },
     onSuccess: () => {
       showSuccessToast("Заказ оформлен")
       queryClient.invalidateQueries({ queryKey: ["cart"] })
@@ -95,7 +139,14 @@ export function CheckoutForm() {
             <FormItem>
               <FormLabel>Телефон</FormLabel>
               <FormControl>
-                <Input placeholder="+7 (___) ___-__-__" {...field} />
+                <MaskedInput
+                  mask="+7 (000) 000-00-00"
+                  placeholder="+7 (___) ___-__-__"
+                  value={field.value}
+                  onAccept={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
