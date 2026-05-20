@@ -8,6 +8,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   PAID: "Оплачен",
   SHIPPED: "Отправлен",
   DELIVERED: "Доставлен",
+  CANCELLED: "Отменён",
 }
 
 const STATUS_CLASSES: Record<OrderStatus, string> = {
@@ -17,6 +18,7 @@ const STATUS_CLASSES: Record<OrderStatus, string> = {
   SHIPPED: "bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-100",
   DELIVERED:
     "bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100",
+  CANCELLED: "bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100",
 }
 
 interface OrderStatusBadgeProps {

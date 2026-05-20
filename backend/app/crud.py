@@ -276,6 +276,19 @@ def update_order_status(
     return order
 
 
+def cancel_order(*, session: Session, order: Order, reason: str) -> Order:
+    order.status = OrderStatus.CANCELLED
+    order.cancellation_reason = reason
+    session.add(order)
+    for oi in order.items:
+        if oi.item is not None:
+            oi.item.stock += oi.quantity
+            session.add(oi.item)
+    session.commit()
+    session.refresh(order)
+    return order
+
+
 def create_order_from_cart(
     *, session: Session, user: User, payload: OrderCreate
 ) -> Order:

@@ -20,6 +20,7 @@ class OrderStatus(str, Enum):
     PAID = "PAID"
     SHIPPED = "SHIPPED"
     DELIVERED = "DELIVERED"
+    CANCELLED = "CANCELLED"
 
 
 class OrderBase(SQLModel):
@@ -40,6 +41,10 @@ class OrderUpdate(SQLModel):
     status: OrderStatus | None = None
 
 
+class OrderCancel(SQLModel):
+    reason: str = Field(min_length=1, max_length=500)
+
+
 class Order(OrderBase, table=True):
     __tablename__ = "shop_order"
 
@@ -51,6 +56,7 @@ class Order(OrderBase, table=True):
     user_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE", index=True
     )
+    cancellation_reason: str | None = Field(default=None, max_length=500)
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
@@ -72,6 +78,7 @@ class OrderPublic(OrderBase):
     user_id: uuid.UUID
     status: OrderStatus
     total: Decimal
+    cancellation_reason: str | None = None
     created_at: datetime | None = None
     items: list[OrderItemPublic] = []
 

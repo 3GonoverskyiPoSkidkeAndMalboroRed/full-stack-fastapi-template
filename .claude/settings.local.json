@@ -6,7 +6,11 @@
       "Bash(docker compose *)",
       "Bash(npx tsc *)",
       "Bash(npx prettier *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npx shadcn@latest add radio-group --yes)",
+      "Bash(npm install *)",
+      "Bash(npx eslint *)",
+      "Bash(bash scripts/lint.sh)"
     ]
   }
 }

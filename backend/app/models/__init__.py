@@ -26,6 +26,7 @@ from app.models.message import Message
 from app.models.order import (
     Order,
     OrderBase,
+    OrderCancel,
     OrderCreate,
     OrderItemPublic,
     OrderPublic,
@@ -83,6 +84,7 @@ __all__ = [
     "NewPassword",
     "Order",
     "OrderBase",
+    "OrderCancel",
     "OrderCreate",
     "OrderItem",
     "OrderItemPublic",

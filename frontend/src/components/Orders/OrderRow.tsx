@@ -3,9 +3,12 @@ import { useState } from "react"
 
 import type { OrderPublic } from "@/client"
 import { formatPrice } from "@/components/Catalog/ProductCard"
+import { CancelOrderDialog } from "@/components/Orders/CancelOrderDialog"
 import { OrderStatusBadge } from "@/components/Orders/OrderStatusBadge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+
+const CANCELLABLE_STATUSES = new Set(["NEW", "PROCESSED", "PAID"])
 
 interface OrderRowProps {
   order: OrderPublic
@@ -22,6 +25,8 @@ function formatDate(dt?: string | null): string {
 
 export function OrderRow({ order }: OrderRowProps) {
   const [open, setOpen] = useState(false)
+  const [cancelOpen, setCancelOpen] = useState(false)
+  const canCancel = CANCELLABLE_STATUSES.has(order.status)
 
   return (
     <div className="rounded-md border">
@@ -80,6 +85,12 @@ export function OrderRow({ order }: OrderRowProps) {
                 {order.comment}
               </div>
             )}
+            {order.cancellation_reason && (
+              <div className="sm:col-span-2">
+                <span className="text-muted-foreground">Причина отмены: </span>
+                {order.cancellation_reason}
+              </div>
+            )}
           </div>
           <div className="space-y-1">
             {(order.items ?? []).map((oi) => (
@@ -96,8 +107,25 @@ export function OrderRow({ order }: OrderRowProps) {
               </div>
             ))}
           </div>
+          {canCancel && (
+            <div className="flex justify-end border-t pt-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCancelOpen(true)}
+              >
+                Отменить заказ
+              </Button>
+            </div>
+          )}
         </div>
       )}
+      <CancelOrderDialog
+        orderId={order.id}
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+      />
     </div>
   )
 }

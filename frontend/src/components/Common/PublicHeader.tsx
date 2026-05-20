@@ -1,13 +1,23 @@
+import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { LogOut, ShoppingBag, ShoppingCart, User2 } from "lucide-react"
 
+import { cartReadCart } from "@/client"
 import { Logo } from "@/components/Common/Logo"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
 export function PublicHeader() {
   const loggedIn = isLoggedIn()
   const { logout } = useAuth()
+
+  const { data: cart } = useQuery({
+    queryKey: ["cart"],
+    queryFn: async () => (await cartReadCart()).data!,
+    enabled: loggedIn,
+  })
+  const cartCount = cart?.count ?? 0
 
   return (
     <header className="bg-background sticky top-0 z-10 border-b">
@@ -22,9 +32,19 @@ export function PublicHeader() {
           </Button>
           {loggedIn ? (
             <>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="relative">
                 <Link to="/cart">
-                  <ShoppingCart className="size-4" />
+                  <span className="relative inline-flex">
+                    <ShoppingCart className="size-4" />
+                    {cartCount > 0 && (
+                      <Badge
+                        className="absolute -top-2 -right-2 h-4 min-w-4 justify-center rounded-full px-1 text-[10px] leading-none"
+                        variant="default"
+                      >
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </Badge>
+                    )}
+                  </span>
                   <span className="hidden sm:inline">Корзина</span>
                 </Link>
               </Button>

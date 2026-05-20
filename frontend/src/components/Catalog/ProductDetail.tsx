@@ -106,6 +106,7 @@ export function ProductDetail({ item }: ProductDetailProps) {
             <AddToCartButton
               itemId={item.id}
               quantity={quantity}
+              stock={stock}
               disabled={outOfStock}
             />
             <AddToWishlistButton itemId={item.id} />

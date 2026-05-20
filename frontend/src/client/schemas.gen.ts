@@ -607,6 +607,20 @@ export const NewPasswordSchema = {
     title: 'NewPassword'
 } as const;
 
+export const OrderCancelSchema = {
+    properties: {
+        reason: {
+            type: 'string',
+            maxLength: 500,
+            minLength: 1,
+            title: 'Reason'
+        }
+    },
+    type: 'object',
+    required: ['reason'],
+    title: 'OrderCancel'
+} as const;
+
 export const OrderCreateSchema = {
     properties: {
         recipient_name: {
@@ -733,6 +747,17 @@ export const OrderPublicSchema = {
             pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Total'
         },
+        cancellation_reason: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Cancellation Reason'
+        },
         created_at: {
             anyOf: [
                 {
@@ -761,7 +786,7 @@ export const OrderPublicSchema = {
 
 export const OrderStatusSchema = {
     type: 'string',
-    enum: ['NEW', 'PROCESSED', 'PAID', 'SHIPPED', 'DELIVERED'],
+    enum: ['NEW', 'PROCESSED', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
     title: 'OrderStatus'
 } as const;
 

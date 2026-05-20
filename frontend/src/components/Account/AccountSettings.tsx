@@ -116,7 +116,9 @@ export function AccountSettings() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Почта</FormLabel>
+                <FormLabel>
+                  Почта <span className="text-destructive">*</span>
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="email"

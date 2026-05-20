@@ -324,6 +324,16 @@ export type NewPassword = {
 };
 
 /**
+ * OrderCancel
+ */
+export type OrderCancel = {
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
  * OrderCreate
  */
 export type OrderCreate = {
@@ -405,6 +415,10 @@ export type OrderPublic = {
      */
     total: string;
     /**
+     * Cancellation Reason
+     */
+    cancellation_reason?: string | null;
+    /**
      * Created At
      */
     created_at?: string | null;
@@ -417,7 +431,7 @@ export type OrderPublic = {
 /**
  * OrderStatus
  */
-export type OrderStatus = 'NEW' | 'PROCESSED' | 'PAID' | 'SHIPPED' | 'DELIVERED';
+export type OrderStatus = 'NEW' | 'PROCESSED' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 
 /**
  * OrderUpdate
@@ -2214,6 +2228,36 @@ export type OrdersUpdateOrderStatusResponses = {
 };
 
 export type OrdersUpdateOrderStatusResponse = OrdersUpdateOrderStatusResponses[keyof OrdersUpdateOrderStatusResponses];
+
+export type OrdersCancelOrderData = {
+    body: OrderCancel;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/orders/{id}/cancel';
+};
+
+export type OrdersCancelOrderErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OrdersCancelOrderError = OrdersCancelOrderErrors[keyof OrdersCancelOrderErrors];
+
+export type OrdersCancelOrderResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrderPublic;
+};
+
+export type OrdersCancelOrderResponse = OrdersCancelOrderResponses[keyof OrdersCancelOrderResponses];
 
 export type PrivateCreateUserData = {
     body: PrivateUserCreate;

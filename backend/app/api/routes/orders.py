@@ -7,6 +7,7 @@ from app import crud
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.models import (
     Order,
+    OrderCancel,
     OrderCreate,
     OrderItemPublic,
     OrderPublic,
@@ -32,6 +33,7 @@ def _serialize_order(order: Order) -> OrderPublic:
         user_id=order.user_id,
         status=order.status,
         total=order.total,
+        cancellation_reason=order.cancellation_reason,
         created_at=order.created_at,
         recipient_name=order.recipient_name,
         phone=order.phone,
@@ -132,4 +134,31 @@ def update_order_status(
     updated = crud.update_order_status(
         session=session, order=order, new_status=payload.status
     )
+    return _serialize_order(updated)
+
+
+_CANCELLABLE_STATUSES = {OrderStatus.NEW, OrderStatus.PROCESSED, OrderStatus.PAID}
+
+
+@router.post("/{id}/cancel", response_model=OrderPublic)
+def cancel_order(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+    payload: OrderCancel,
+) -> Any:
+    """
+    Cancel an order. Allowed only by the order's owner (or superuser) while the
+    order is in NEW, PROCESSED, or PAID status. Returns reserved stock back to items.
+    """
+    order = crud.get_order(session=session, order_id=id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if not current_user.is_superuser and order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    if order.status not in _CANCELLABLE_STATUSES:
+        raise HTTPException(status_code=400, detail="Этот заказ нельзя отменить")
+
+    updated = crud.cancel_order(session=session, order=order, reason=payload.reason)
     return _serialize_order(updated)

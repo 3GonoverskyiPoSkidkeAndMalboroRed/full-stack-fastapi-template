@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { Check, ShoppingCart } from "lucide-react"
+import { ShoppingCart, Trash2 } from "lucide-react"
 
-import { cartAddCartItem, cartReadCart } from "@/client"
+import { cartAddCartItem, cartDeleteCartItem, cartReadCart } from "@/client"
+import { QuantityControl } from "@/components/Cart/QuantityControl"
 import { Button } from "@/components/ui/button"
 import { isLoggedIn } from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -11,12 +12,14 @@ import { handleError } from "@/utils"
 interface AddToCartButtonProps {
   itemId: string
   quantity?: number
+  stock?: number
   disabled?: boolean
 }
 
 export function AddToCartButton({
   itemId,
   quantity = 1,
+  stock,
   disabled = false,
 }: AddToCartButtonProps) {
   const navigate = useNavigate()
@@ -30,9 +33,9 @@ export function AddToCartButton({
     enabled: loggedIn,
   })
 
-  const inCart = Boolean(cart?.data.find((c) => c.item_id === itemId))
+  const cartItem = cart?.data.find((c) => c.item_id === itemId)
 
-  const mutation = useMutation({
+  const addMutation = useMutation({
     mutationFn: () => cartAddCartItem({ body: { item_id: itemId, quantity } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] })
@@ -40,30 +43,67 @@ export function AddToCartButton({
     onError: handleError.bind(showErrorToast),
   })
 
-  const handleClick = (e: React.MouseEvent) => {
+  const deleteMutation = useMutation({
+    mutationFn: () => cartDeleteCartItem({ path: { id: cartItem?.id ?? "" } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] })
+    },
+    onError: handleError.bind(showErrorToast),
+  })
+
+  const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     if (!loggedIn) {
       navigate({ to: "/login" })
       return
     }
-    mutation.mutate()
+    addMutation.mutate()
+  }
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    deleteMutation.mutate()
+  }
+
+  if (cartItem) {
+    return (
+      <div
+        className="inline-flex items-center gap-2"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
+        <QuantityControl
+          cartItemId={cartItem.id}
+          quantity={cartItem.quantity ?? 1}
+          maxQuantity={stock}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={handleDelete}
+          disabled={deleteMutation.isPending}
+          aria-label="Удалить из корзины"
+        >
+          <Trash2 className="size-4" />
+        </Button>
+      </div>
+    )
   }
 
   return (
     <Button
       type="button"
-      variant={inCart ? "secondary" : "default"}
-      onClick={handleClick}
-      disabled={disabled || mutation.isPending}
-      aria-pressed={inCart}
+      variant="default"
+      onClick={handleAdd}
+      disabled={disabled || addMutation.isPending}
     >
-      {inCart ? (
-        <Check className="size-4" />
-      ) : (
-        <ShoppingCart className="size-4" />
-      )}
-      {inCart ? "В корзине" : "В корзину"}
+      <ShoppingCart className="size-4" />В корзину
     </Button>
   )
 }

@@ -67,7 +67,11 @@ export function ProductCard({ item }: ProductCardProps) {
           <span className="text-base font-semibold">
             {formatPrice(item.cost)}
           </span>
-          <AddToCartButton itemId={item.id} disabled={outOfStock} />
+          <AddToCartButton
+            itemId={item.id}
+            stock={item.stock ?? undefined}
+            disabled={outOfStock}
+          />
           <AddToWishlistButton itemId={item.id} variant="floating" />
         </CardFooter>
       </Card>
