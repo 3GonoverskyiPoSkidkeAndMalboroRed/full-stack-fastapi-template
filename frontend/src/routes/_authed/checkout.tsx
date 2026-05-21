@@ -7,18 +7,26 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export const Route = createFileRoute("/_authed/checkout")({
   component: Checkout,
+  head: () => ({ meta: [{ title: "Оформление — РЕЕСТР13" }] }),
 })
 
 function Checkout() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Оформление заказа</h1>
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <section>
+      <header className="sec-head">
+        <div>
+          <div className="mono text-muted-foreground mb-3 text-[11px] tracking-[0.2em] uppercase">
+            Раздел / 06 · Оплата
+          </div>
+          <h2>Оформление заказа</h2>
+        </div>
+      </header>
+      <div className="frame grid gap-8 py-8 lg:grid-cols-[1fr_360px]">
         <CheckoutForm />
-        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-none" />}>
           <OrderSummary />
         </Suspense>
       </div>
-    </div>
+    </section>
   )
 }

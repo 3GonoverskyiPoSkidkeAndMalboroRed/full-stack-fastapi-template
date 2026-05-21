@@ -84,8 +84,13 @@ function SignUp() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-6"
         >
-          <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">Создать аккаунт</h1>
+          <div className="flex flex-col gap-3">
+            <span className="mono text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
+              Раздел / 00 · Регистрация
+            </span>
+            <h1 className="text-[36px] leading-[1.05] font-semibold tracking-[-0.02em]">
+              Создать аккаунт
+            </h1>
           </div>
 
           <div className="grid gap-4">

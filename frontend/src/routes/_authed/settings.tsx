@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useAuth from "@/hooks/useAuth"
 
 const tabsConfig = [
-  { value: "my-profile", title: "Мой профиль", component: UserInformation },
+  { value: "my-profile", title: "Профиль", component: UserInformation },
   { value: "password", title: "Пароль", component: ChangePassword },
   { value: "danger-zone", title: "Опасная зона", component: DeleteAccount },
 ]
@@ -15,49 +15,51 @@ const tabsConfig = [
 export const Route = createFileRoute("/_authed/settings")({
   component: UserSettings,
   head: () => ({
-    meta: [
-      {
-        title: "Настройки — FastAPI Template",
-      },
-    ],
+    meta: [{ title: "Настройки — РЕЕСТР13" }],
   }),
 })
 
 function UserSettings() {
   const { user: currentUser } = useAuth()
-  const finalTabs = currentUser?.is_superuser
-    ? tabsConfig.slice(0, 3)
-    : tabsConfig
 
   if (!currentUser) {
     return null
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Настройки пользователя
-        </h1>
-        <p className="text-muted-foreground">
+    <section>
+      <header className="sec-head">
+        <div>
+          <div className="mono text-muted-foreground mb-3 text-[11px] tracking-[0.2em] uppercase">
+            Раздел / 04 · Настройки
+          </div>
+          <h2>Настройки пользователя</h2>
+        </div>
+        <span className="text-muted-foreground hidden text-[13px] sm:inline">
           Управляйте настройками аккаунта и предпочтениями
-        </p>
-      </div>
+        </span>
+      </header>
 
-      <Tabs defaultValue="my-profile">
-        <TabsList>
-          {finalTabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.title}
-            </TabsTrigger>
+      <div className="frame py-8">
+        <Tabs defaultValue="my-profile">
+          <TabsList className="border-ink h-auto gap-2 rounded-none border bg-transparent p-1">
+            {tabsConfig.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="data-[state=active]:bg-ink data-[state=active]:text-paper rounded-none text-[11px] tracking-[0.18em] uppercase"
+              >
+                {tab.title}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {tabsConfig.map((tab) => (
+            <TabsContent key={tab.value} value={tab.value} className="pt-6">
+              <tab.component />
+            </TabsContent>
           ))}
-        </TabsList>
-        {finalTabs.map((tab) => (
-          <TabsContent key={tab.value} value={tab.value}>
-            <tab.component />
-          </TabsContent>
-        ))}
-      </Tabs>
-    </div>
+        </Tabs>
+      </div>
+    </section>
   )
 }

@@ -70,20 +70,30 @@ function Login() {
   }
 
   return (
-    <AuthLayout showThemeToggle={false}>
+    <AuthLayout>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-6"
         >
-          <div className="flex flex-col items-center gap-3 text-center">
-            <Button variant="ghost" size="sm" asChild className="self-start">
+          <div className="flex flex-col gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="-ml-2 self-start"
+            >
               <RouterLink to="/">
                 <ArrowLeft className="size-4" />
                 На главную
               </RouterLink>
             </Button>
-            <h1 className="text-2xl font-bold">Войдите в аккаунт</h1>
+            <span className="mono text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
+              Раздел / 00 · Аккаунт
+            </span>
+            <h1 className="text-[36px] leading-[1.05] font-semibold tracking-[-0.02em]">
+              Войдите в аккаунт
+            </h1>
           </div>
 
           <div className="grid gap-4">

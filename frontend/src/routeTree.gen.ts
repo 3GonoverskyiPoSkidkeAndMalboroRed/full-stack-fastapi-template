@@ -23,6 +23,11 @@ import { Route as AuthedCartRouteImport } from './routes/_authed/cart'
 import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
 import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
 import { Route as PublicCatalogIndexRouteImport } from './routes/_public/catalog.index'
+import { Route as PublicDocsTermsRouteImport } from './routes/_public/docs.terms'
+import { Route as PublicDocsRefundRouteImport } from './routes/_public/docs.refund'
+import { Route as PublicDocsPrivacyRouteImport } from './routes/_public/docs.privacy'
+import { Route as PublicDocsDeliveryRouteImport } from './routes/_public/docs.delivery'
+import { Route as PublicDocsContactsRouteImport } from './routes/_public/docs.contacts'
 import { Route as PublicCatalogIdRouteImport } from './routes/_public/catalog.$id'
 
 const SignupRoute = SignupRouteImport.update({
@@ -92,6 +97,31 @@ const PublicCatalogIndexRoute = PublicCatalogIndexRouteImport.update({
   path: '/catalog/',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicDocsTermsRoute = PublicDocsTermsRouteImport.update({
+  id: '/docs/terms',
+  path: '/docs/terms',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicDocsRefundRoute = PublicDocsRefundRouteImport.update({
+  id: '/docs/refund',
+  path: '/docs/refund',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicDocsPrivacyRoute = PublicDocsPrivacyRouteImport.update({
+  id: '/docs/privacy',
+  path: '/docs/privacy',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicDocsDeliveryRoute = PublicDocsDeliveryRouteImport.update({
+  id: '/docs/delivery',
+  path: '/docs/delivery',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicDocsContactsRoute = PublicDocsContactsRouteImport.update({
+  id: '/docs/contacts',
+  path: '/docs/contacts',
+  getParentRoute: () => PublicRoute,
+} as any)
 const PublicCatalogIdRoute = PublicCatalogIdRouteImport.update({
   id: '/catalog/$id',
   path: '/catalog/$id',
@@ -110,6 +140,11 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof AuthedCheckoutRoute
   '/settings': typeof AuthedSettingsRoute
   '/catalog/$id': typeof PublicCatalogIdRoute
+  '/docs/contacts': typeof PublicDocsContactsRoute
+  '/docs/delivery': typeof PublicDocsDeliveryRoute
+  '/docs/privacy': typeof PublicDocsPrivacyRoute
+  '/docs/refund': typeof PublicDocsRefundRoute
+  '/docs/terms': typeof PublicDocsTermsRoute
   '/catalog/': typeof PublicCatalogIndexRoute
 }
 export interface FileRoutesByTo {
@@ -124,6 +159,11 @@ export interface FileRoutesByTo {
   '/checkout': typeof AuthedCheckoutRoute
   '/settings': typeof AuthedSettingsRoute
   '/catalog/$id': typeof PublicCatalogIdRoute
+  '/docs/contacts': typeof PublicDocsContactsRoute
+  '/docs/delivery': typeof PublicDocsDeliveryRoute
+  '/docs/privacy': typeof PublicDocsPrivacyRoute
+  '/docs/refund': typeof PublicDocsRefundRoute
+  '/docs/terms': typeof PublicDocsTermsRoute
   '/catalog': typeof PublicCatalogIndexRoute
 }
 export interface FileRoutesById {
@@ -142,6 +182,11 @@ export interface FileRoutesById {
   '/_authed/settings': typeof AuthedSettingsRoute
   '/_public/': typeof PublicIndexRoute
   '/_public/catalog/$id': typeof PublicCatalogIdRoute
+  '/_public/docs/contacts': typeof PublicDocsContactsRoute
+  '/_public/docs/delivery': typeof PublicDocsDeliveryRoute
+  '/_public/docs/privacy': typeof PublicDocsPrivacyRoute
+  '/_public/docs/refund': typeof PublicDocsRefundRoute
+  '/_public/docs/terms': typeof PublicDocsTermsRoute
   '/_public/catalog/': typeof PublicCatalogIndexRoute
 }
 export interface FileRouteTypes {
@@ -158,6 +203,11 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/settings'
     | '/catalog/$id'
+    | '/docs/contacts'
+    | '/docs/delivery'
+    | '/docs/privacy'
+    | '/docs/refund'
+    | '/docs/terms'
     | '/catalog/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -172,6 +222,11 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/settings'
     | '/catalog/$id'
+    | '/docs/contacts'
+    | '/docs/delivery'
+    | '/docs/privacy'
+    | '/docs/refund'
+    | '/docs/terms'
     | '/catalog'
   id:
     | '__root__'
@@ -189,6 +244,11 @@ export interface FileRouteTypes {
     | '/_authed/settings'
     | '/_public/'
     | '/_public/catalog/$id'
+    | '/_public/docs/contacts'
+    | '/_public/docs/delivery'
+    | '/_public/docs/privacy'
+    | '/_public/docs/refund'
+    | '/_public/docs/terms'
     | '/_public/catalog/'
   fileRoutesById: FileRoutesById
 }
@@ -302,6 +362,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicCatalogIndexRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/docs/terms': {
+      id: '/_public/docs/terms'
+      path: '/docs/terms'
+      fullPath: '/docs/terms'
+      preLoaderRoute: typeof PublicDocsTermsRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/docs/refund': {
+      id: '/_public/docs/refund'
+      path: '/docs/refund'
+      fullPath: '/docs/refund'
+      preLoaderRoute: typeof PublicDocsRefundRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/docs/privacy': {
+      id: '/_public/docs/privacy'
+      path: '/docs/privacy'
+      fullPath: '/docs/privacy'
+      preLoaderRoute: typeof PublicDocsPrivacyRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/docs/delivery': {
+      id: '/_public/docs/delivery'
+      path: '/docs/delivery'
+      fullPath: '/docs/delivery'
+      preLoaderRoute: typeof PublicDocsDeliveryRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/docs/contacts': {
+      id: '/_public/docs/contacts'
+      path: '/docs/contacts'
+      fullPath: '/docs/contacts'
+      preLoaderRoute: typeof PublicDocsContactsRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/catalog/$id': {
       id: '/_public/catalog/$id'
       path: '/catalog/$id'
@@ -342,12 +437,22 @@ const AuthedRouteWithChildren =
 interface PublicRouteChildren {
   PublicIndexRoute: typeof PublicIndexRoute
   PublicCatalogIdRoute: typeof PublicCatalogIdRoute
+  PublicDocsContactsRoute: typeof PublicDocsContactsRoute
+  PublicDocsDeliveryRoute: typeof PublicDocsDeliveryRoute
+  PublicDocsPrivacyRoute: typeof PublicDocsPrivacyRoute
+  PublicDocsRefundRoute: typeof PublicDocsRefundRoute
+  PublicDocsTermsRoute: typeof PublicDocsTermsRoute
   PublicCatalogIndexRoute: typeof PublicCatalogIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
   PublicIndexRoute: PublicIndexRoute,
   PublicCatalogIdRoute: PublicCatalogIdRoute,
+  PublicDocsContactsRoute: PublicDocsContactsRoute,
+  PublicDocsDeliveryRoute: PublicDocsDeliveryRoute,
+  PublicDocsPrivacyRoute: PublicDocsPrivacyRoute,
+  PublicDocsRefundRoute: PublicDocsRefundRoute,
+  PublicDocsTermsRoute: PublicDocsTermsRoute,
   PublicCatalogIndexRoute: PublicCatalogIndexRoute,
 }
 

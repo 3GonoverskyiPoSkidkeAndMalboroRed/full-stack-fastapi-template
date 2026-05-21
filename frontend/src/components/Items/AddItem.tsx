@@ -50,6 +50,11 @@ const formSchema = z.object({
   brand: z.string().optional(),
   cost: z.string().optional(),
   category_id: z.string().optional(),
+  stock: z
+    .string()
+    .regex(/^\d+$/, { message: "Введите целое неотрицательное число" })
+    .optional()
+    .or(z.literal("")),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -78,6 +83,7 @@ const AddItem = () => {
       brand: "",
       cost: "",
       category_id: "",
+      stock: "1",
     },
   })
 
@@ -107,7 +113,11 @@ const AddItem = () => {
   })
 
   const onSubmit = (data: FormData) => {
-    mutation.mutate(data)
+    const payload: ItemCreate = {
+      ...data,
+      stock: data.stock ? Number.parseInt(data.stock, 10) : 0,
+    }
+    mutation.mutate(payload)
   }
 
   return (
@@ -227,6 +237,26 @@ const AddItem = () => {
                           placeholder="0.00"
                           type="number"
                           step="0.01"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="stock"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Наличие, шт.</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="0"
+                          type="number"
+                          min={0}
+                          step={1}
                           {...field}
                         />
                       </FormControl>

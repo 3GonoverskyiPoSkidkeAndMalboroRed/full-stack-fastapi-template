@@ -31,6 +31,7 @@ def read_items_public(
     limit: int = 100,
     category_id: uuid.UUID | None = None,
     size_id: uuid.UUID | None = None,
+    q: str | None = None,
 ) -> Any:
     """
     Public catalog listing — no authentication required.
@@ -45,6 +46,10 @@ def read_items_public(
     if size_id is not None:
         count_statement = count_statement.where(Item.size_id == size_id)
         statement = statement.where(Item.size_id == size_id)
+    if q:
+        pattern = f"%{q.strip()}%"
+        count_statement = count_statement.where(col(Item.title).ilike(pattern))
+        statement = statement.where(col(Item.title).ilike(pattern))
     count = session.exec(count_statement).one()
     items = session.exec(statement).all()
     items_public = [ItemPublic.model_validate(item) for item in items]

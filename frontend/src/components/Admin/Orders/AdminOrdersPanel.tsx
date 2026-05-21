@@ -3,7 +3,7 @@ import { Fragment, Suspense, useState } from "react"
 
 import { ordersReadOrders } from "@/client"
 import { OrderStatusSelect } from "@/components/Admin/Orders/OrderStatusSelect"
-import { formatPrice } from "@/components/Catalog/ProductCard"
+import { formatPrice } from "@/lib/format"
 import { OrderStatusBadge } from "@/components/Orders/OrderStatusBadge"
 import { PendingOrders } from "@/components/Pending/PendingOrders"
 import { Button } from "@/components/ui/button"

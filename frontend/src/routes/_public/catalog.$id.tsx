@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export const Route = createFileRoute("/_public/catalog/$id")({
   component: CatalogItem,
+  head: () => ({ meta: [{ title: "Товар — РЕЕСТР13" }] }),
 })
 
 function getCatalogItemQueryOptions(id: string) {
@@ -28,14 +29,17 @@ function CatalogItemContent() {
 
 function PendingDetail() {
   return (
-    <div className="grid gap-8 lg:grid-cols-2">
-      <Skeleton className="aspect-square w-full" />
-      <div className="space-y-3">
-        <Skeleton className="h-8 w-2/3" />
-        <Skeleton className="h-6 w-1/3" />
-        <Skeleton className="h-20 w-full" />
+    <section className="border-ink grid grid-cols-1 border-b lg:grid-cols-2">
+      <div className="border-ink border-b p-6 lg:border-r lg:border-b-0">
+        <Skeleton className="aspect-square w-full rounded-none" />
       </div>
-    </div>
+      <div className="space-y-4 p-7">
+        <Skeleton className="h-6 w-24 rounded-none" />
+        <Skeleton className="h-12 w-3/4 rounded-none" />
+        <Skeleton className="h-7 w-1/3 rounded-none" />
+        <Skeleton className="h-24 w-full rounded-none" />
+      </div>
+    </section>
   )
 }
 
