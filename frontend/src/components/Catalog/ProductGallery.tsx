@@ -53,12 +53,12 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
               <button
                 type="button"
                 onClick={() => setLightboxOpen(true)}
-                className="bg-soft block aspect-square w-full overflow-hidden"
+                className="block w-full"
               >
                 <img
                   src={getPhotoUrl(src)}
                   alt={`${title} — ${index + 1}`}
-                  className="h-full w-full cursor-zoom-in object-contain"
+                  className="block h-auto w-full cursor-zoom-in"
                 />
               </button>
             </CarouselItem>
@@ -89,7 +89,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
               <img
                 src={getPhotoUrl(src)}
                 alt=""
-                className="h-full w-full object-contain"
+                className="h-full w-full object-cover"
               />
             </button>
           ))}

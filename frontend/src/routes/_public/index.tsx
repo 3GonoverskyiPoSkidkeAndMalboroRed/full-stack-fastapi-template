@@ -1,10 +1,19 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { Suspense } from "react"
+import Autoplay from "embla-carousel-autoplay"
+import { Suspense, useRef } from "react"
 
 import { itemsReadItemsPublic } from "@/client"
 import { ProductGrid } from "@/components/Catalog/ProductGrid"
 import { PendingCatalog } from "@/components/Pending/PendingCatalog"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import { firstPhotoOrPlaceholder } from "@/lib/photo"
 
 export const Route = createFileRoute("/_public/")({
   component: HomePage,
@@ -38,8 +47,8 @@ function HeroSection() {
             магазине
           </h1>
           <p className="mt-5 max-w-[42ch] text-[17px] leading-[1.45]">
-            Мужская и женская одежда, а также ювелирные изделия. Найдено и привезено для вас,
-            ограниченные и редкие вещи.
+            Мужская и женская одежда, а также ювелирные изделия. Найдено и
+            привезено для вас, ограниченные и редкие вещи.
           </p>
           <div className="mt-7 flex items-center justify-between gap-4">
             <Link to="/catalog" className="read-link">
@@ -51,9 +60,10 @@ function HeroSection() {
           </div>
         </div>
       </div>
-      <div className="ph relative min-h-[420px] lg:min-h-[520px]">
-        <span className="label">cover · 01</span>
-        <span className="corner">2400 × 1600</span>
+      <div className="relative min-h-[420px] overflow-hidden lg:min-h-[520px]">
+        <Suspense fallback={<div className="ph absolute inset-0" />}>
+          <HeroCarousel />
+        </Suspense>
       </div>
     </section>
   )
@@ -100,6 +110,51 @@ function ShopSection() {
         </Suspense>
       </Link>
     </section>
+  )
+}
+
+function HeroCarousel() {
+  const { data } = useSuspenseQuery(getHomeItemsQueryOptions())
+  const autoplay = useRef(Autoplay({ delay: 4000, stopOnInteraction: false }))
+
+  if (data.data.length === 0) {
+    return <div className="ph absolute inset-0" />
+  }
+
+  return (
+    <Carousel
+      plugins={[autoplay.current]}
+      opts={{ loop: true }}
+      className="absolute inset-0"
+    >
+      <CarouselContent className="h-full">
+        {data.data.map((item) => {
+          const photo = firstPhotoOrPlaceholder(item.images)
+          const hasPhoto = (item.images?.length ?? 0) > 0
+          return (
+            <CarouselItem key={item.id} className="h-full basis-1/2">
+              <Link
+                to="/catalog/$id"
+                params={{ id: item.id }}
+                className="block h-full w-full"
+              >
+                {hasPhoto ? (
+                  <img
+                    src={photo}
+                    alt={item.title}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <span className="ph block h-full w-full" />
+                )}
+              </Link>
+            </CarouselItem>
+          )
+        })}
+      </CarouselContent>
+      <CarouselPrevious className="left-3" />
+      <CarouselNext className="right-3" />
+    </Carousel>
   )
 }
 

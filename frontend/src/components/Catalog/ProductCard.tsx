@@ -21,17 +21,17 @@ export function ProductCard({ item, index }: ProductCardProps) {
       <Link
         to="/catalog/$id"
         params={{ id: item.id }}
-        className="bg-soft relative block aspect-square"
+        className="relative block w-full"
       >
         {hasPhoto ? (
           <img
             src={photo}
             alt={item.title}
             loading="lazy"
-            className="absolute inset-0 h-full w-full object-contain p-3"
+            className="block h-auto w-full"
           />
         ) : (
-          <span className="ph absolute inset-0 block">
+          <span className="ph relative block aspect-square w-full">
             <span className="label">{number}</span>
           </span>
         )}

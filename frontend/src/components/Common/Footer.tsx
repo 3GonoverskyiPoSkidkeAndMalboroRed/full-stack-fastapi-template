@@ -28,7 +28,7 @@ export function Footer() {
         <div>
           <div className="brand-mark text-[42px] leading-none">РЕЕСТР13</div>
           <p className="text-muted-foregroundmt-4 max-w-[36ch] text-[13px] leading-relaxed">
-            Медиа о моде и культуре. Магазин стритвира. Очные мероприятия.
+            То, что скрыто от масс...
           </p>
         </div>
 
@@ -70,9 +70,7 @@ export function Footer() {
 
       <div className="text-muted-foregroundflex flex-wrap items-start justify-between gap-6 pt-6 text-[11px] leading-relaxed">
         <p className="max-w-[62ch]">
-          На сайте reestr13.ru могут содержаться упоминания и ссылки на ресурсы,
-          принадлежащие компаниям, деятельность которых ограничена в РФ. Вся
-          информация размещена до вступления в силу соответствующих решений.
+          Специально для АУГСГИП. Нагабедян Денис Сергеевич
         </p>
         <span className="mono upper">© {currentYear} · РЕЕСТР13 v0.1</span>
       </div>
