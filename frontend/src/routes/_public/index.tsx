@@ -34,12 +34,12 @@ function HeroSection() {
         </div>
         <div>
           <h1 className="m-0 text-[56px] leading-none font-semibold tracking-[-0.02em] text-balance md:text-[60px]">
-            Ре́ <em className="hero-em">Spring 2026</em> — новый дроп уже в
+            Встречайте <em className="hero-em">Лето</em> — новый дроп уже в
             магазине
           </h1>
           <p className="mt-5 max-w-[42ch] text-[17px] leading-[1.45]">
-            Сумки, лонгсливы, футболки и шорты сезона. Производство в России,
-            ограниченные партии, нумерованные релизы.
+            Мужская и женская одежда, а также ювелирные изделия. Найдено и привезено для вас,
+            ограниченные и редкие вещи.
           </p>
           <div className="mt-7 flex items-center justify-between gap-4">
             <Link to="/catalog" className="read-link">

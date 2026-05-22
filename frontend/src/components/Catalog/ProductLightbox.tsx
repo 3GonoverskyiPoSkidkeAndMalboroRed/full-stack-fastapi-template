@@ -40,7 +40,7 @@ export function ProductLightbox({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="h-screen w-screen max-w-none rounded-none border-0 bg-black/95 p-0 sm:max-w-none"
+        className="!fixed !inset-0 !top-0 !left-0 !block !h-screen !w-screen !max-w-none !translate-x-0 !translate-y-0 !gap-0 !rounded-none !border-0 !bg-black/95 !p-0 !shadow-none"
       >
         <DialogTitle className="sr-only">{title}</DialogTitle>
         <button
@@ -54,9 +54,9 @@ export function ProductLightbox({
         <Carousel
           opts={{ startIndex: initialIndex, loop: true }}
           setApi={setApi}
-          className="flex h-full w-full items-center"
+          className="absolute inset-0"
         >
-          <CarouselContent className="ml-0 h-screen">
+          <CarouselContent className="m-0 h-screen">
             {images.map((src, index) => (
               <CarouselItem
                 key={src}
@@ -69,13 +69,13 @@ export function ProductLightbox({
                   centerOnInit
                 >
                   <TransformComponent
-                    wrapperClass="!h-full !w-full"
-                    contentClass="!h-full !w-full flex items-center justify-center"
+                    wrapperClass="!h-screen !w-screen"
+                    contentClass="!h-screen !w-screen flex items-center justify-center"
                   >
                     <img
                       src={getPhotoUrl(src)}
                       alt={`${title} — ${index + 1}`}
-                      className="max-h-screen max-w-screen object-contain"
+                      className="max-h-[100vh] max-w-[100vw] object-contain"
                       draggable={false}
                     />
                   </TransformComponent>

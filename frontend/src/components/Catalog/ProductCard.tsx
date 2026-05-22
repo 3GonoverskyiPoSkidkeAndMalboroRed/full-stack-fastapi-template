@@ -28,7 +28,7 @@ export function ProductCard({ item, index }: ProductCardProps) {
             src={photo}
             alt={item.title}
             loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-contain p-3"
           />
         ) : (
           <span className="ph absolute inset-0 block">

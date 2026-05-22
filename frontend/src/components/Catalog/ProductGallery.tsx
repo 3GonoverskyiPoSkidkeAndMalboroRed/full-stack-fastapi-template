@@ -34,11 +34,11 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
 
   if (images.length === 0) {
     return (
-      <div className="bg-muted aspect-square overflow-hidden rounded-lg">
+      <div className="bg-soft aspect-square overflow-hidden">
         <img
           src={PLACEHOLDER_IMAGE}
           alt={title}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain"
         />
       </div>
     )
@@ -53,12 +53,12 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
               <button
                 type="button"
                 onClick={() => setLightboxOpen(true)}
-                className="bg-muted block aspect-square w-full overflow-hidden rounded-lg"
+                className="bg-soft block aspect-square w-full overflow-hidden"
               >
                 <img
                   src={getPhotoUrl(src)}
                   alt={`${title} — ${index + 1}`}
-                  className="h-full w-full cursor-zoom-in object-cover"
+                  className="h-full w-full cursor-zoom-in object-contain"
                 />
               </button>
             </CarouselItem>
@@ -80,16 +80,16 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
               onClick={() => api?.scrollTo(index)}
               aria-label={`Фото ${index + 1}`}
               className={cn(
-                "size-16 overflow-hidden rounded-md border-2 transition-colors",
+                "bg-soft size-16 overflow-hidden border-2 transition-colors",
                 index === current
-                  ? "border-primary"
+                  ? "border-ink"
                   : "border-transparent opacity-70 hover:opacity-100",
               )}
             >
               <img
                 src={getPhotoUrl(src)}
                 alt=""
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             </button>
           ))}
