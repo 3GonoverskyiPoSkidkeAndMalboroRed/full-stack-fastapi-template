@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { getCartQueryOptions } from "@/components/Cart/CartList"
-import { formatPrice } from "@/components/Catalog/ProductCard"
+import { formatPrice } from "@/lib/format"
 
 export function OrderSummary() {
   const { data } = useSuspenseQuery(getCartQueryOptions())

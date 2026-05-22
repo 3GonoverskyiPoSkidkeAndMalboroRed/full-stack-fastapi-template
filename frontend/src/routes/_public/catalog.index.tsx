@@ -11,13 +11,6 @@ import {
 } from "@/client"
 import { ProductGrid } from "@/components/Catalog/ProductGrid"
 import { PendingCatalog } from "@/components/Pending/PendingCatalog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 const catalogSearchSchema = z.object({
   category_id: z.string().uuid().optional().catch(undefined),
@@ -28,6 +21,7 @@ type CatalogSearch = z.infer<typeof catalogSearchSchema>
 
 export const Route = createFileRoute("/_public/catalog/")({
   component: Catalog,
+  head: () => ({ meta: [{ title: "Каталог — РЕЕСТР13" }] }),
   validateSearch: (search): CatalogSearch =>
     catalogSearchSchema.parse(search ?? {}),
 })
@@ -49,14 +43,6 @@ function getCatalogQueryOptions(search: CatalogSearch) {
   }
 }
 
-function CatalogContent() {
-  const search = Route.useSearch()
-  const { data } = useSuspenseQuery(getCatalogQueryOptions(search))
-  return <ProductGrid items={data.data} />
-}
-
-const ALL_VALUE = "__all__"
-
 const LETTER_SIZE = /^[A-Za-z]+$/
 const NUMERIC_SIZE = /^\d+$/
 
@@ -71,6 +57,30 @@ function filterSizesByCategoryName<T extends { name: string }>(
     return sizes.filter((s) => NUMERIC_SIZE.test(s.name))
   }
   return sizes
+}
+
+function CatalogContent() {
+  const search = Route.useSearch()
+  const { data } = useSuspenseQuery(getCatalogQueryOptions(search))
+  return (
+    <>
+      <CatalogMeta count={data.count} shown={data.data.length} />
+      <ProductGrid items={data.data} columns={5} />
+    </>
+  )
+}
+
+function CatalogMeta({ count, shown }: { count: number; shown: number }) {
+  return (
+    <div className="sec-sub">
+      <span className="text-ink">
+        Показано {shown} из {count}
+      </span>
+      <span className="mono text-muted-foreground text-[11px] tracking-[0.06em]">
+        ДРОП №04 · {new Date().getFullYear()}
+      </span>
+    </div>
+  )
 }
 
 function CatalogFilters() {
@@ -116,15 +126,13 @@ function CatalogFilters() {
     return filterSizesByCategoryName(all, selectedCategoryName)
   }, [sizesQuery.data, selectedCategoryName])
 
-  const handleCategoryChange = (value: string) => {
-    const nextCategoryId = value === ALL_VALUE ? undefined : value
-    const nextCategoryName = nextCategoryId
-      ? categoriesQuery.data?.data.find((c) => c.id === nextCategoryId)?.name
+  const handleCategoryChange = (nextId: string | undefined) => {
+    const nextName = nextId
+      ? categoriesQuery.data?.data.find((c) => c.id === nextId)?.name
       : undefined
-
     const allowedSizes = filterSizesByCategoryName(
       sizesQuery.data?.data ?? [],
-      nextCategoryName,
+      nextName,
     )
     const sizeStillValid =
       search.size_id !== undefined &&
@@ -133,80 +141,124 @@ function CatalogFilters() {
     navigate({
       search: (prev: CatalogSearch) => ({
         ...prev,
-        category_id: nextCategoryId,
+        category_id: nextId,
         size_id: sizeStillValid ? prev.size_id : undefined,
       }),
     })
   }
 
+  const handleSizeChange = (nextId: string | undefined) => {
+    navigate({
+      search: (prev: CatalogSearch) => ({ ...prev, size_id: nextId }),
+    })
+  }
+
   return (
-    <div className="flex flex-wrap items-end gap-4 pb-6">
-      <div className="flex flex-col gap-1">
-        <span className="text-muted-foreground text-xs">Категория</span>
-        <Select
-          value={search.category_id ?? ALL_VALUE}
-          onValueChange={handleCategoryChange}
+    <div className="border-ink flex flex-col gap-5 border-b px-6 py-5">
+      <FilterRow label="Категория">
+        <Chip
+          active={!search.category_id}
+          onClick={() => handleCategoryChange(undefined)}
         >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Все категории" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_VALUE}>Все категории</SelectItem>
-            {categoriesQuery.data?.data.map((c) => (
-              <SelectItem key={c.id} value={c.id}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex flex-col gap-1">
-        <span className="text-muted-foreground text-xs">Размер</span>
-        <Select
-          value={search.size_id ?? ALL_VALUE}
-          onValueChange={(value) =>
-            navigate({
-              search: (prev: CatalogSearch) => ({
-                ...prev,
-                size_id: value === ALL_VALUE ? undefined : value,
-              }),
-            })
-          }
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Все размеры" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_VALUE}>Все размеры</SelectItem>
-            {visibleSizes.map((s) => {
-              const count = countsBySize.get(s.id) ?? 0
-              return (
-                <SelectItem key={s.id} value={s.id}>
-                  <span className="flex w-full items-center justify-between gap-3">
-                    <span>{s.name}</span>
-                    <span className="text-muted-foreground text-xs">
-                      {count}
-                    </span>
-                  </span>
-                </SelectItem>
-              )
-            })}
-          </SelectContent>
-        </Select>
-      </div>
+          Все
+        </Chip>
+        {categoriesQuery.data?.data.map((c) => (
+          <Chip
+            key={c.id}
+            active={search.category_id === c.id}
+            onClick={() => handleCategoryChange(c.id)}
+          >
+            {c.name}
+          </Chip>
+        ))}
+      </FilterRow>
+      {visibleSizes.length > 0 && (
+        <FilterRow label="Размер">
+          <Chip
+            active={!search.size_id}
+            onClick={() => handleSizeChange(undefined)}
+          >
+            Все
+          </Chip>
+          {visibleSizes.map((s) => {
+            const count = countsBySize.get(s.id) ?? 0
+            return (
+              <Chip
+                key={s.id}
+                active={search.size_id === s.id}
+                onClick={() => handleSizeChange(s.id)}
+              >
+                {s.name}
+                <span className="mono ml-1 text-[10px] opacity-60">
+                  {count}
+                </span>
+              </Chip>
+            )
+          })}
+        </FilterRow>
+      )}
     </div>
+  )
+}
+
+function FilterRow({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <span className="text-muted-foreground w-24 text-[11px] tracking-[0.2em] uppercase">
+        {label}
+      </span>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </div>
+  )
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`tag ${active ? "solid" : ""} transition-colors`}
+    >
+      {children}
+    </button>
   )
 }
 
 function Catalog() {
   return (
-    <div className="space-y-2">
-      <h1 className="text-3xl font-bold">Каталог</h1>
-      <p className="text-muted-foreground">Все товары магазина</p>
+    <section>
+      <header className="sec-head">
+        <div>
+          <div className="mono text-muted-foreground mb-3 text-[11px] tracking-[0.2em] uppercase">
+            Раздел / 02 · Магазин
+          </div>
+          <h2>Каталог</h2>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
+            Все позиции
+          </span>
+          <span className="mono text-[12px] tracking-[0.08em]">ДРОП №04</span>
+        </div>
+      </header>
       <CatalogFilters />
       <Suspense fallback={<PendingCatalog />}>
         <CatalogContent />
       </Suspense>
-    </div>
+    </section>
   )
 }

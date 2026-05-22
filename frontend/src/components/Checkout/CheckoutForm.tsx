@@ -170,7 +170,7 @@ export function CheckoutForm() {
           name="comment"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Комментарий (опц.)</FormLabel>
+              <FormLabel>Комментарий</FormLabel>
               <FormControl>
                 <Input placeholder="Удобное время и пр." {...field} />
               </FormControl>

@@ -1,11 +1,6 @@
 import { Link } from "@tanstack/react-router"
 
-import { useTheme } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
-import icon from "/assets/images/fastapi-icon.svg"
-import iconLight from "/assets/images/fastapi-icon-light.svg"
-import logo from "/assets/images/logo.png"
-import logoLight from "/assets/images/fastapi-logo-light.svg"
 
 interface LogoProps {
   variant?: "full" | "icon" | "responsive"
@@ -13,48 +8,52 @@ interface LogoProps {
   asLink?: boolean
 }
 
+const FULL_TEXT = "РЕЕСТР13"
+const ICON_TEXT = "Р13"
+
 export function Logo({
   variant = "full",
   className,
   asLink = true,
 }: LogoProps) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === "dark"
-
-  const fullLogo = isDark ? logoLight : logo
-  const iconLogo = isDark ? iconLight : icon
-
   const content =
     variant === "responsive" ? (
-      <>
-        <img
-          src={fullLogo}
-          alt="FastAPI"
-          className={cn(
-            "h-6 w-auto group-data-[collapsible=icon]:hidden",
-            className,
-          )}
-        />
-        <img
-          src={iconLogo}
-          alt="FastAPI"
-          className={cn(
-            "hidden size-5 group-data-[collapsible=icon]:block",
-            className,
-          )}
-        />
-      </>
+      <span
+        aria-label="РЕЕСТР13"
+        className={cn(
+          "brand-mark inline-flex items-baseline",
+          "group-data-[collapsible=icon]:hidden",
+          className,
+        )}
+      >
+        {FULL_TEXT}
+        <span
+          aria-hidden="true"
+          className="brand-mark hidden group-data-[collapsible=icon]:inline"
+        >
+          {ICON_TEXT}
+        </span>
+      </span>
     ) : (
-      <img
-        src={variant === "full" ? fullLogo : iconLogo}
-        alt="FastAPI"
-        className={cn(variant === "full" ? "h-6 w-auto" : "size-5", className)}
-      />
+      <span
+        aria-label="РЕЕСТР13"
+        className={cn(
+          "brand-mark inline-flex items-baseline",
+          variant === "icon" && "text-xl",
+          className,
+        )}
+      >
+        {variant === "full" ? FULL_TEXT : ICON_TEXT}
+      </span>
     )
 
   if (!asLink) {
     return content
   }
 
-  return <Link to="/">{content}</Link>
+  return (
+    <Link to="/" className="inline-flex">
+      {content}
+    </Link>
+  )
 }

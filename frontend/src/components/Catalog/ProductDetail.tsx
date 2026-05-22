@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ArrowLeft } from "lucide-react"
 import { useState } from "react"
 
 import {
@@ -10,10 +9,8 @@ import {
 } from "@/client"
 import { AddToCartButton } from "@/components/Catalog/AddToCartButton"
 import { AddToWishlistButton } from "@/components/Catalog/AddToWishlistButton"
-import { formatPrice } from "@/components/Catalog/ProductCard"
 import { ProductGallery } from "@/components/Catalog/ProductGallery"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { formatPrice } from "@/lib/format"
 
 interface ProductDetailProps {
   item: ItemPublic
@@ -41,78 +38,106 @@ export function ProductDetail({ item }: ProductDetailProps) {
     : undefined
 
   return (
-    <div className="space-y-6">
-      <Button asChild variant="ghost" size="sm" className="-ml-2">
-        <Link to="/catalog">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Назад в каталог
+    <section className="border-ink grid grid-cols-1 border-b lg:grid-cols-2">
+      <div className="border-ink relative p-6 lg:border-r">
+        <Link
+          to="/catalog"
+          className="upper text-muted-foreground mb-6 inline-flex items-center gap-2 text-[11px] tracking-[0.18em] hover:text-[color:var(--ink)]"
+        >
+          ← Назад в каталог
         </Link>
-      </Button>
-      <div className="grid gap-8 lg:grid-cols-2">
         <ProductGallery images={item.images ?? []} title={item.title} />
-        <div className="flex flex-col gap-4">
+      </div>
+
+      <div className="flex flex-col gap-6 p-7 lg:p-8">
+        <div className="flex items-center justify-between gap-4">
+          <span className={`tag ${outOfStock ? "" : "solid"}`}>
+            {outOfStock ? "Sold out" : "In stock"}
+          </span>
           {item.brand && (
-            <span className="text-muted-foreground text-sm tracking-wide uppercase">
+            <span className="mono text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
               {item.brand}
             </span>
           )}
-          <h1 className="text-3xl font-bold">{item.title}</h1>
-          {(categoryName || sizeName) && (
-            <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-sm">
-              {categoryName && <span>Категория: {categoryName}</span>}
-              {sizeName && <span>Размер: {sizeName}</span>}
-            </div>
-          )}
-          <div className="flex items-center gap-3">
-            <span className="text-2xl font-semibold">
-              {formatPrice(item.cost)}
-            </span>
-            {outOfStock ? (
-              <Badge variant="secondary">Нет в наличии</Badge>
-            ) : (
-              <Badge variant="outline">В наличии: {stock}</Badge>
-            )}
-          </div>
-          {item.description && (
-            <p className="text-muted-foreground">{item.description}</p>
-          )}
+        </div>
+
+        <h1 className="text-[44px] leading-[1.02] font-semibold tracking-[-0.02em] text-balance md:text-[56px]">
+          {item.title}
+        </h1>
+
+        <div className="border-ink flex items-end justify-between gap-4 border-b pb-5">
+          <span className="mono text-[28px] leading-none">
+            {formatPrice(item.cost)}
+          </span>
           {!outOfStock && (
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground text-sm">Количество</span>
-              <div className="flex items-center gap-1 rounded-md border">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={quantity <= 1}
-                >
-                  −
-                </Button>
-                <span className="w-10 text-center text-sm">{quantity}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
-                  disabled={quantity >= stock}
-                >
-                  +
-                </Button>
-              </div>
-            </div>
+            <span className="mono text-muted-foreground text-[12px] tracking-[0.08em]">
+              На складе · {stock}
+            </span>
           )}
-          <div className="flex flex-wrap gap-2 pt-4">
-            <AddToCartButton
-              itemId={item.id}
-              quantity={quantity}
-              stock={stock}
-              disabled={outOfStock}
-            />
-            <AddToWishlistButton itemId={item.id} />
+        </div>
+
+        {(categoryName || sizeName) && (
+          <dl className="border-ink/30 grid grid-cols-2 gap-x-4 gap-y-2 border-b border-dashed pb-4 text-[13px]">
+            {categoryName && (
+              <>
+                <dt className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
+                  Категория
+                </dt>
+                <dd className="text-right">{categoryName}</dd>
+              </>
+            )}
+            {sizeName && (
+              <>
+                <dt className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
+                  Размер
+                </dt>
+                <dd className="text-right">{sizeName}</dd>
+              </>
+            )}
+          </dl>
+        )}
+
+        {item.description && (
+          <p className="text-[15px] leading-[1.5]">{item.description}</p>
+        )}
+
+        {!outOfStock && (
+          <div className="flex items-center gap-4">
+            <span className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
+              Количество
+            </span>
+            <div className="border-ink inline-flex items-center border">
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                disabled={quantity <= 1}
+                className="hover:bg-ink hover:text-paper h-9 w-9 transition-colors disabled:opacity-30"
+              >
+                −
+              </button>
+              <span className="mono w-12 text-center text-sm">{quantity}</span>
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
+                disabled={quantity >= stock}
+                className="hover:bg-ink hover:text-paper h-9 w-9 transition-colors disabled:opacity-30"
+              >
+                +
+              </button>
+            </div>
           </div>
+        )}
+
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <AddToCartButton
+            itemId={item.id}
+            quantity={quantity}
+            stock={stock}
+            disabled={outOfStock}
+          />
+          <AddToWishlistButton itemId={item.id} />
         </div>
       </div>
-    </div>
+    </section>
   )
 }

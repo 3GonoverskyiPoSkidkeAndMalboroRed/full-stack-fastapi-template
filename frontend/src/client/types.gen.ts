@@ -1256,6 +1256,10 @@ export type ItemsReadItemsPublicData = {
          * Size Id
          */
         size_id?: string | null;
+        /**
+         * Q
+         */
+        q?: string | null;
     };
     url: '/api/v1/items/public';
 };
