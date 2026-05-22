@@ -4,7 +4,7 @@ import { Trash2 } from "lucide-react"
 
 import { type CartItemPublic, cartDeleteCartItem } from "@/client"
 import { QuantityControl } from "@/components/Cart/QuantityControl"
-import { formatPrice } from "@/components/Catalog/ProductCard"
+import { formatPrice } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { firstPhotoOrPlaceholder } from "@/lib/photo"

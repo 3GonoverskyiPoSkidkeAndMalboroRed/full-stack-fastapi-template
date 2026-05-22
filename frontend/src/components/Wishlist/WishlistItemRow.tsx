@@ -7,7 +7,7 @@ import {
   type WishlistItemPublic,
   wishlistDeleteWishlistItem,
 } from "@/client"
-import { formatPrice } from "@/components/Catalog/ProductCard"
+import { formatPrice } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { firstPhotoOrPlaceholder } from "@/lib/photo"

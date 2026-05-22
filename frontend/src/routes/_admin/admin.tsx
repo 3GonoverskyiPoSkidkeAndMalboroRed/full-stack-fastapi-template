@@ -28,11 +28,7 @@ export const Route = createFileRoute("/_admin/admin")({
   validateSearch: (search): AdminSearch =>
     adminSearchSchema.parse(search ?? {}),
   head: () => ({
-    meta: [
-      {
-        title: "Admin - FastAPI Template",
-      },
-    ],
+    meta: [{ title: "Админка — РЕЕСТР13" }],
   }),
 })
 
@@ -42,36 +38,61 @@ function Admin() {
   const tab = search.tab ?? "users"
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Админка</h1>
-        <p className="text-muted-foreground">
+    <section>
+      <header className="border-ink flex items-end justify-between gap-6 border-b px-6 pt-10 pb-5">
+        <div>
+          <div className="mono text-muted-foreground mb-3 text-[11px] tracking-[0.2em] uppercase">
+            Раздел / 99 · Системное
+          </div>
+          <h1 className="text-[40px] leading-none font-semibold tracking-[-0.02em]">
+            Админка
+          </h1>
+        </div>
+        <span className="text-muted-foreground hidden text-[13px] sm:inline">
           Управление пользователями, товарами и заказами
-        </p>
+        </span>
+      </header>
+
+      <div className="px-6 py-8">
+        <Tabs
+          value={tab}
+          onValueChange={(value) =>
+            navigate({
+              search: { tab: value as "users" | "items" | "orders" },
+            })
+          }
+        >
+          <TabsList className="border-ink h-auto gap-2 rounded-none border bg-transparent p-1">
+            <TabsTrigger
+              value="users"
+              className="data-[state=active]:bg-ink data-[state=active]:text-paper rounded-none text-[11px] tracking-[0.18em] uppercase"
+            >
+              Пользователи
+            </TabsTrigger>
+            <TabsTrigger
+              value="items"
+              className="data-[state=active]:bg-ink data-[state=active]:text-paper rounded-none text-[11px] tracking-[0.18em] uppercase"
+            >
+              Товары
+            </TabsTrigger>
+            <TabsTrigger
+              value="orders"
+              className="data-[state=active]:bg-ink data-[state=active]:text-paper rounded-none text-[11px] tracking-[0.18em] uppercase"
+            >
+              Заказы
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="users" className="mt-6">
+            <UsersAdminPanel />
+          </TabsContent>
+          <TabsContent value="items" className="mt-6">
+            <ItemsAdminPanel />
+          </TabsContent>
+          <TabsContent value="orders" className="mt-6">
+            <AdminOrdersPanel />
+          </TabsContent>
+        </Tabs>
       </div>
-      <Tabs
-        value={tab}
-        onValueChange={(value) =>
-          navigate({
-            search: { tab: value as "users" | "items" | "orders" },
-          })
-        }
-      >
-        <TabsList>
-          <TabsTrigger value="users">Пользователи</TabsTrigger>
-          <TabsTrigger value="items">Товары</TabsTrigger>
-          <TabsTrigger value="orders">Заказы</TabsTrigger>
-        </TabsList>
-        <TabsContent value="users" className="mt-4">
-          <UsersAdminPanel />
-        </TabsContent>
-        <TabsContent value="items" className="mt-4">
-          <ItemsAdminPanel />
-        </TabsContent>
-        <TabsContent value="orders" className="mt-4">
-          <AdminOrdersPanel />
-        </TabsContent>
-      </Tabs>
-    </div>
+    </section>
   )
 }

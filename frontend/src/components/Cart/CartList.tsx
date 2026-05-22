@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router"
 
 import { cartReadCart } from "@/client"
 import { CartItemRow } from "@/components/Cart/CartItemRow"
-import { formatPrice } from "@/components/Catalog/ProductCard"
+import { formatPrice } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 
 export function getCartQueryOptions() {

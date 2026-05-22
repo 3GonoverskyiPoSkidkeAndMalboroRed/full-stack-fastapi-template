@@ -22,14 +22,15 @@ function AdminLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="text-muted-foreground -ml-1" />
+      <SidebarInset className="bg-paper">
+        <header className="border-ink bg-paper sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <span className="mono text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
+            РЕЕСТР13 / Админ-консоль
+          </span>
         </header>
-        <main className="flex-1 p-6 md:p-8">
-          <div className="mx-auto max-w-7xl">
-            <Outlet />
-          </div>
+        <main className="flex-1">
+          <Outlet />
         </main>
         <Footer />
       </SidebarInset>

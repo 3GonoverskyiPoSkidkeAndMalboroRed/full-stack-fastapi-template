@@ -51,6 +51,11 @@ const formSchema = z.object({
   brand: z.string().optional(),
   cost: z.string().optional(),
   category_id: z.string().optional(),
+  stock: z
+    .string()
+    .regex(/^\d+$/, { message: "Введите целое неотрицательное число" })
+    .optional()
+    .or(z.literal("")),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -82,6 +87,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
       brand: item.brand ?? undefined,
       cost: item.cost ?? undefined,
       category_id: item.category_id ?? undefined,
+      stock: String(item.stock ?? 0),
     },
   })
 
@@ -100,7 +106,14 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
   })
 
   const onSubmit = (data: FormData) => {
-    mutation.mutate(data)
+    const payload: ItemUpdate = {
+      ...data,
+      stock:
+        data.stock !== undefined && data.stock !== ""
+          ? Number.parseInt(data.stock, 10)
+          : undefined,
+    }
+    mutation.mutate(payload)
   }
 
   return (
@@ -200,6 +213,26 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                         placeholder="0.00"
                         type="number"
                         step="0.01"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="stock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Наличие, шт.</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="0"
+                        type="number"
+                        min={0}
+                        step={1}
                         {...field}
                       />
                     </FormControl>

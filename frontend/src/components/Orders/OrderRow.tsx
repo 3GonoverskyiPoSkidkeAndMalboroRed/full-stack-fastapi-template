@@ -2,7 +2,7 @@ import { ChevronDown } from "lucide-react"
 import { useState } from "react"
 
 import type { OrderPublic } from "@/client"
-import { formatPrice } from "@/components/Catalog/ProductCard"
+import { formatPrice } from "@/lib/format"
 import { CancelOrderDialog } from "@/components/Orders/CancelOrderDialog"
 import { OrderStatusBadge } from "@/components/Orders/OrderStatusBadge"
 import { Button } from "@/components/ui/button"
