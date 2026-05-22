@@ -37,9 +37,9 @@ services:
 
   backend:
     environment:
-      VIRTUAL_HOST: api.${DOMAIN?Variable not set}
+      VIRTUAL_HOST: ${API_HOST?Variable not set}
       VIRTUAL_PORT: "8000"
-      LETSENCRYPT_HOST: api.${DOMAIN?Variable not set}
+      LETSENCRYPT_HOST: ${API_HOST?Variable not set}
       LETSENCRYPT_EMAIL: ${EMAIL?Variable not set}
     networks:
       - proxy-net
@@ -47,9 +47,9 @@ services:
 
   frontend:
     environment:
-      VIRTUAL_HOST: dashboard.${DOMAIN?Variable not set}
+      VIRTUAL_HOST: ${FRONTEND_VHOST?Variable not set}
       VIRTUAL_PORT: "80"
-      LETSENCRYPT_HOST: dashboard.${DOMAIN?Variable not set}
+      LETSENCRYPT_HOST: ${FRONTEND_VHOST?Variable not set}
       LETSENCRYPT_EMAIL: ${EMAIL?Variable not set}
     networks:
       - proxy-net
