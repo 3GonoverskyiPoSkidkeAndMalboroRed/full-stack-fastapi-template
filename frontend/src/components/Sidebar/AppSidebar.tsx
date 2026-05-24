@@ -1,6 +1,7 @@
 import {
   Heart,
   Home,
+  LogOut,
   ShieldCheck,
   ShoppingBag,
   ShoppingCart,
@@ -13,10 +14,12 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
 import { type Item, Main } from "./Main"
-import { User } from "./User"
 
 const baseItems: Item[] = [
   { icon: Home, title: "Главная", path: "/" },
@@ -36,10 +39,13 @@ const baseItems: Item[] = [
 ]
 
 export function AppSidebar() {
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, logout } = useAuth()
 
-  const items = currentUser?.is_superuser
-    ? [...baseItems, { icon: ShieldCheck, title: "Админка", path: "/admin" }]
+  const items: Item[] = currentUser?.is_superuser
+    ? [
+        { icon: ShoppingBag, title: "Каталог", path: "/catalog" },
+        { icon: ShieldCheck, title: "Админка", path: "/admin" },
+      ]
     : baseItems
 
   return (
@@ -51,7 +57,14 @@ export function AppSidebar() {
         <Main items={items} />
       </SidebarContent>
       <SidebarFooter>
-        <User user={currentUser} />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Выйти" onClick={logout}>
+              <LogOut />
+              <span>Выйти</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   )

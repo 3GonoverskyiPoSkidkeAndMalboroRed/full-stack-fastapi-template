@@ -9,7 +9,8 @@ import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
 export function PublicHeader() {
   const loggedIn = isLoggedIn()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
+  const isAdmin = !!user?.is_superuser
   const router = useRouter()
   const [searchOpen, setSearchOpen] = useState(false)
 
@@ -62,7 +63,7 @@ export function PublicHeader() {
         </Link>
         <Logo variant="full" />
         {loggedIn ? (
-          <Link to="/account" className="nav-link">
+          <Link to={isAdmin ? "/admin" : "/account"} className="nav-link">
             Кабинет
           </Link>
         ) : (
@@ -73,9 +74,11 @@ export function PublicHeader() {
       </div>
 
       <div className="flex items-center justify-end gap-4">
-        <Link to={loggedIn ? "/cart" : "/login"} className="cart-pill">
-          Корзина · {cartCount}
-        </Link>
+        {!isAdmin && (
+          <Link to={loggedIn ? "/cart" : "/login"} className="cart-pill">
+            Корзина · {cartCount}
+          </Link>
+        )}
         {loggedIn && (
           <button
             type="button"
@@ -93,7 +96,7 @@ export function PublicHeader() {
         </Link>
         <Logo variant="icon" />
         {loggedIn ? (
-          <Link to="/account" className="nav-link">
+          <Link to={isAdmin ? "/admin" : "/account"} className="nav-link">
             Кабинет
           </Link>
         ) : (

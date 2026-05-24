@@ -5,6 +5,7 @@ import { ShoppingCart, Trash2 } from "lucide-react"
 import { cartAddCartItem, cartDeleteCartItem, cartReadCart } from "@/client"
 import { QuantityControl } from "@/components/Cart/QuantityControl"
 import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/ui/loading-button"
 import { isLoggedIn } from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -97,13 +98,14 @@ export function AddToCartButton({
   }
 
   return (
-    <Button
+    <LoadingButton
       type="button"
       variant="default"
       onClick={handleAdd}
-      disabled={disabled || addMutation.isPending}
+      disabled={disabled}
+      loading={addMutation.isPending}
     >
       <ShoppingCart className="size-4" />В корзину
-    </Button>
+    </LoadingButton>
   )
 }

@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from app.models.cart import CartItem
     from app.models.item import Item
     from app.models.order import Order
+    from app.models.payment_card import PaymentCard
     from app.models.wishlist import WishlistItem
 
 
@@ -72,6 +73,9 @@ class User(UserBase, table=True):
         back_populates="user", cascade_delete=True
     )
     orders: list["Order"] = Relationship(back_populates="user", cascade_delete=True)
+    payment_cards: list["PaymentCard"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
 
 
 # Properties to return via API, id is always required

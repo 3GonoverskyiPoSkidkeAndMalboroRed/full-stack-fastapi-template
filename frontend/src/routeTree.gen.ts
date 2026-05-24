@@ -29,6 +29,7 @@ import { Route as PublicDocsPrivacyRouteImport } from './routes/_public/docs.pri
 import { Route as PublicDocsDeliveryRouteImport } from './routes/_public/docs.delivery'
 import { Route as PublicDocsContactsRouteImport } from './routes/_public/docs.contacts'
 import { Route as PublicCatalogIdRouteImport } from './routes/_public/catalog.$id'
+import { Route as AuthedPayOrderIdRouteImport } from './routes/_authed/pay.$orderId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -127,6 +128,11 @@ const PublicCatalogIdRoute = PublicCatalogIdRouteImport.update({
   path: '/catalog/$id',
   getParentRoute: () => PublicRoute,
 } as any)
+const AuthedPayOrderIdRoute = AuthedPayOrderIdRouteImport.update({
+  id: '/pay/$orderId',
+  path: '/pay/$orderId',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof AuthedCartRoute
   '/checkout': typeof AuthedCheckoutRoute
   '/settings': typeof AuthedSettingsRoute
+  '/pay/$orderId': typeof AuthedPayOrderIdRoute
   '/catalog/$id': typeof PublicCatalogIdRoute
   '/docs/contacts': typeof PublicDocsContactsRoute
   '/docs/delivery': typeof PublicDocsDeliveryRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/cart': typeof AuthedCartRoute
   '/checkout': typeof AuthedCheckoutRoute
   '/settings': typeof AuthedSettingsRoute
+  '/pay/$orderId': typeof AuthedPayOrderIdRoute
   '/catalog/$id': typeof PublicCatalogIdRoute
   '/docs/contacts': typeof PublicDocsContactsRoute
   '/docs/delivery': typeof PublicDocsDeliveryRoute
@@ -181,6 +189,7 @@ export interface FileRoutesById {
   '/_authed/checkout': typeof AuthedCheckoutRoute
   '/_authed/settings': typeof AuthedSettingsRoute
   '/_public/': typeof PublicIndexRoute
+  '/_authed/pay/$orderId': typeof AuthedPayOrderIdRoute
   '/_public/catalog/$id': typeof PublicCatalogIdRoute
   '/_public/docs/contacts': typeof PublicDocsContactsRoute
   '/_public/docs/delivery': typeof PublicDocsDeliveryRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/settings'
+    | '/pay/$orderId'
     | '/catalog/$id'
     | '/docs/contacts'
     | '/docs/delivery'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/settings'
+    | '/pay/$orderId'
     | '/catalog/$id'
     | '/docs/contacts'
     | '/docs/delivery'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/_authed/checkout'
     | '/_authed/settings'
     | '/_public/'
+    | '/_authed/pay/$orderId'
     | '/_public/catalog/$id'
     | '/_public/docs/contacts'
     | '/_public/docs/delivery'
@@ -404,6 +416,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicCatalogIdRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_authed/pay/$orderId': {
+      id: '/_authed/pay/$orderId'
+      path: '/pay/$orderId'
+      fullPath: '/pay/$orderId'
+      preLoaderRoute: typeof AuthedPayOrderIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -422,6 +441,7 @@ interface AuthedRouteChildren {
   AuthedCartRoute: typeof AuthedCartRoute
   AuthedCheckoutRoute: typeof AuthedCheckoutRoute
   AuthedSettingsRoute: typeof AuthedSettingsRoute
+  AuthedPayOrderIdRoute: typeof AuthedPayOrderIdRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -429,6 +449,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedCartRoute: AuthedCartRoute,
   AuthedCheckoutRoute: AuthedCheckoutRoute,
   AuthedSettingsRoute: AuthedSettingsRoute,
+  AuthedPayOrderIdRoute: AuthedPayOrderIdRoute,
 }
 
 const AuthedRouteWithChildren =

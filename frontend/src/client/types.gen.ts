@@ -431,6 +431,21 @@ export type OrderItemPublic = {
 };
 
 /**
+ * OrderPay
+ */
+export type OrderPay = {
+    /**
+     * Card Id
+     */
+    card_id?: string | null;
+    card?: PaymentCardCreate | null;
+    /**
+     * Save Card
+     */
+    save_card?: boolean;
+};
+
+/**
  * OrderPublic
  */
 export type OrderPublic = {
@@ -467,6 +482,26 @@ export type OrderPublic = {
      * Cancellation Reason
      */
     cancellation_reason?: string | null;
+    /**
+     * Paid At
+     */
+    paid_at?: string | null;
+    /**
+     * Received At
+     */
+    received_at?: string | null;
+    /**
+     * Refunded At
+     */
+    refunded_at?: string | null;
+    /**
+     * Card Brand
+     */
+    card_brand?: string | null;
+    /**
+     * Card Last4
+     */
+    card_last4?: string | null;
     /**
      * Created At
      */
@@ -543,7 +578,7 @@ export type OrderStatsSummary = {
 /**
  * OrderStatus
  */
-export type OrderStatus = 'NEW' | 'PROCESSED' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+export type OrderStatus = 'NEW' | 'PROCESSED' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'RECEIVED' | 'REFUNDED' | 'CANCELLED';
 
 /**
  * OrderUpdate
@@ -560,6 +595,80 @@ export type OrdersPublic = {
      * Data
      */
     data: Array<OrderPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * PaymentCardCreate
+ */
+export type PaymentCardCreate = {
+    /**
+     * Card Number
+     */
+    card_number: string;
+    /**
+     * Exp Month
+     */
+    exp_month: number;
+    /**
+     * Exp Year
+     */
+    exp_year: number;
+    /**
+     * Cvc
+     */
+    cvc: string;
+    /**
+     * Cardholder Name
+     */
+    cardholder_name: string;
+};
+
+/**
+ * PaymentCardPublic
+ */
+export type PaymentCardPublic = {
+    /**
+     * Brand
+     */
+    brand: string;
+    /**
+     * Last4
+     */
+    last4: string;
+    /**
+     * Exp Month
+     */
+    exp_month: number;
+    /**
+     * Exp Year
+     */
+    exp_year: number;
+    /**
+     * Cardholder Name
+     */
+    cardholder_name: string;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * PaymentCardsPublic
+ */
+export type PaymentCardsPublic = {
+    /**
+     * Data
+     */
+    data: Array<PaymentCardPublic>;
     /**
      * Count
      */
@@ -2603,6 +2712,167 @@ export type OrdersCancelOrderResponses = {
 };
 
 export type OrdersCancelOrderResponse = OrdersCancelOrderResponses[keyof OrdersCancelOrderResponses];
+
+export type OrdersPayOrderData = {
+    body: OrderPay;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/orders/{id}/pay';
+};
+
+export type OrdersPayOrderErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OrdersPayOrderError = OrdersPayOrderErrors[keyof OrdersPayOrderErrors];
+
+export type OrdersPayOrderResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrderPublic;
+};
+
+export type OrdersPayOrderResponse = OrdersPayOrderResponses[keyof OrdersPayOrderResponses];
+
+export type OrdersReceiveOrderData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/orders/{id}/receive';
+};
+
+export type OrdersReceiveOrderErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OrdersReceiveOrderError = OrdersReceiveOrderErrors[keyof OrdersReceiveOrderErrors];
+
+export type OrdersReceiveOrderResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrderPublic;
+};
+
+export type OrdersReceiveOrderResponse = OrdersReceiveOrderResponses[keyof OrdersReceiveOrderResponses];
+
+export type OrdersRefundOrderData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/orders/{id}/refund';
+};
+
+export type OrdersRefundOrderErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OrdersRefundOrderError = OrdersRefundOrderErrors[keyof OrdersRefundOrderErrors];
+
+export type OrdersRefundOrderResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrderPublic;
+};
+
+export type OrdersRefundOrderResponse = OrdersRefundOrderResponses[keyof OrdersRefundOrderResponses];
+
+export type PaymentCardsReadPaymentCardsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/payment-cards/';
+};
+
+export type PaymentCardsReadPaymentCardsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaymentCardsPublic;
+};
+
+export type PaymentCardsReadPaymentCardsResponse = PaymentCardsReadPaymentCardsResponses[keyof PaymentCardsReadPaymentCardsResponses];
+
+export type PaymentCardsCreatePaymentCardData = {
+    body: PaymentCardCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/payment-cards/';
+};
+
+export type PaymentCardsCreatePaymentCardErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PaymentCardsCreatePaymentCardError = PaymentCardsCreatePaymentCardErrors[keyof PaymentCardsCreatePaymentCardErrors];
+
+export type PaymentCardsCreatePaymentCardResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaymentCardPublic;
+};
+
+export type PaymentCardsCreatePaymentCardResponse = PaymentCardsCreatePaymentCardResponses[keyof PaymentCardsCreatePaymentCardResponses];
+
+export type PaymentCardsDeletePaymentCardData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/payment-cards/{id}';
+};
+
+export type PaymentCardsDeletePaymentCardErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PaymentCardsDeletePaymentCardError = PaymentCardsDeletePaymentCardErrors[keyof PaymentCardsDeletePaymentCardErrors];
+
+export type PaymentCardsDeletePaymentCardResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type PaymentCardsDeletePaymentCardResponse = PaymentCardsDeletePaymentCardResponses[keyof PaymentCardsDeletePaymentCardResponses];
 
 export type PrivateCreateUserData = {
     body: PrivateUserCreate;

@@ -45,6 +45,7 @@ def read_size_counts_public(
     statement = (
         select(Item.size_id, func.count(col(Item.id)))
         .where(col(Item.size_id).is_not(None))
+        .where(Item.stock > 0)
         .group_by(col(Item.size_id))
     )
     if category_id is not None:

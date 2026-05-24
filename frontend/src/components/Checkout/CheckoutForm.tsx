@@ -10,7 +10,6 @@ import {
   type UserUpdateMe,
   usersUpdateUserMe,
 } from "@/client"
-import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -20,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { LoadingButton } from "@/components/ui/loading-button"
 import { MaskedInput } from "@/components/ui/masked-input"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -41,7 +41,7 @@ type FormValues = z.infer<typeof formSchema>
 export function CheckoutForm() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showErrorToast } = useCustomToast()
   const { user } = useAuth()
 
   const form = useForm<FormValues>({
@@ -101,11 +101,15 @@ export function CheckoutForm() {
       await syncUserProfile(data)
       return response
     },
-    onSuccess: () => {
-      showSuccessToast("Заказ оформлен")
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["cart"] })
       queryClient.invalidateQueries({ queryKey: ["orders"] })
-      navigate({ to: "/account" })
+      const orderId = response.data?.id
+      if (orderId) {
+        navigate({ to: "/pay/$orderId", params: { orderId } })
+      } else {
+        navigate({ to: "/account" })
+      }
     },
     onError: handleError.bind(showErrorToast),
   })
@@ -178,14 +182,14 @@ export function CheckoutForm() {
             </FormItem>
           )}
         />
-        <Button
+        <LoadingButton
           type="submit"
           className="w-full"
           size="lg"
-          disabled={mutation.isPending}
+          loading={mutation.isPending}
         >
-          Оформить заказ
-        </Button>
+          Перейти к оплате
+        </LoadingButton>
       </form>
     </Form>
   )

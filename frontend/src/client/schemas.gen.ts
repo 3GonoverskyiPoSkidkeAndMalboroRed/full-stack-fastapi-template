@@ -779,6 +779,40 @@ export const OrderItemPublicSchema = {
     title: 'OrderItemPublic'
 } as const;
 
+export const OrderPaySchema = {
+    properties: {
+        card_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Card Id'
+        },
+        card: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/PaymentCardCreate'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        save_card: {
+            type: 'boolean',
+            title: 'Save Card',
+            default: false
+        }
+    },
+    type: 'object',
+    title: 'OrderPay'
+} as const;
+
 export const OrderPublicSchema = {
     properties: {
         recipient_name: {
@@ -839,6 +873,64 @@ export const OrderPublicSchema = {
                 }
             ],
             title: 'Cancellation Reason'
+        },
+        paid_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Paid At'
+        },
+        received_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Received At'
+        },
+        refunded_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Refunded At'
+        },
+        card_brand: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Card Brand'
+        },
+        card_last4: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Card Last4'
         },
         created_at: {
             anyOf: [
@@ -950,7 +1042,7 @@ export const OrderStatsSummarySchema = {
 
 export const OrderStatusSchema = {
     type: 'string',
-    enum: ['NEW', 'PROCESSED', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
+    enum: ['NEW', 'PROCESSED', 'PAID', 'SHIPPED', 'DELIVERED', 'RECEIVED', 'REFUNDED', 'CANCELLED'],
     title: 'OrderStatus'
 } as const;
 
@@ -988,6 +1080,116 @@ export const OrdersPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'OrdersPublic'
+} as const;
+
+export const PaymentCardCreateSchema = {
+    properties: {
+        card_number: {
+            type: 'string',
+            maxLength: 23,
+            minLength: 12,
+            title: 'Card Number'
+        },
+        exp_month: {
+            type: 'integer',
+            maximum: 12,
+            minimum: 1,
+            title: 'Exp Month'
+        },
+        exp_year: {
+            type: 'integer',
+            maximum: 2100,
+            minimum: 2000,
+            title: 'Exp Year'
+        },
+        cvc: {
+            type: 'string',
+            maxLength: 4,
+            minLength: 3,
+            title: 'Cvc'
+        },
+        cardholder_name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 2,
+            title: 'Cardholder Name'
+        }
+    },
+    type: 'object',
+    required: ['card_number', 'exp_month', 'exp_year', 'cvc', 'cardholder_name'],
+    title: 'PaymentCardCreate'
+} as const;
+
+export const PaymentCardPublicSchema = {
+    properties: {
+        brand: {
+            type: 'string',
+            maxLength: 32,
+            title: 'Brand'
+        },
+        last4: {
+            type: 'string',
+            maxLength: 4,
+            minLength: 4,
+            title: 'Last4'
+        },
+        exp_month: {
+            type: 'integer',
+            maximum: 12,
+            minimum: 1,
+            title: 'Exp Month'
+        },
+        exp_year: {
+            type: 'integer',
+            maximum: 2100,
+            minimum: 2000,
+            title: 'Exp Year'
+        },
+        cardholder_name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Cardholder Name'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['brand', 'last4', 'exp_month', 'exp_year', 'cardholder_name', 'id'],
+    title: 'PaymentCardPublic'
+} as const;
+
+export const PaymentCardsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/PaymentCardPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'PaymentCardsPublic'
 } as const;
 
 export const PrivateUserCreateSchema = {

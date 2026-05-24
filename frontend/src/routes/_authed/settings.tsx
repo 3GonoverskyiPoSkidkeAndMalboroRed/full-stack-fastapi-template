@@ -2,12 +2,14 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
+import UserCards from "@/components/UserSettings/UserCards"
 import UserInformation from "@/components/UserSettings/UserInformation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useAuth from "@/hooks/useAuth"
 
 const tabsConfig = [
   { value: "my-profile", title: "Профиль", component: UserInformation },
+  { value: "cards", title: "Мои карты", component: UserCards },
   { value: "password", title: "Пароль", component: ChangePassword },
   { value: "danger-zone", title: "Опасная зона", component: DeleteAccount },
 ]

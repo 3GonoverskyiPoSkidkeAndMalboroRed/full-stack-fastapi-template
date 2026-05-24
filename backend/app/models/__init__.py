@@ -36,6 +36,7 @@ from app.models.order import (
     OrderCancel,
     OrderCreate,
     OrderItemPublic,
+    OrderPay,
     OrderPublic,
     OrdersPublic,
     OrderStatsBucket,
@@ -46,6 +47,12 @@ from app.models.order import (
     OrderUpdate,
 )
 from app.models.order_item import OrderItem
+from app.models.payment_card import (
+    PaymentCard,
+    PaymentCardCreate,
+    PaymentCardPublic,
+    PaymentCardsPublic,
+)
 from app.models.size import (
     Size,
     SizeCount,
@@ -104,6 +111,7 @@ __all__ = [
     "OrderCreate",
     "OrderItem",
     "OrderItemPublic",
+    "OrderPay",
     "OrderPublic",
     "OrderStatsBucket",
     "OrderStatsGroupBy",
@@ -112,6 +120,10 @@ __all__ = [
     "OrderStatus",
     "OrderUpdate",
     "OrdersPublic",
+    "PaymentCard",
+    "PaymentCardCreate",
+    "PaymentCardPublic",
+    "PaymentCardsPublic",
     "SQLModel",
     "Size",
     "SizeCount",

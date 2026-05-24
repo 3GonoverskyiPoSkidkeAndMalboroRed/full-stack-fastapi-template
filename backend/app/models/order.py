@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Literal, Optional
 from sqlalchemy import Column, DateTime, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
+from app.models.payment_card import PaymentCardCreate
 from app.models.user import get_datetime_utc
 
 if TYPE_CHECKING:
@@ -20,6 +21,8 @@ class OrderStatus(str, Enum):
     PAID = "PAID"
     SHIPPED = "SHIPPED"
     DELIVERED = "DELIVERED"
+    RECEIVED = "RECEIVED"
+    REFUNDED = "REFUNDED"
     CANCELLED = "CANCELLED"
 
 
@@ -45,6 +48,14 @@ class OrderCancel(SQLModel):
     reason: str = Field(min_length=1, max_length=500)
 
 
+class OrderPay(SQLModel):
+    # Pay with a previously saved card...
+    card_id: uuid.UUID | None = None
+    # ...or with a new card (raw data, never stored — only masked fields persist).
+    card: PaymentCardCreate | None = None
+    save_card: bool = False
+
+
 class Order(OrderBase, table=True):
     __tablename__ = "shop_order"
 
@@ -57,6 +68,20 @@ class Order(OrderBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE", index=True
     )
     cancellation_reason: str | None = Field(default=None, max_length=500)
+    paid_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    received_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    refunded_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    card_brand: str | None = Field(default=None, max_length=32)
+    card_last4: str | None = Field(default=None, max_length=4)
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
@@ -79,6 +104,11 @@ class OrderPublic(OrderBase):
     status: OrderStatus
     total: Decimal
     cancellation_reason: str | None = None
+    paid_at: datetime | None = None
+    received_at: datetime | None = None
+    refunded_at: datetime | None = None
+    card_brand: str | None = None
+    card_last4: str | None = None
     created_at: datetime | None = None
     items: list[OrderItemPublic] = []
 

@@ -26,6 +26,7 @@ from app.models import (
     OrderStatsResponse,
     OrderStatsSummary,
     OrderStatus,
+    PaymentCard,
     Size,
     SizeCreate,
     SizeUpdate,
@@ -34,6 +35,9 @@ from app.models import (
     UserUpdate,
     WishlistItem,
 )
+from app.payments import MaskedCard
+
+REFUND_WINDOW_DAYS = 14
 
 STATS_TZ = ZoneInfo("Europe/Moscow")
 _MONEY_QUANTUM = Decimal("0.01")
@@ -343,13 +347,102 @@ def cancel_order(*, session: Session, order: Order, reason: str) -> Order:
     order.status = OrderStatus.CANCELLED
     order.cancellation_reason = reason
     session.add(order)
+    _restock_order(session=session, order=order)
+    session.commit()
+    session.refresh(order)
+    return order
+
+
+def _restock_order(*, session: Session, order: Order) -> None:
     for oi in order.items:
         if oi.item is not None:
             oi.item.stock += oi.quantity
             session.add(oi.item)
+
+
+def pay_order(*, session: Session, order: Order, brand: str, last4: str) -> Order:
+    order.status = OrderStatus.PAID
+    order.paid_at = datetime.now(timezone.utc)
+    order.card_brand = brand
+    order.card_last4 = last4
+    session.add(order)
     session.commit()
     session.refresh(order)
     return order
+
+
+def mark_order_received(*, session: Session, order: Order) -> Order:
+    order.status = OrderStatus.RECEIVED
+    order.received_at = datetime.now(timezone.utc)
+    session.add(order)
+    session.commit()
+    session.refresh(order)
+    return order
+
+
+def refund_order(*, session: Session, order: Order) -> Order:
+    order.status = OrderStatus.REFUNDED
+    order.refunded_at = datetime.now(timezone.utc)
+    session.add(order)
+    _restock_order(session=session, order=order)
+    session.commit()
+    session.refresh(order)
+    return order
+
+
+def is_within_refund_window(order: Order) -> bool:
+    if order.received_at is None:
+        return False
+    received = order.received_at
+    if received.tzinfo is None:
+        received = received.replace(tzinfo=timezone.utc)
+    return datetime.now(timezone.utc) - received <= timedelta(days=REFUND_WINDOW_DAYS)
+
+
+# Payment cards
+
+
+def create_payment_card(
+    *, session: Session, user_id: uuid.UUID, masked: MaskedCard
+) -> PaymentCard:
+    card = PaymentCard(
+        user_id=user_id,
+        brand=masked.brand,
+        last4=masked.last4,
+        exp_month=masked.exp_month,
+        exp_year=masked.exp_year,
+        cardholder_name=masked.cardholder_name,
+    )
+    session.add(card)
+    session.commit()
+    session.refresh(card)
+    return card
+
+
+def list_payment_cards(
+    *, session: Session, user_id: uuid.UUID
+) -> tuple[list[PaymentCard], int]:
+    statement = (
+        select(PaymentCard)
+        .where(col(PaymentCard.user_id) == user_id)
+        .order_by(col(PaymentCard.created_at).desc())
+    )
+    cards = list(session.exec(statement).all())
+    return cards, len(cards)
+
+
+def get_payment_card(
+    *, session: Session, card_id: uuid.UUID, user_id: uuid.UUID
+) -> PaymentCard | None:
+    card = session.get(PaymentCard, card_id)
+    if card is None or card.user_id != user_id:
+        return None
+    return card
+
+
+def delete_payment_card(*, session: Session, card: PaymentCard) -> None:
+    session.delete(card)
+    session.commit()
 
 
 def create_order_from_cart(

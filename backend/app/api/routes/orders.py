@@ -11,6 +11,7 @@ from app.models import (
     OrderCancel,
     OrderCreate,
     OrderItemPublic,
+    OrderPay,
     OrderPublic,
     OrdersPublic,
     OrderStatsGroupBy,
@@ -18,13 +19,13 @@ from app.models import (
     OrderStatus,
     OrderUpdate,
 )
+from app.payments import CardValidationError, mask_card
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
 
+# Admin-driven transitions after the order is paid.
 _ALLOWED_TRANSITIONS: dict[OrderStatus, OrderStatus] = {
-    OrderStatus.NEW: OrderStatus.PROCESSED,
-    OrderStatus.PROCESSED: OrderStatus.PAID,
     OrderStatus.PAID: OrderStatus.SHIPPED,
     OrderStatus.SHIPPED: OrderStatus.DELIVERED,
 }
@@ -37,6 +38,11 @@ def _serialize_order(order: Order) -> OrderPublic:
         status=order.status,
         total=order.total,
         cancellation_reason=order.cancellation_reason,
+        paid_at=order.paid_at,
+        received_at=order.received_at,
+        refunded_at=order.refunded_at,
+        card_brand=order.card_brand,
+        card_last4=order.card_last4,
         created_at=order.created_at,
         recipient_name=order.recipient_name,
         phone=order.phone,
@@ -148,7 +154,7 @@ def update_order_status(
     payload: OrderUpdate,
 ) -> Any:
     """
-    Update order status. Allowed transitions: NEW → PROCESSED → PAID → SHIPPED → DELIVERED.
+    Update order status. Admin-driven transitions: PAID → SHIPPED → DELIVERED.
     """
     if payload.status is None:
         raise HTTPException(status_code=400, detail="status is required")
@@ -167,7 +173,7 @@ def update_order_status(
     return _serialize_order(updated)
 
 
-_CANCELLABLE_STATUSES = {OrderStatus.NEW, OrderStatus.PROCESSED, OrderStatus.PAID}
+_CANCELLABLE_STATUSES = {OrderStatus.NEW}
 
 
 @router.post("/{id}/cancel", response_model=OrderPublic)
@@ -179,8 +185,8 @@ def cancel_order(
     payload: OrderCancel,
 ) -> Any:
     """
-    Cancel an order. Allowed only by the order's owner (or superuser) while the
-    order is in NEW, PROCESSED, or PAID status. Returns reserved stock back to items.
+    Cancel an unpaid order. Allowed only by the order's owner (or superuser)
+    while the order is still in NEW (awaiting payment). Returns reserved stock.
     """
     order = crud.get_order(session=session, order_id=id)
     if not order:
@@ -191,4 +197,102 @@ def cancel_order(
         raise HTTPException(status_code=400, detail="Этот заказ нельзя отменить")
 
     updated = crud.cancel_order(session=session, order=order, reason=payload.reason)
+    return _serialize_order(updated)
+
+
+def _get_owned_order(
+    *, session: SessionDep, current_user: CurrentUser, order_id: uuid.UUID
+) -> Order:
+    order = crud.get_order(session=session, order_id=order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if not current_user.is_superuser and order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    return order
+
+
+@router.post("/{id}/pay", response_model=OrderPublic)
+def pay_order(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+    payload: OrderPay,
+) -> Any:
+    """
+    Pay for an order in NEW status using a saved card or new card data.
+    Raw card data (PAN/CVC) is never stored — only brand and last4 are kept.
+    """
+    order = _get_owned_order(session=session, current_user=current_user, order_id=id)
+    if order.status != OrderStatus.NEW:
+        raise HTTPException(status_code=400, detail="Этот заказ нельзя оплатить")
+
+    if payload.card_id is not None:
+        card = crud.get_payment_card(
+            session=session, card_id=payload.card_id, user_id=current_user.id
+        )
+        if not card:
+            raise HTTPException(status_code=404, detail="Card not found")
+        brand, last4 = card.brand, card.last4
+    elif payload.card is not None:
+        try:
+            masked = mask_card(
+                card_number=payload.card.card_number,
+                exp_month=payload.card.exp_month,
+                exp_year=payload.card.exp_year,
+                cardholder_name=payload.card.cardholder_name,
+            )
+        except CardValidationError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+        brand, last4 = masked.brand, masked.last4
+        if payload.save_card:
+            crud.create_payment_card(
+                session=session, user_id=current_user.id, masked=masked
+            )
+    else:
+        raise HTTPException(status_code=400, detail="Укажите карту для оплаты")
+
+    updated = crud.pay_order(session=session, order=order, brand=brand, last4=last4)
+    return _serialize_order(updated)
+
+
+@router.post("/{id}/receive", response_model=OrderPublic)
+def receive_order(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+) -> Any:
+    """
+    Buyer confirms receipt of a delivered order (DELIVERED → RECEIVED).
+    """
+    order = _get_owned_order(session=session, current_user=current_user, order_id=id)
+    if order.status != OrderStatus.DELIVERED:
+        raise HTTPException(
+            status_code=400,
+            detail="Подтвердить получение можно только доставленный заказ",
+        )
+    updated = crud.mark_order_received(session=session, order=order)
+    return _serialize_order(updated)
+
+
+@router.post("/{id}/refund", response_model=OrderPublic)
+def refund_order(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+) -> Any:
+    """
+    Refund a received order within the legal return window
+    (RECEIVED → REFUNDED). Funds are returned to the card used for payment.
+    """
+    order = _get_owned_order(session=session, current_user=current_user, order_id=id)
+    if order.status != OrderStatus.RECEIVED:
+        raise HTTPException(
+            status_code=400, detail="Возврат доступен только для полученного заказа"
+        )
+    if not crud.is_within_refund_window(order):
+        raise HTTPException(status_code=400, detail="Срок для возврата средств истёк")
+    updated = crud.refund_order(session=session, order=order)
     return _serialize_order(updated)

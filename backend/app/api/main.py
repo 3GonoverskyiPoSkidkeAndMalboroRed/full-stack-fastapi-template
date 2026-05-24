@@ -7,6 +7,7 @@ from app.api.routes import (
     items,
     login,
     orders,
+    payment_cards,
     private,
     sizes,
     users,
@@ -26,6 +27,7 @@ api_router.include_router(brands.router)
 api_router.include_router(cart.router)
 api_router.include_router(wishlist.router)
 api_router.include_router(orders.router)
+api_router.include_router(payment_cards.router)
 
 
 if settings.ENVIRONMENT == "local":

@@ -191,14 +191,14 @@ def test_update_status_happy_path(
     superuser_token_headers: dict[str, str],
 ) -> None:
     user = create_random_user(db)
-    order = create_random_order(db, user=user, status=OrderStatus.NEW)
+    order = create_random_order(db, user=user, status=OrderStatus.PAID)
     r = client.patch(
         f"{settings.API_V1_STR}/orders/{order.id}/status",
-        json={"status": "PROCESSED"},
+        json={"status": "SHIPPED"},
         headers=superuser_token_headers,
     )
     assert r.status_code == 200
-    assert r.json()["status"] == "PROCESSED"
+    assert r.json()["status"] == "SHIPPED"
 
 
 def test_update_status_invalid_transition(

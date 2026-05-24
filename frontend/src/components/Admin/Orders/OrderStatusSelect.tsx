@@ -13,8 +13,6 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
-  NEW: "PROCESSED",
-  PROCESSED: "PAID",
   PAID: "SHIPPED",
   SHIPPED: "DELIVERED",
 }
@@ -48,9 +46,8 @@ export function OrderStatusSelect({
   const next = NEXT_STATUS[currentStatus]
 
   if (!next) {
-    return (
-      <span className="text-muted-foreground text-sm">Финальный статус</span>
-    )
+    const note = currentStatus === "NEW" ? "Ожидает оплаты" : "Финальный статус"
+    return <span className="text-muted-foreground text-sm">{note}</span>
   }
 
   return (

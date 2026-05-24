@@ -41,8 +41,8 @@ def read_items_public(
     """
     Public catalog listing — no authentication required.
     """
-    count_statement = select(func.count()).select_from(Item)
-    statement = select(Item)
+    count_statement = select(func.count()).select_from(Item).where(Item.stock > 0)
+    statement = select(Item).where(Item.stock > 0)
     if category_id is not None:
         count_statement = count_statement.where(Item.category_id == category_id)
         statement = statement.where(Item.category_id == category_id)

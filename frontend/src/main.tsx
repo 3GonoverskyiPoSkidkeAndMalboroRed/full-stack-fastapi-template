@@ -4,6 +4,7 @@ import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 import { z } from "zod"
 import { client } from "./client/client.gen"
+import { Spinner } from "./components/Common/Spinner"
 import { Toaster } from "./components/ui/sonner"
 import "./index.css"
 import { routeTree } from "./routeTree.gen"
@@ -29,7 +30,12 @@ client.interceptors.error.use((error, response) => {
 
 const queryClient = new QueryClient()
 
-const router = createRouter({ routeTree })
+const router = createRouter({
+  routeTree,
+  defaultPendingComponent: () => <Spinner label="Загрузка…" />,
+  defaultPendingMs: 200,
+  defaultPendingMinMs: 300,
+})
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router
