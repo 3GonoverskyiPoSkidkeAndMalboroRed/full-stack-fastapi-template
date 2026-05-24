@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Literal, Optional
 
 from sqlalchemy import Column, DateTime, Numeric
 from sqlmodel import Field, Relationship, SQLModel
@@ -86,3 +86,27 @@ class OrderPublic(OrderBase):
 class OrdersPublic(SQLModel):
     data: list[OrderPublic]
     count: int
+
+
+OrderStatsGroupBy = Literal["hour", "day", "month"]
+
+
+class OrderStatsBucket(SQLModel):
+    bucket: datetime
+    count: int
+    total: Decimal
+    average: Decimal
+
+
+class OrderStatsSummary(SQLModel):
+    count: int
+    total: Decimal
+    average: Decimal
+
+
+class OrderStatsResponse(SQLModel):
+    group_by: OrderStatsGroupBy
+    start: datetime
+    end: datetime
+    points: list[OrderStatsBucket]
+    summary: OrderStatsSummary

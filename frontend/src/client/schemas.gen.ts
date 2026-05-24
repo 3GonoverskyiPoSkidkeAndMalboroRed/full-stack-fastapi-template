@@ -784,6 +784,88 @@ export const OrderPublicSchema = {
     title: 'OrderPublic'
 } as const;
 
+export const OrderStatsBucketSchema = {
+    properties: {
+        bucket: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Bucket'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        },
+        total: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
+            title: 'Total'
+        },
+        average: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
+            title: 'Average'
+        }
+    },
+    type: 'object',
+    required: ['bucket', 'count', 'total', 'average'],
+    title: 'OrderStatsBucket'
+} as const;
+
+export const OrderStatsResponseSchema = {
+    properties: {
+        group_by: {
+            type: 'string',
+            enum: ['hour', 'day', 'month'],
+            title: 'Group By'
+        },
+        start: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Start'
+        },
+        end: {
+            type: 'string',
+            format: 'date-time',
+            title: 'End'
+        },
+        points: {
+            items: {
+                '$ref': '#/components/schemas/OrderStatsBucket'
+            },
+            type: 'array',
+            title: 'Points'
+        },
+        summary: {
+            '$ref': '#/components/schemas/OrderStatsSummary'
+        }
+    },
+    type: 'object',
+    required: ['group_by', 'start', 'end', 'points', 'summary'],
+    title: 'OrderStatsResponse'
+} as const;
+
+export const OrderStatsSummarySchema = {
+    properties: {
+        count: {
+            type: 'integer',
+            title: 'Count'
+        },
+        total: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
+            title: 'Total'
+        },
+        average: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
+            title: 'Average'
+        }
+    },
+    type: 'object',
+    required: ['count', 'total', 'average'],
+    title: 'OrderStatsSummary'
+} as const;
+
 export const OrderStatusSchema = {
     type: 'string',
     enum: ['NEW', 'PROCESSED', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'],

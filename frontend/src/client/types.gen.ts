@@ -429,6 +429,69 @@ export type OrderPublic = {
 };
 
 /**
+ * OrderStatsBucket
+ */
+export type OrderStatsBucket = {
+    /**
+     * Bucket
+     */
+    bucket: string;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Total
+     */
+    total: string;
+    /**
+     * Average
+     */
+    average: string;
+};
+
+/**
+ * OrderStatsResponse
+ */
+export type OrderStatsResponse = {
+    /**
+     * Group By
+     */
+    group_by: 'hour' | 'day' | 'month';
+    /**
+     * Start
+     */
+    start: string;
+    /**
+     * End
+     */
+    end: string;
+    /**
+     * Points
+     */
+    points: Array<OrderStatsBucket>;
+    summary: OrderStatsSummary;
+};
+
+/**
+ * OrderStatsSummary
+ */
+export type OrderStatsSummary = {
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Total
+     */
+    total: string;
+    /**
+     * Average
+     */
+    average: string;
+};
+
+/**
  * OrderStatus
  */
 export type OrderStatus = 'NEW' | 'PROCESSED' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
@@ -2172,6 +2235,44 @@ export type OrdersCreateOrderResponses = {
 };
 
 export type OrdersCreateOrderResponse = OrdersCreateOrderResponses[keyof OrdersCreateOrderResponses];
+
+export type OrdersReadOrdersStatsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Start
+         */
+        start: string;
+        /**
+         * End
+         */
+        end: string;
+        /**
+         * Group By
+         */
+        group_by?: 'hour' | 'day' | 'month';
+    };
+    url: '/api/v1/orders/stats';
+};
+
+export type OrdersReadOrdersStatsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OrdersReadOrdersStatsError = OrdersReadOrdersStatsErrors[keyof OrdersReadOrdersStatsErrors];
+
+export type OrdersReadOrdersStatsResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrderStatsResponse;
+};
+
+export type OrdersReadOrdersStatsResponse = OrdersReadOrdersStatsResponses[keyof OrdersReadOrdersStatsResponses];
 
 export type OrdersReadOrderData = {
     body?: never;

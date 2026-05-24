@@ -1,12 +1,14 @@
 import uuid
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app import crud
 from app.core.config import settings
-from app.models import CartItem, CartItemCreate, Item, OrderStatus
+from app.models import CartItem, CartItemCreate, Item, Order, OrderStatus
 from tests.utils.item import create_random_item
 from tests.utils.order import create_random_order
 from tests.utils.user import create_random_user
@@ -228,3 +230,149 @@ def test_update_status_rollback_forbidden(
         headers=superuser_token_headers,
     )
     assert r.status_code == 400
+
+
+# --- Order stats endpoint ---
+
+MSK = ZoneInfo("Europe/Moscow")
+
+
+def _set_order_created_at(db: Session, order: Order, dt: datetime) -> None:
+    order.created_at = dt
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+
+
+def test_orders_stats_requires_superuser(
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+) -> None:
+    r = client.get(
+        f"{settings.API_V1_STR}/orders/stats",
+        params={
+            "start": "2024-01-01T00:00:00+00:00",
+            "end": "2024-01-02T00:00:00+00:00",
+            "group_by": "day",
+        },
+        headers=normal_user_token_headers,
+    )
+    assert r.status_code == 403
+
+
+def test_orders_stats_rejects_inverted_range(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+) -> None:
+    r = client.get(
+        f"{settings.API_V1_STR}/orders/stats",
+        params={
+            "start": "2024-01-02T00:00:00+00:00",
+            "end": "2024-01-01T00:00:00+00:00",
+            "group_by": "day",
+        },
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 400
+
+
+def test_orders_stats_rejects_too_wide_hour_range(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+) -> None:
+    r = client.get(
+        f"{settings.API_V1_STR}/orders/stats",
+        params={
+            "start": "2024-01-01T00:00:00+00:00",
+            "end": "2024-03-01T00:00:00+00:00",
+            "group_by": "hour",
+        },
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 400
+
+
+def test_orders_stats_aggregates_by_hour_in_moscow_tz(
+    client: TestClient,
+    db: Session,
+    superuser_token_headers: dict[str, str],
+) -> None:
+    user = create_random_user(db)
+    # Базовая дата — 2024-01-15, далеко от тестового шума.
+    msk_day = datetime(2024, 1, 15, tzinfo=MSK)
+
+    o1 = create_random_order(db, user=user, status=OrderStatus.NEW)
+    _set_order_created_at(
+        db, o1, msk_day.replace(hour=10, minute=30).astimezone(timezone.utc)
+    )
+    o2 = create_random_order(db, user=user, status=OrderStatus.PAID)
+    _set_order_created_at(
+        db, o2, msk_day.replace(hour=10, minute=45).astimezone(timezone.utc)
+    )
+    o3 = create_random_order(db, user=user, status=OrderStatus.CANCELLED)
+    _set_order_created_at(
+        db, o3, msk_day.replace(hour=14).astimezone(timezone.utc)
+    )
+
+    start = msk_day
+    end = msk_day + timedelta(days=1)
+    r = client.get(
+        f"{settings.API_V1_STR}/orders/stats",
+        params={
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "group_by": "hour",
+        },
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["group_by"] == "hour"
+    assert len(body["points"]) == 24
+
+    by_hour = {datetime.fromisoformat(p["bucket"]).hour: p for p in body["points"]}
+    assert by_hour[10]["count"] == 2
+    assert by_hour[14]["count"] == 1
+    assert by_hour[9]["count"] == 0  # пустой бакет заполнен нулём
+
+    expected_total = (
+        Decimal(o1.total) + Decimal(o2.total) + Decimal(o3.total)
+    )
+    assert Decimal(body["summary"]["total"]) == expected_total.quantize(Decimal("0.01"))
+    assert body["summary"]["count"] == 3
+
+
+def test_orders_stats_aggregates_by_day(
+    client: TestClient,
+    db: Session,
+    superuser_token_headers: dict[str, str],
+) -> None:
+    user = create_random_user(db)
+    msk_day = datetime(2024, 2, 1, tzinfo=MSK)
+
+    o1 = create_random_order(db, user=user)
+    _set_order_created_at(
+        db, o1, msk_day.replace(hour=12).astimezone(timezone.utc)
+    )
+    o2 = create_random_order(db, user=user)
+    _set_order_created_at(
+        db, o2, (msk_day + timedelta(days=2, hours=8)).astimezone(timezone.utc)
+    )
+
+    start = msk_day
+    end = msk_day + timedelta(days=5)
+    r = client.get(
+        f"{settings.API_V1_STR}/orders/stats",
+        params={
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "group_by": "day",
+        },
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert len(body["points"]) == 5
+
+    counts = [p["count"] for p in body["points"]]
+    assert counts == [1, 0, 1, 0, 0]

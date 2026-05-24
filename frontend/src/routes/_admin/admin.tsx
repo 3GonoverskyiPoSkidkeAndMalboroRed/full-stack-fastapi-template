@@ -4,16 +4,21 @@ import { z } from "zod"
 import { usersReadUserMe } from "@/client"
 import { ItemsAdminPanel } from "@/components/Admin/ItemsAdminPanel"
 import { AdminOrdersPanel } from "@/components/Admin/Orders/AdminOrdersPanel"
+import { OrdersStatsPanel } from "@/components/Admin/Stats/OrdersStatsPanel"
 import { UsersAdminPanel } from "@/components/Admin/UsersAdminPanel"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const adminSearchSchema = z
   .object({
-    tab: z.enum(["users", "items", "orders"]).optional().catch(undefined),
+    tab: z
+      .enum(["users", "items", "orders", "stats"])
+      .optional()
+      .catch(undefined),
   })
   .catch({})
 
 type AdminSearch = z.infer<typeof adminSearchSchema>
+type AdminTab = NonNullable<AdminSearch["tab"]>
 
 export const Route = createFileRoute("/_admin/admin")({
   component: Admin,
@@ -58,7 +63,7 @@ function Admin() {
           value={tab}
           onValueChange={(value) =>
             navigate({
-              search: { tab: value as "users" | "items" | "orders" },
+              search: { tab: value as AdminTab },
             })
           }
         >
@@ -81,6 +86,12 @@ function Admin() {
             >
               Заказы
             </TabsTrigger>
+            <TabsTrigger
+              value="stats"
+              className="data-[state=active]:bg-ink data-[state=active]:text-paper rounded-none text-[11px] tracking-[0.18em] uppercase"
+            >
+              Статистика
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="users" className="mt-6">
             <UsersAdminPanel />
@@ -90,6 +101,9 @@ function Admin() {
           </TabsContent>
           <TabsContent value="orders" className="mt-6">
             <AdminOrdersPanel />
+          </TabsContent>
+          <TabsContent value="stats" className="mt-6">
+            <OrdersStatsPanel />
           </TabsContent>
         </Tabs>
       </div>

@@ -1,6 +1,8 @@
 import uuid
-from decimal import Decimal
+from datetime import datetime, timedelta, timezone
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from sqlmodel import Session, col, delete, func, select
 
@@ -16,6 +18,10 @@ from app.models import (
     Order,
     OrderCreate,
     OrderItem,
+    OrderStatsBucket,
+    OrderStatsGroupBy,
+    OrderStatsResponse,
+    OrderStatsSummary,
     OrderStatus,
     Size,
     SizeCreate,
@@ -25,6 +31,38 @@ from app.models import (
     UserUpdate,
     WishlistItem,
 )
+
+STATS_TZ = ZoneInfo("Europe/Moscow")
+_MONEY_QUANTUM = Decimal("0.01")
+
+
+def _to_utc(dt: datetime) -> datetime:
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
+def _quantize_money(value: Decimal) -> Decimal:
+    return value.quantize(_MONEY_QUANTUM, rounding=ROUND_HALF_UP)
+
+
+def _truncate_to_bucket(dt: datetime, group_by: OrderStatsGroupBy) -> datetime:
+    """Усечь datetime до начала бакета по выбранной группировке (в её tz)."""
+    if group_by == "hour":
+        return dt.replace(minute=0, second=0, microsecond=0)
+    if group_by == "day":
+        return dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    return dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+
+def _next_bucket(dt: datetime, group_by: OrderStatsGroupBy) -> datetime:
+    if group_by == "hour":
+        return dt + timedelta(hours=1)
+    if group_by == "day":
+        return dt + timedelta(days=1)
+    year = dt.year + (1 if dt.month == 12 else 0)
+    month = 1 if dt.month == 12 else dt.month + 1
+    return dt.replace(year=year, month=month)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -340,3 +378,79 @@ def create_order_from_cart(
     except Exception:
         session.rollback()
         raise
+
+
+def get_orders_stats(
+    *,
+    session: Session,
+    start: datetime,
+    end: datetime,
+    group_by: OrderStatsGroupBy,
+) -> OrderStatsResponse:
+    """Агрегированная статистика заказов по времени в часовом поясе Europe/Moscow.
+
+    Бакеты считаются через PostgreSQL `date_trunc(:group_by, created_at AT TIME ZONE 'Europe/Moscow')`.
+    Пустые интервалы заполняются нулями, чтобы area chart не рвался.
+    """
+    start_utc = _to_utc(start)
+    end_utc = _to_utc(end)
+
+    bucket_expr = func.date_trunc(
+        group_by,
+        func.timezone("Europe/Moscow", Order.created_at),
+    )
+    total_expr = func.coalesce(func.sum(Order.total), 0)
+    count_expr = func.count()
+
+    rows = session.exec(
+        select(bucket_expr, count_expr, total_expr)
+        .where(col(Order.created_at) >= start_utc)
+        .where(col(Order.created_at) < end_utc)
+        .group_by(bucket_expr)
+        .order_by(bucket_expr)
+    ).all()
+
+    data: dict[datetime, tuple[int, Decimal]] = {}
+    for bucket, count, total in rows:
+        if bucket is None:
+            continue
+        # date_trunc возвращает naive datetime (по МСК) — навешиваем tz.
+        naive = bucket if bucket.tzinfo is None else bucket.replace(tzinfo=None)
+        data[naive] = (int(count), Decimal(total))
+
+    points: list[OrderStatsBucket] = []
+    cursor = _truncate_to_bucket(start.astimezone(STATS_TZ).replace(tzinfo=None), group_by)
+    boundary = end.astimezone(STATS_TZ).replace(tzinfo=None)
+    while cursor < boundary:
+        count, total = data.get(cursor, (0, Decimal("0")))
+        average = _quantize_money(total / count) if count else Decimal("0.00")
+        points.append(
+            OrderStatsBucket(
+                bucket=cursor.replace(tzinfo=STATS_TZ),
+                count=count,
+                total=_quantize_money(total),
+                average=average,
+            )
+        )
+        cursor = _next_bucket(cursor, group_by)
+
+    summary_row = session.exec(
+        select(count_expr, total_expr)
+        .where(col(Order.created_at) >= start_utc)
+        .where(col(Order.created_at) < end_utc)
+    ).one()
+    total_count = int(summary_row[0])
+    total_sum = Decimal(summary_row[1])
+    summary = OrderStatsSummary(
+        count=total_count,
+        total=_quantize_money(total_sum),
+        average=_quantize_money(total_sum / total_count) if total_count else Decimal("0.00"),
+    )
+
+    return OrderStatsResponse(
+        group_by=group_by,
+        start=start,
+        end=end,
+        points=points,
+        summary=summary,
+    )

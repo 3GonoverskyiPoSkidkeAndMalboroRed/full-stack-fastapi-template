@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,6 +13,8 @@ from app.models import (
     OrderItemPublic,
     OrderPublic,
     OrdersPublic,
+    OrderStatsGroupBy,
+    OrderStatsResponse,
     OrderStatus,
     OrderUpdate,
 )
@@ -91,6 +94,33 @@ def read_orders(
         limit=limit,
     )
     return OrdersPublic(data=[_serialize_order(o) for o in orders], count=count)
+
+
+@router.get(
+    "/stats",
+    response_model=OrderStatsResponse,
+    dependencies=[Depends(get_current_active_superuser)],
+)
+def read_orders_stats(
+    session: SessionDep,
+    start: datetime,
+    end: datetime,
+    group_by: OrderStatsGroupBy = "day",
+) -> Any:
+    """
+    Aggregated order statistics by time bucket (hour/day/month) in Europe/Moscow tz.
+    Superuser only.
+    """
+    if end <= start:
+        raise HTTPException(status_code=400, detail="end must be after start")
+    if group_by == "hour" and (end - start) > timedelta(days=31):
+        raise HTTPException(
+            status_code=400,
+            detail="Для группировки по часам диапазон не более 31 дня",
+        )
+    return crud.get_orders_stats(
+        session=session, start=start, end=end, group_by=group_by
+    )
 
 
 @router.get("/{id}", response_model=OrderPublic)
