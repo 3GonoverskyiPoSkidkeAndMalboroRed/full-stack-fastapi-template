@@ -22,11 +22,11 @@ type Metric = "count" | "total"
 
 const CHART_CONFIG: ChartConfig = {
   count: {
-    label: "Заказов",
+    label: " Заказов",
     color: "var(--chart-1)",
   },
   total: {
-    label: "Сумма",
+    label: " Сумма",
     color: "var(--chart-2)",
   },
 }

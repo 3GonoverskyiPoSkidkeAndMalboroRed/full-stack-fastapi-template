@@ -419,7 +419,9 @@ def get_orders_stats(
         data[naive] = (int(count), Decimal(total))
 
     points: list[OrderStatsBucket] = []
-    cursor = _truncate_to_bucket(start.astimezone(STATS_TZ).replace(tzinfo=None), group_by)
+    cursor = _truncate_to_bucket(
+        start.astimezone(STATS_TZ).replace(tzinfo=None), group_by
+    )
     boundary = end.astimezone(STATS_TZ).replace(tzinfo=None)
     while cursor < boundary:
         count, total = data.get(cursor, (0, Decimal("0")))
@@ -444,7 +446,9 @@ def get_orders_stats(
     summary = OrderStatsSummary(
         count=total_count,
         total=_quantize_money(total_sum),
-        average=_quantize_money(total_sum / total_count) if total_count else Decimal("0.00"),
+        average=_quantize_money(total_sum / total_count)
+        if total_count
+        else Decimal("0.00"),
     )
 
     return OrderStatsResponse(
