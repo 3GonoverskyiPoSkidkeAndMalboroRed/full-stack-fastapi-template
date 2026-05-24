@@ -103,7 +103,7 @@ function CatalogMeta({ count, shown }: { count: number; shown: number }) {
         Показано {shown} из {count}
       </span>
       <span className="mono text-muted-foreground text-[11px] tracking-[0.06em]">
-        ДРОП №04 · {new Date().getFullYear()}
+        ДРОП №1 · {new Date().getFullYear()}
       </span>
     </div>
   )
@@ -286,7 +286,7 @@ function Catalog() {
           <span className="text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
             Все позиции
           </span>
-          <span className="mono text-[12px] tracking-[0.08em]">ДРОП №04</span>
+          <span className="mono text-[12px] tracking-[0.08em]">ДРОП №1</span>
         </div>
       </header>
       <CatalogFilters />
