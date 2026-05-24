@@ -1376,6 +1376,10 @@ export type ItemsReadItemsPublicData = {
          * Q
          */
         q?: string | null;
+        /**
+         * Sort
+         */
+        sort?: ('popular' | 'recent' | 'price_asc' | 'price_desc') | null;
     };
     url: '/api/v1/items/public';
 };

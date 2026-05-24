@@ -1,7 +1,8 @@
 import uuid
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
+from sqlalchemy import nulls_last
 from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
@@ -14,6 +15,7 @@ from app.models import (
     ItemsPublic,
     ItemUpdate,
     Message,
+    OrderItem,
     Size,
 )
 from app.utils_files import (
@@ -34,14 +36,13 @@ def read_items_public(
     size_id: uuid.UUID | None = None,
     brand_id: uuid.UUID | None = None,
     q: str | None = None,
+    sort: Literal["popular", "recent", "price_asc", "price_desc"] | None = None,
 ) -> Any:
     """
     Public catalog listing — no authentication required.
     """
     count_statement = select(func.count()).select_from(Item)
-    statement = (
-        select(Item).order_by(col(Item.created_at).desc()).offset(skip).limit(limit)
-    )
+    statement = select(Item)
     if category_id is not None:
         count_statement = count_statement.where(Item.category_id == category_id)
         statement = statement.where(Item.category_id == category_id)
@@ -55,6 +56,29 @@ def read_items_public(
         pattern = f"%{q.strip()}%"
         count_statement = count_statement.where(col(Item.title).ilike(pattern))
         statement = statement.where(col(Item.title).ilike(pattern))
+
+    if sort == "popular":
+        sold = (
+            select(
+                col(OrderItem.item_id).label("item_id"),
+                func.coalesce(func.sum(OrderItem.quantity), 0).label("sold"),
+            )
+            .where(col(OrderItem.item_id).is_not(None))
+            .group_by(col(OrderItem.item_id))
+            .subquery()
+        )
+        statement = statement.outerjoin(sold, col(Item.id) == sold.c.item_id).order_by(
+            func.coalesce(sold.c.sold, 0).desc(),
+            col(Item.created_at).desc(),
+        )
+    elif sort == "price_asc":
+        statement = statement.order_by(nulls_last(col(Item.cost).asc()))
+    elif sort == "price_desc":
+        statement = statement.order_by(nulls_last(col(Item.cost).desc()))
+    else:
+        statement = statement.order_by(col(Item.created_at).desc())
+
+    statement = statement.offset(skip).limit(limit)
     count = session.exec(count_statement).one()
     items = session.exec(statement).all()
     items_public = [ItemPublic.model_validate(item) for item in items]

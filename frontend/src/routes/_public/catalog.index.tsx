@@ -11,12 +11,34 @@ import {
   sizesReadSizesPublic,
 } from "@/client"
 import { ProductGrid } from "@/components/Catalog/ProductGrid"
+import {
+  FilterCombobox,
+  type FilterOption,
+} from "@/components/Catalog/FilterCombobox"
 import { PendingCatalog } from "@/components/Pending/PendingCatalog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+const SORT_VALUES = ["popular", "recent", "price_asc", "price_desc"] as const
+type SortValue = (typeof SORT_VALUES)[number]
+
+const SORT_OPTIONS: { value: SortValue; label: string }[] = [
+  { value: "recent", label: "Сначала новые" },
+  { value: "popular", label: "Сначала популярные" },
+  { value: "price_asc", label: "Сначала дешёвые" },
+  { value: "price_desc", label: "Сначала дорогие" },
+]
 
 const catalogSearchSchema = z.object({
   category_id: z.string().uuid().optional().catch(undefined),
   size_id: z.string().uuid().optional().catch(undefined),
   brand_id: z.string().uuid().optional().catch(undefined),
+  sort: z.enum(SORT_VALUES).optional().catch(undefined),
 })
 
 type CatalogSearch = z.infer<typeof catalogSearchSchema>
@@ -39,6 +61,7 @@ function getCatalogQueryOptions(search: CatalogSearch) {
           ...(search.category_id ? { category_id: search.category_id } : {}),
           ...(search.size_id ? { size_id: search.size_id } : {}),
           ...(search.brand_id ? { brand_id: search.brand_id } : {}),
+          ...(search.sort ? { sort: search.sort } : {}),
         },
       })
       return res.data!
@@ -133,6 +156,31 @@ function CatalogFilters() {
     return filterSizesByCategoryName(all, selectedCategoryName)
   }, [sizesQuery.data, selectedCategoryName])
 
+  const categoryOptions: FilterOption[] = useMemo(
+    () =>
+      (categoriesQuery.data?.data ?? []).map((c) => ({
+        id: c.id,
+        name: c.name,
+      })),
+    [categoriesQuery.data],
+  )
+
+  const sizeOptions: FilterOption[] = useMemo(
+    () =>
+      visibleSizes.map((s) => ({
+        id: s.id,
+        name: s.name,
+        count: countsBySize.get(s.id) ?? 0,
+      })),
+    [visibleSizes, countsBySize],
+  )
+
+  const brandOptions: FilterOption[] = useMemo(
+    () =>
+      (brandsQuery.data?.data ?? []).map((b) => ({ id: b.id, name: b.name })),
+    [brandsQuery.data],
+  )
+
   const handleCategoryChange = (nextId: string | undefined) => {
     const nextName = nextId
       ? categoriesQuery.data?.data.find((c) => c.id === nextId)?.name
@@ -166,107 +214,61 @@ function CatalogFilters() {
     })
   }
 
+  const handleSortChange = (next: SortValue) => {
+    navigate({
+      search: (prev: CatalogSearch) => ({
+        ...prev,
+        sort: next === "recent" ? undefined : next,
+      }),
+    })
+  }
+
   return (
-    <div className="border-ink flex flex-col gap-5 border-b px-6 py-5">
-      <FilterRow label="Категория">
-        <Chip
-          active={!search.category_id}
-          onClick={() => handleCategoryChange(undefined)}
-        >
-          Все
-        </Chip>
-        {categoriesQuery.data?.data.map((c) => (
-          <Chip
-            key={c.id}
-            active={search.category_id === c.id}
-            onClick={() => handleCategoryChange(c.id)}
-          >
-            {c.name}
-          </Chip>
-        ))}
-      </FilterRow>
+    <div className="border-ink flex flex-wrap items-center gap-3 border-b px-6 py-5">
+      <FilterCombobox
+        label="Категория"
+        options={categoryOptions}
+        value={search.category_id}
+        onChange={handleCategoryChange}
+        searchPlaceholder="Поиск категории…"
+      />
       {visibleSizes.length > 0 && (
-        <FilterRow label="Размер">
-          <Chip
-            active={!search.size_id}
-            onClick={() => handleSizeChange(undefined)}
-          >
-            Все
-          </Chip>
-          {visibleSizes.map((s) => {
-            const count = countsBySize.get(s.id) ?? 0
-            return (
-              <Chip
-                key={s.id}
-                active={search.size_id === s.id}
-                onClick={() => handleSizeChange(s.id)}
-              >
-                {s.name}
-                <span className="mono ml-1 text-[10px] opacity-60">
-                  {count}
-                </span>
-              </Chip>
-            )
-          })}
-        </FilterRow>
+        <FilterCombobox
+          label="Размер"
+          options={sizeOptions}
+          value={search.size_id}
+          onChange={handleSizeChange}
+          searchPlaceholder="Поиск размера…"
+        />
       )}
-      {(brandsQuery.data?.data.length ?? 0) > 0 && (
-        <FilterRow label="Бренд">
-          <Chip
-            active={!search.brand_id}
-            onClick={() => handleBrandChange(undefined)}
-          >
-            Все
-          </Chip>
-          {brandsQuery.data?.data.map((b) => (
-            <Chip
-              key={b.id}
-              active={search.brand_id === b.id}
-              onClick={() => handleBrandChange(b.id)}
-            >
-              {b.name}
-            </Chip>
-          ))}
-        </FilterRow>
-      )}
+      <FilterCombobox
+        label="Бренд"
+        options={brandOptions}
+        value={search.brand_id}
+        onChange={handleBrandChange}
+        searchPlaceholder="Поиск бренда…"
+      />
+      <div className="w-full sm:ml-auto sm:w-72">
+        <Select
+          value={search.sort ?? "recent"}
+          onValueChange={(value) => handleSortChange(value as SortValue)}
+        >
+          <SelectTrigger className="w-full">
+            <span className="text-muted-foreground mr-1.5 shrink-0 text-[11px] tracking-[0.12em] whitespace-nowrap uppercase">
+              Сортировка
+            </span>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
     </div>
-  )
-}
-
-function FilterRow({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <span className="text-muted-foreground w-24 text-[11px] tracking-[0.2em] uppercase">
-        {label}
-      </span>
-      <div className="flex flex-wrap gap-2">{children}</div>
-    </div>
-  )
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`tag ${active ? "solid" : ""} transition-colors`}
-    >
-      {children}
-    </button>
   )
 }
 

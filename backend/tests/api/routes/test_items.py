@@ -11,6 +11,7 @@ from tests.utils.brand import create_random_brand
 from tests.utils.category import create_random_category
 from tests.utils.item import create_random_item
 from tests.utils.size import create_random_size
+from tests.utils.utils import random_lower_string
 
 _PNG_BYTES = (
     b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
@@ -252,6 +253,47 @@ def test_read_items_public_filter_by_category(
     assert body["count"] >= 1
     for entry in body["data"]:
         assert entry["category_id"] == str(item.category_id)
+
+
+def test_read_items_public_sort_modes(client: TestClient, db: Session) -> None:
+    create_random_item(db)
+    for sort in ("popular", "recent", "price_asc", "price_desc"):
+        response = client.get(
+            f"{settings.API_V1_STR}/items/public",
+            params={"sort": sort},
+        )
+        assert response.status_code == 200
+
+
+def test_read_items_public_sort_by_price(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    tag = random_lower_string()
+    cheap_title = f"{tag} cheap"
+    pricey_title = f"{tag} pricey"
+    for title, cost in ((cheap_title, "1.00"), (pricey_title, "9999.00")):
+        response = client.post(
+            f"{settings.API_V1_STR}/items/",
+            headers=superuser_token_headers,
+            json={"title": title, "cost": cost},
+        )
+        assert response.status_code == 200
+
+    response = client.get(
+        f"{settings.API_V1_STR}/items/public",
+        params={"q": tag, "sort": "price_asc"},
+    )
+    assert response.status_code == 200
+    titles = [entry["title"] for entry in response.json()["data"]]
+    assert titles.index(cheap_title) < titles.index(pricey_title)
+
+    response = client.get(
+        f"{settings.API_V1_STR}/items/public",
+        params={"q": tag, "sort": "price_desc"},
+    )
+    assert response.status_code == 200
+    titles = [entry["title"] for entry in response.json()["data"]]
+    assert titles.index(pricey_title) < titles.index(cheap_title)
 
 
 def test_read_item_public_no_auth(client: TestClient, db: Session) -> None:

@@ -2,7 +2,11 @@ import { useQuery } from "@tanstack/react-query"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Check, Copy } from "lucide-react"
 
-import { type ItemPublic, sizesReadSizes } from "@/client"
+import {
+  categoriesReadCategories,
+  type ItemPublic,
+  sizesReadSizes,
+} from "@/client"
 import { Button } from "@/components/ui/button"
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard"
 import { cn } from "@/lib/utils"
@@ -16,6 +20,17 @@ function SizeCell({ id }: { id: string | null | undefined }) {
   })
   if (!id) return <span className="text-muted-foreground italic">—</span>
   const match = sizes.find((s) => s.id === id)
+  return <span>{match?.name ?? id}</span>
+}
+
+function CategoryCell({ id }: { id: string | null | undefined }) {
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => categoriesReadCategories(),
+    select: (res) => res.data?.data ?? [],
+  })
+  if (!id) return <span className="text-muted-foreground italic">—</span>
+  const match = categories.find((c) => c.id === id)
   return <span>{match?.name ?? id}</span>
 }
 
@@ -76,6 +91,7 @@ export const columns: ColumnDef<ItemPublic>[] = [
   {
     accessorKey: "category_id",
     header: "Категория",
+    cell: ({ row }) => <CategoryCell id={row.original.category_id} />,
   },
   {
     accessorKey: "size_id",

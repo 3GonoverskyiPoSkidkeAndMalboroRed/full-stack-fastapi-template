@@ -12,7 +12,10 @@
       "Bash(npx eslint *)",
       "Bash(bash scripts/lint.sh)",
       "Read(//tmp/**)",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(mv openapi.json frontend/)",
+      "Bash(npm -w frontend run generate-client)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)"
     ]
   }
 }
