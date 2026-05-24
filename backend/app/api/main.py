@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    brands,
     cart,
     categories,
     items,
@@ -21,6 +22,7 @@ api_router.include_router(utils.router)
 api_router.include_router(items.router)
 api_router.include_router(categories.router)
 api_router.include_router(sizes.router)
+api_router.include_router(brands.router)
 api_router.include_router(cart.router)
 api_router.include_router(wishlist.router)
 api_router.include_router(orders.router)

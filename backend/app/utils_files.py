@@ -33,7 +33,7 @@ def _photo_root() -> Path:
 
 
 def build_item_dir(item: Item) -> Path:
-    brand_slug = slugify(item.brand or "")
+    brand_slug = slugify(item.brand.name if item.brand else "")
     title_slug = slugify(item.title) or "item"
     name_parts = [p for p in (brand_slug, title_slug) if p] or [title_slug]
     name = f"{'_'.join(name_parts)}_{_short_uuid()}"

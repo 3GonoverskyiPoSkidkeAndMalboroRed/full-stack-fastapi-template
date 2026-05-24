@@ -4,6 +4,7 @@ import { Suspense, useMemo } from "react"
 import { z } from "zod"
 
 import {
+  brandsReadBrandsPublic,
   categoriesReadCategoriesPublic,
   itemsReadItemsPublic,
   sizesReadSizeCountsPublic,
@@ -15,6 +16,7 @@ import { PendingCatalog } from "@/components/Pending/PendingCatalog"
 const catalogSearchSchema = z.object({
   category_id: z.string().uuid().optional().catch(undefined),
   size_id: z.string().uuid().optional().catch(undefined),
+  brand_id: z.string().uuid().optional().catch(undefined),
 })
 
 type CatalogSearch = z.infer<typeof catalogSearchSchema>
@@ -36,6 +38,7 @@ function getCatalogQueryOptions(search: CatalogSearch) {
           limit: 100,
           ...(search.category_id ? { category_id: search.category_id } : {}),
           ...(search.size_id ? { size_id: search.size_id } : {}),
+          ...(search.brand_id ? { brand_id: search.brand_id } : {}),
         },
       })
       return res.data!
@@ -95,6 +98,10 @@ function CatalogFilters() {
     queryKey: ["sizes", "public"],
     queryFn: async () => (await sizesReadSizesPublic()).data!,
   })
+  const brandsQuery = useQuery({
+    queryKey: ["brands", "public"],
+    queryFn: async () => (await brandsReadBrandsPublic()).data!,
+  })
   const sizeCountsQuery = useQuery({
     queryKey: ["sizes", "counts", search.category_id ?? null],
     queryFn: async () =>
@@ -153,6 +160,12 @@ function CatalogFilters() {
     })
   }
 
+  const handleBrandChange = (nextId: string | undefined) => {
+    navigate({
+      search: (prev: CatalogSearch) => ({ ...prev, brand_id: nextId }),
+    })
+  }
+
   return (
     <div className="border-ink flex flex-col gap-5 border-b px-6 py-5">
       <FilterRow label="Категория">
@@ -195,6 +208,25 @@ function CatalogFilters() {
               </Chip>
             )
           })}
+        </FilterRow>
+      )}
+      {(brandsQuery.data?.data.length ?? 0) > 0 && (
+        <FilterRow label="Бренд">
+          <Chip
+            active={!search.brand_id}
+            onClick={() => handleBrandChange(undefined)}
+          >
+            Все
+          </Chip>
+          {brandsQuery.data?.data.map((b) => (
+            <Chip
+              key={b.id}
+              active={search.brand_id === b.id}
+              onClick={() => handleBrandChange(b.id)}
+            >
+              {b.name}
+            </Chip>
+          ))}
         </FilterRow>
       )}
     </div>

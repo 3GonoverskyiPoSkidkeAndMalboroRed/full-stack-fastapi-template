@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
 from app.models import (
+    Brand,
     CartItem,
     Category,
     Item,
@@ -34,6 +35,7 @@ def db() -> Generator[Session, None, None]:
             Item,
             Size,
             Category,
+            Brand,
             User,
         ):
             session.execute(delete(model))

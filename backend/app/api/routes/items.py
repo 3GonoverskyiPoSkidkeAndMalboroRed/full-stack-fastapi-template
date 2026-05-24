@@ -6,6 +6,7 @@ from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
+    Brand,
     Category,
     Item,
     ItemCreate,
@@ -31,6 +32,7 @@ def read_items_public(
     limit: int = 100,
     category_id: uuid.UUID | None = None,
     size_id: uuid.UUID | None = None,
+    brand_id: uuid.UUID | None = None,
     q: str | None = None,
 ) -> Any:
     """
@@ -46,6 +48,9 @@ def read_items_public(
     if size_id is not None:
         count_statement = count_statement.where(Item.size_id == size_id)
         statement = statement.where(Item.size_id == size_id)
+    if brand_id is not None:
+        count_statement = count_statement.where(Item.brand_id == brand_id)
+        statement = statement.where(Item.brand_id == brand_id)
     if q:
         pattern = f"%{q.strip()}%"
         count_statement = count_statement.where(col(Item.title).ilike(pattern))
@@ -130,6 +135,10 @@ def create_item(
         size = session.get(Size, item_in.size_id)
         if not size:
             raise HTTPException(status_code=404, detail="Size not found")
+    if item_in.brand_id is not None:
+        brand = session.get(Brand, item_in.brand_id)
+        if not brand:
+            raise HTTPException(status_code=404, detail="Brand not found")
     item = Item.model_validate(item_in, update={"owner_id": current_user.id})
     session.add(item)
     session.commit()
@@ -162,6 +171,10 @@ def update_item(
         size = session.get(Size, update_dict["size_id"])
         if not size:
             raise HTTPException(status_code=404, detail="Size not found")
+    if "brand_id" in update_dict and update_dict["brand_id"] is not None:
+        brand = session.get(Brand, update_dict["brand_id"])
+        if not brand:
+            raise HTTPException(status_code=404, detail="Brand not found")
     item.sqlmodel_update(update_dict)
     session.add(item)
     session.commit()

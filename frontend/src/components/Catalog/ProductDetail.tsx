@@ -56,7 +56,7 @@ export function ProductDetail({ item }: ProductDetailProps) {
           </span>
           {item.brand && (
             <span className="mono text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
-              {item.brand}
+              {item.brand.name}
             </span>
           )}
         </div>

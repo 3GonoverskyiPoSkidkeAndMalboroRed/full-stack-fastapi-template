@@ -85,6 +85,11 @@ export const columns: ColumnDef<ItemPublic>[] = [
   {
     accessorKey: "brand",
     header: "Бренд",
+    cell: ({ row }) => {
+      const brand = row.original.brand
+      if (!brand) return <span className="text-muted-foreground italic">—</span>
+      return <span>{brand.name}</span>
+    },
   },
   {
     accessorKey: "cost",

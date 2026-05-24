@@ -41,6 +41,54 @@ export type BodyLoginLoginAccessToken = {
 };
 
 /**
+ * BrandCreate
+ */
+export type BrandCreate = {
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * BrandPublic
+ */
+export type BrandPublic = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Id
+     */
+    id: string;
+};
+
+/**
+ * BrandUpdate
+ */
+export type BrandUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+};
+
+/**
+ * BrandsPublic
+ */
+export type BrandsPublic = {
+    /**
+     * Data
+     */
+    data: Array<BrandPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * CartItemCreate
  */
 export type CartItemCreate = {
@@ -180,9 +228,9 @@ export type ItemCreate = {
      */
     size_id?: string | null;
     /**
-     * Brand
+     * Brand Id
      */
-    brand?: string | null;
+    brand_id?: string | null;
     /**
      * Category Id
      */
@@ -218,9 +266,9 @@ export type ItemPublic = {
      */
     size_id?: string | null;
     /**
-     * Brand
+     * Brand Id
      */
-    brand?: string | null;
+    brand_id?: string | null;
     /**
      * Category Id
      */
@@ -249,6 +297,7 @@ export type ItemPublic = {
      * Created At
      */
     created_at?: string | null;
+    brand?: BrandPublic | null;
 };
 
 /**
@@ -268,9 +317,9 @@ export type ItemUpdate = {
      */
     size_id?: string | null;
     /**
-     * Brand
+     * Brand Id
      */
-    brand?: string | null;
+    brand_id?: string | null;
     /**
      * Cost
      */
@@ -1320,6 +1369,10 @@ export type ItemsReadItemsPublicData = {
          */
         size_id?: string | null;
         /**
+         * Brand Id
+         */
+        brand_id?: string | null;
+        /**
          * Q
          */
         q?: string | null;
@@ -1984,6 +2037,189 @@ export type SizesUpdateSizeResponses = {
 };
 
 export type SizesUpdateSizeResponse = SizesUpdateSizeResponses[keyof SizesUpdateSizeResponses];
+
+export type BrandsReadBrandsPublicData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/brands/public';
+};
+
+export type BrandsReadBrandsPublicErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BrandsReadBrandsPublicError = BrandsReadBrandsPublicErrors[keyof BrandsReadBrandsPublicErrors];
+
+export type BrandsReadBrandsPublicResponses = {
+    /**
+     * Successful Response
+     */
+    200: BrandsPublic;
+};
+
+export type BrandsReadBrandsPublicResponse = BrandsReadBrandsPublicResponses[keyof BrandsReadBrandsPublicResponses];
+
+export type BrandsReadBrandsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/brands/';
+};
+
+export type BrandsReadBrandsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BrandsReadBrandsError = BrandsReadBrandsErrors[keyof BrandsReadBrandsErrors];
+
+export type BrandsReadBrandsResponses = {
+    /**
+     * Successful Response
+     */
+    200: BrandsPublic;
+};
+
+export type BrandsReadBrandsResponse = BrandsReadBrandsResponses[keyof BrandsReadBrandsResponses];
+
+export type BrandsCreateBrandData = {
+    body: BrandCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/brands/';
+};
+
+export type BrandsCreateBrandErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BrandsCreateBrandError = BrandsCreateBrandErrors[keyof BrandsCreateBrandErrors];
+
+export type BrandsCreateBrandResponses = {
+    /**
+     * Successful Response
+     */
+    200: BrandPublic;
+};
+
+export type BrandsCreateBrandResponse = BrandsCreateBrandResponses[keyof BrandsCreateBrandResponses];
+
+export type BrandsDeleteBrandData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/brands/{id}';
+};
+
+export type BrandsDeleteBrandErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BrandsDeleteBrandError = BrandsDeleteBrandErrors[keyof BrandsDeleteBrandErrors];
+
+export type BrandsDeleteBrandResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type BrandsDeleteBrandResponse = BrandsDeleteBrandResponses[keyof BrandsDeleteBrandResponses];
+
+export type BrandsReadBrandData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/brands/{id}';
+};
+
+export type BrandsReadBrandErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BrandsReadBrandError = BrandsReadBrandErrors[keyof BrandsReadBrandErrors];
+
+export type BrandsReadBrandResponses = {
+    /**
+     * Successful Response
+     */
+    200: BrandPublic;
+};
+
+export type BrandsReadBrandResponse = BrandsReadBrandResponses[keyof BrandsReadBrandResponses];
+
+export type BrandsUpdateBrandData = {
+    body: BrandUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/brands/{id}';
+};
+
+export type BrandsUpdateBrandErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BrandsUpdateBrandError = BrandsUpdateBrandErrors[keyof BrandsUpdateBrandErrors];
+
+export type BrandsUpdateBrandResponses = {
+    /**
+     * Successful Response
+     */
+    200: BrandPublic;
+};
+
+export type BrandsUpdateBrandResponse = BrandsUpdateBrandResponses[keyof BrandsUpdateBrandResponses];
 
 export type CartClearCartData = {
     body?: never;

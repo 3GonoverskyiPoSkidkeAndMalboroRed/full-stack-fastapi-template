@@ -6,6 +6,7 @@ from sqlmodel import Session, create_engine, func, select
 from app import crud
 from app.core.config import settings
 from app.models import (
+    Brand,
     Category,
     CategoryCreate,
     Item,
@@ -45,6 +46,7 @@ def init_db(session: Session) -> None:
 
     _seed_categories(session)
     _seed_sizes(session)
+    _seed_brands(session)
     _seed_items(session, user.id)
 
 
@@ -157,6 +159,18 @@ def _seed_sizes(session: Session) -> None:
         session.commit()
 
 
+def _seed_brands(session: Session) -> None:
+    seed_brand_names = list(dict.fromkeys(str(item["brand"]) for item in SEED_ITEMS))
+    added = False
+    for name in seed_brand_names:
+        existing = session.exec(select(Brand).where(Brand.name == name)).first()
+        if existing is None:
+            session.add(Brand(name=name))
+            added = True
+    if added:
+        session.commit()
+
+
 def _seed_items(session: Session, owner_id: uuid.UUID) -> None:
     existing_count = session.exec(select(func.count()).select_from(Item)).one()
     if existing_count > 0:
@@ -167,12 +181,13 @@ def _seed_items(session: Session, owner_id: uuid.UUID) -> None:
             session=session, name=str(item_data["category"])
         )
         size = crud.get_size_by_name(session=session, name=str(item_data["size_name"]))
+        brand = crud.get_brand_by_name(session=session, name=str(item_data["brand"]))
         cost_value = item_data["cost"]
         stock_value = item_data.get("stock", 0)
         item_in = ItemCreate(
             title=str(item_data["title"]),
             description=str(item_data["description"]),
-            brand=str(item_data["brand"]),
+            brand_id=(brand.id if brand else None),
             cost=cost_value if isinstance(cost_value, Decimal) else None,
             category_id=(category.id if category else None),
             size_id=(size.id if size else None),

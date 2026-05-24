@@ -11,6 +11,7 @@ import {
   type ItemUpdate,
   itemsUpdateItem,
 } from "@/client"
+import { BrandCombobox } from "@/components/Common/BrandCombobox"
 import { SizeCombobox } from "@/components/Common/SizeCombobox"
 import { ImageUploader } from "@/components/Items/ImageUploader"
 import { Button } from "@/components/ui/button"
@@ -48,7 +49,7 @@ const formSchema = z.object({
   title: z.string().min(1, { message: "Введите название" }),
   description: z.string().optional(),
   size_id: z.string().optional(),
-  brand: z.string().optional(),
+  brand_id: z.string().optional(),
   cost: z.string().optional(),
   category_id: z.string().optional(),
   stock: z
@@ -84,7 +85,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
       title: item.title,
       description: item.description ?? undefined,
       size_id: item.size_id ?? undefined,
-      brand: item.brand ?? undefined,
+      brand_id: item.brand_id ?? undefined,
       cost: item.cost ?? undefined,
       category_id: item.category_id ?? undefined,
       stock: String(item.stock ?? 0),
@@ -107,7 +108,12 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
 
   const onSubmit = (data: FormData) => {
     const payload: ItemUpdate = {
-      ...data,
+      title: data.title,
+      description: data.description || undefined,
+      size_id: data.size_id || undefined,
+      brand_id: data.brand_id || undefined,
+      cost: data.cost || undefined,
+      category_id: data.category_id || undefined,
       stock:
         data.stock !== undefined && data.stock !== ""
           ? Number.parseInt(data.stock, 10)
@@ -190,12 +196,15 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
 
               <FormField
                 control={form.control}
-                name="brand"
+                name="brand_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Бренд</FormLabel>
                     <FormControl>
-                      <Input placeholder="Бренд" type="text" {...field} />
+                      <BrandCombobox
+                        value={field.value}
+                        onChange={(id) => field.onChange(id ?? "")}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

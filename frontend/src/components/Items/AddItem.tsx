@@ -10,6 +10,7 @@ import {
   type ItemCreate,
   itemsCreateItem,
 } from "@/client"
+import { BrandCombobox } from "@/components/Common/BrandCombobox"
 import { SizeCombobox } from "@/components/Common/SizeCombobox"
 import { ImageUploader } from "@/components/Items/ImageUploader"
 import { Button } from "@/components/ui/button"
@@ -47,7 +48,7 @@ const formSchema = z.object({
   title: z.string().min(1, { message: "Введите название" }),
   description: z.string().optional(),
   size_id: z.string().optional(),
-  brand: z.string().optional(),
+  brand_id: z.string().optional(),
   cost: z.string().optional(),
   category_id: z.string().optional(),
   stock: z
@@ -80,7 +81,7 @@ const AddItem = () => {
       title: "",
       description: "",
       size_id: "",
-      brand: "",
+      brand_id: "",
       cost: "",
       category_id: "",
       stock: "1",
@@ -114,7 +115,12 @@ const AddItem = () => {
 
   const onSubmit = (data: FormData) => {
     const payload: ItemCreate = {
-      ...data,
+      title: data.title,
+      description: data.description || undefined,
+      size_id: data.size_id || undefined,
+      brand_id: data.brand_id || undefined,
+      cost: data.cost || undefined,
+      category_id: data.category_id || undefined,
       stock: data.stock ? Number.parseInt(data.stock, 10) : 0,
     }
     mutation.mutate(payload)
@@ -214,12 +220,15 @@ const AddItem = () => {
 
                 <FormField
                   control={form.control}
-                  name="brand"
+                  name="brand_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Бренд</FormLabel>
                       <FormControl>
-                        <Input placeholder="Бренд" type="text" {...field} />
+                        <BrandCombobox
+                          value={field.value}
+                          onChange={(id) => field.onChange(id ?? "")}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

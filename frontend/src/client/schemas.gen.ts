@@ -73,6 +73,78 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const BrandCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'BrandCreate'
+} as const;
+
+export const BrandPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id'],
+    title: 'BrandPublic'
+} as const;
+
+export const BrandUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        }
+    },
+    type: 'object',
+    title: 'BrandUpdate'
+} as const;
+
+export const BrandsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/BrandPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'BrandsPublic'
+} as const;
+
 export const CartItemCreateSchema = {
     properties: {
         item_id: {
@@ -296,17 +368,17 @@ export const ItemCreateSchema = {
             ],
             title: 'Size Id'
         },
-        brand: {
+        brand_id: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 255
+                    format: 'uuid'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Brand'
+            title: 'Brand Id'
         },
         category_id: {
             anyOf: [
@@ -386,17 +458,17 @@ export const ItemPublicSchema = {
             ],
             title: 'Size Id'
         },
-        brand: {
+        brand_id: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 255
+                    format: 'uuid'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Brand'
+            title: 'Brand Id'
         },
         category_id: {
             anyOf: [
@@ -456,6 +528,16 @@ export const ItemPublicSchema = {
                 }
             ],
             title: 'Created At'
+        },
+        brand: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/BrandPublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
@@ -502,17 +584,17 @@ export const ItemUpdateSchema = {
             ],
             title: 'Size Id'
         },
-        brand: {
+        brand_id: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 255
+                    format: 'uuid'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Brand'
+            title: 'Brand Id'
         },
         cost: {
             anyOf: [

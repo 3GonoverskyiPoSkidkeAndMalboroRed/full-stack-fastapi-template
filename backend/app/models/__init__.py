@@ -1,5 +1,12 @@
 from sqlmodel import SQLModel
 
+from app.models.brand import (
+    Brand,
+    BrandCreate,
+    BrandPublic,
+    BrandsPublic,
+    BrandUpdate,
+)
 from app.models.cart import (
     CartItem,
     CartItemBase,
@@ -68,6 +75,11 @@ from app.models.wishlist import (
 )
 
 __all__ = [
+    "Brand",
+    "BrandCreate",
+    "BrandPublic",
+    "BrandUpdate",
+    "BrandsPublic",
     "CartItem",
     "CartItemBase",
     "CartItemCreate",

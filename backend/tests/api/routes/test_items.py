@@ -7,6 +7,7 @@ from sqlmodel import Session
 
 from app.core.config import settings
 from app.models import Item
+from tests.utils.brand import create_random_brand
 from tests.utils.category import create_random_category
 from tests.utils.item import create_random_item
 from tests.utils.size import create_random_size
@@ -181,11 +182,12 @@ def test_create_item_with_new_fields(
 ) -> None:
     category = create_random_category(db)
     size = create_random_size(db)
+    brand = create_random_brand(db)
     data = {
         "title": "Foo",
         "description": "Fighters",
         "size_id": str(size.id),
-        "brand": "TestBrand",
+        "brand_id": str(brand.id),
         "cost": "19.99",
         "category_id": str(category.id),
     }
@@ -198,7 +200,8 @@ def test_create_item_with_new_fields(
     content = response.json()
     assert content["title"] == data["title"]
     assert content["size_id"] == data["size_id"]
-    assert content["brand"] == data["brand"]
+    assert content["brand_id"] == data["brand_id"]
+    assert content["brand"]["name"] == brand.name
     assert content["cost"] == data["cost"]
     assert content["category_id"] == data["category_id"]
 

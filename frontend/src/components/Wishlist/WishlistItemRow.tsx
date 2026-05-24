@@ -62,7 +62,7 @@ export function WishlistItemRow({ wishlistItem }: WishlistItemRowProps) {
       <div className="flex-1 space-y-1">
         {item?.brand && (
           <span className="text-muted-foreground text-xs uppercase">
-            {item.brand}
+            {item.brand.name}
           </span>
         )}
         <Link

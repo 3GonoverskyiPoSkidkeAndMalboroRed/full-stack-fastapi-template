@@ -7,9 +7,11 @@ from sqlalchemy import Column, DateTime, Numeric
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
+from app.models.brand import BrandPublic
 from app.models.user import get_datetime_utc
 
 if TYPE_CHECKING:
+    from app.models.brand import Brand
     from app.models.cart import CartItem
     from app.models.category import Category
     from app.models.order_item import OrderItem
@@ -25,7 +27,9 @@ class ItemBase(SQLModel):
     size_id: uuid.UUID | None = Field(
         default=None, foreign_key="size.id", ondelete="SET NULL"
     )
-    brand: str | None = Field(default=None, max_length=255)
+    brand_id: uuid.UUID | None = Field(
+        default=None, foreign_key="brand.id", ondelete="SET NULL"
+    )
     category_id: uuid.UUID | None = Field(default=None, foreign_key="category.id")
     images: list[str] = Field(
         default_factory=list,
@@ -46,7 +50,9 @@ class ItemUpdate(SQLModel):
     size_id: uuid.UUID | None = Field(
         default=None, foreign_key="size.id", ondelete="SET NULL"
     )
-    brand: str | None = Field(default=None, max_length=255)
+    brand_id: uuid.UUID | None = Field(
+        default=None, foreign_key="brand.id", ondelete="SET NULL"
+    )
     cost: Decimal | None = Field(default=None)
     category_id: uuid.UUID | None = Field(default=None, foreign_key="category.id")
     stock: int | None = Field(default=None, ge=0)
@@ -69,6 +75,7 @@ class Item(ItemBase, table=True):
     owner: Optional["User"] = Relationship(back_populates="items")
     category: Optional["Category"] = Relationship(back_populates="items")
     size: Optional["Size"] = Relationship(back_populates="items")
+    brand: Optional["Brand"] = Relationship(back_populates="items")
     cart_items: list["CartItem"] = Relationship(
         back_populates="item", cascade_delete=True
     )
@@ -84,6 +91,7 @@ class ItemPublic(ItemBase):
     owner_id: uuid.UUID
     cost: Decimal | None = None
     created_at: datetime | None = None
+    brand: BrandPublic | None = None
 
 
 class ItemsPublic(SQLModel):

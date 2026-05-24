@@ -8,6 +8,9 @@ from sqlmodel import Session, col, delete, func, select
 
 from app.core.security import get_password_hash, verify_password
 from app.models import (
+    Brand,
+    BrandCreate,
+    BrandUpdate,
     CartItem,
     CartItemCreate,
     Category,
@@ -170,6 +173,28 @@ def update_size(*, session: Session, db_size: Size, size_in: SizeUpdate) -> Size
     session.commit()
     session.refresh(db_size)
     return db_size
+
+
+def create_brand(*, session: Session, brand_in: BrandCreate) -> Brand:
+    db_obj = Brand.model_validate(brand_in)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_brand_by_name(*, session: Session, name: str) -> Brand | None:
+    statement = select(Brand).where(Brand.name == name)
+    return session.exec(statement).first()
+
+
+def update_brand(*, session: Session, db_brand: Brand, brand_in: BrandUpdate) -> Brand:
+    brand_data = brand_in.model_dump(exclude_unset=True)
+    db_brand.sqlmodel_update(brand_data)
+    session.add(db_brand)
+    session.commit()
+    session.refresh(db_brand)
+    return db_brand
 
 
 # Cart
