@@ -55,7 +55,7 @@ function HeroSection() {
               Открыть каталог
             </Link>
             <span className="mono text-muted-foreground text-[11px] tracking-[0.06em] uppercase">
-              ДРОП №1
+              10 SKU · ДРОП №04
             </span>
           </div>
         </div>
@@ -77,11 +77,11 @@ function ShopSection() {
           <div className="mono text-muted-foreground mb-3 text-[11px] tracking-[0.2em] uppercase">
             Раздел / 02 · Магазин
           </div>
-          <h2>Ре́ Spring 2026</h2>
+          <h2>Лето 2026</h2>
         </div>
         <div className="flex flex-col items-end gap-1">
           <span className="text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
-            Дроп №04
+            Дроп №1
           </span>
           <Suspense fallback={<span className="mono text-[12px]">…</span>}>
             <ShopMeta />
@@ -174,7 +174,7 @@ function HomeProducts() {
 
 function SeeAllHint() {
   const { data } = useSuspenseQuery(getHomeItemsQueryOptions())
-  return <span className="hint">{data.count} ПОЗИЦИЙ · ДРОП №1</span>
+  return <span className="hint">{data.count} ПОЗИЦИЙ · ДРОП №04</span>
 }
 
 function getHomeItemsQueryOptions() {
