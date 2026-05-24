@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { useState } from "react"
 
 import {
   categoriesReadCategoriesPublic,
@@ -17,7 +16,6 @@ interface ProductDetailProps {
 }
 
 export function ProductDetail({ item }: ProductDetailProps) {
-  const [quantity, setQuantity] = useState(1)
   const stock = item.stock ?? 0
   const outOfStock = stock <= 0
 
@@ -101,37 +99,10 @@ export function ProductDetail({ item }: ProductDetailProps) {
           <p className="text-[15px] leading-[1.5]">{item.description}</p>
         )}
 
-        {!outOfStock && (
-          <div className="flex items-center gap-4">
-            <span className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
-              Количество
-            </span>
-            <div className="border-ink inline-flex items-center border">
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                disabled={quantity <= 1}
-                className="hover:bg-ink hover:text-paper h-9 w-9 transition-colors disabled:opacity-30"
-              >
-                −
-              </button>
-              <span className="mono w-12 text-center text-sm">{quantity}</span>
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
-                disabled={quantity >= stock}
-                className="hover:bg-ink hover:text-paper h-9 w-9 transition-colors disabled:opacity-30"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        )}
-
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <AddToCartButton
             itemId={item.id}
-            quantity={quantity}
+            quantity={1}
             stock={stock}
             disabled={outOfStock}
           />

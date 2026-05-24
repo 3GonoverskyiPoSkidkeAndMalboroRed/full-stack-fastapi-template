@@ -55,7 +55,7 @@ function HeroSection() {
               Открыть каталог
             </Link>
             <span className="mono text-muted-foreground text-[11px] tracking-[0.06em] uppercase">
-              10 SKU · ДРОП №04
+              ДРОП №1
             </span>
           </div>
         </div>
@@ -162,7 +162,7 @@ function ShopMeta() {
   const { data } = useSuspenseQuery(getHomeItemsQueryOptions())
   return (
     <span className="mono text-[12px] tracking-[0.08em]">
-      {Math.min(10, data.data.length)} / {data.count} SKU
+      {Math.min(10, data.data.length)} / {data.count} товаров
     </span>
   )
 }
@@ -174,7 +174,7 @@ function HomeProducts() {
 
 function SeeAllHint() {
   const { data } = useSuspenseQuery(getHomeItemsQueryOptions())
-  return <span className="hint">{data.count} ПОЗИЦИЙ · ДРОП №04</span>
+  return <span className="hint">{data.count} ПОЗИЦИЙ · ДРОП №1</span>
 }
 
 function getHomeItemsQueryOptions() {
