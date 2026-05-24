@@ -61,7 +61,7 @@ export function ProductCard({ item, index }: ProductCardProps) {
             outOfStock ? "text-[color:var(--accent)]" : "text-ink"
           }`}
         >
-          {outOfStock ? "Sold out" : "In stock"}
+          {outOfStock ? "Нет в наличии" : "В наличии"}
         </span>
       </div>
     </article>

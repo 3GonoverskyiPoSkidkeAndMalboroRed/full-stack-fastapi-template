@@ -52,7 +52,7 @@ export function ProductDetail({ item }: ProductDetailProps) {
       <div className="flex flex-col gap-6 p-7 lg:p-8">
         <div className="flex items-center justify-between gap-4">
           <span className={`tag ${outOfStock ? "" : "solid"}`}>
-            {outOfStock ? "Sold out" : "In stock"}
+            {outOfStock ? "Нет в наличии" : "В наличии"}
           </span>
           {item.brand && (
             <span className="mono text-muted-foreground text-[11px] tracking-[0.18em] uppercase">

@@ -13,14 +13,14 @@ const PendingItems = () => (
     <TableHeader>
       <TableRow>
         <TableHead>ID</TableHead>
-        <TableHead>Title</TableHead>
-        <TableHead>Description</TableHead>
-        <TableHead>Category</TableHead>
-        <TableHead>Size</TableHead>
-        <TableHead>Brand</TableHead>
-        <TableHead>Cost</TableHead>
+        <TableHead>Название</TableHead>
+        <TableHead>Описание</TableHead>
+        <TableHead>Категория</TableHead>
+        <TableHead>Размер</TableHead>
+        <TableHead>Бренд</TableHead>
+        <TableHead>Цена</TableHead>
         <TableHead>
-          <span className="sr-only">Actions</span>
+          <span className="sr-only">Действия</span>
         </TableHead>
       </TableRow>
     </TableHeader>
