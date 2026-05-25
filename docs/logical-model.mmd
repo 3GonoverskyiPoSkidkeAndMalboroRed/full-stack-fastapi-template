@@ -1,0 +1,98 @@
+%%{init: {"layout": "elk"}}%%
+%% Логическая модель: сущности с атрибутами и обобщёнными типами
+erDiagram
+    USER {
+        UUID id PK
+        string email UK
+        string full_name
+        string phone
+        string delivery_address
+        boolean is_active
+        boolean is_superuser
+        string hashed_password
+        datetime created_at
+    }
+    ITEM {
+        UUID id PK
+        UUID owner_id FK
+        UUID category_id FK
+        UUID size_id FK
+        UUID brand_id FK
+        string title
+        string description
+        integer stock
+        decimal cost
+        json images
+        datetime created_at
+    }
+    CATEGORY {
+        UUID id PK
+        string name UK
+    }
+    SIZE {
+        UUID id PK
+        string name UK
+    }
+    BRAND {
+        UUID id PK
+        string name UK
+    }
+    ORDER {
+        UUID id PK
+        UUID user_id FK
+        enum status
+        string recipient_name
+        string phone
+        string address
+        string comment
+        decimal total
+        string card_last4
+        string cancellation_reason
+        datetime paid_at
+        datetime received_at
+        datetime refunded_at
+        datetime created_at
+    }
+    ORDER_ITEM {
+        UUID id PK
+        UUID order_id FK
+        UUID item_id FK
+        string title_snapshot
+        decimal price_snapshot
+        integer quantity
+    }
+    CART_ITEM {
+        UUID id PK
+        UUID user_id FK
+        UUID item_id FK
+        integer quantity
+        datetime created_at
+    }
+    WISHLIST_ITEM {
+        UUID id PK
+        UUID user_id FK
+        UUID item_id FK
+        datetime created_at
+    }
+    PAYMENT_CARD {
+        UUID id PK
+        UUID user_id FK
+        string last4
+        integer exp_month
+        integer exp_year
+        string cardholder_name
+        datetime created_at
+    }
+
+    USER ||--o{ ITEM : "владеет"
+    USER ||--o{ ORDER : "оформляет"
+    USER ||--o{ CART_ITEM : "имеет"
+    USER ||--o{ WISHLIST_ITEM : "имеет"
+    USER ||--o{ PAYMENT_CARD : "сохраняет"
+    CATEGORY ||--o{ ITEM : "объединяет"
+    SIZE ||--o{ ITEM : "характеризует"
+    BRAND ||--o{ ITEM : "выпускает"
+    ITEM ||--o{ CART_ITEM : "включён в"
+    ITEM ||--o{ WISHLIST_ITEM : "включён в"
+    ITEM ||--o{ ORDER_ITEM : "фигурирует в"
+    ORDER ||--|{ ORDER_ITEM : "состоит из"

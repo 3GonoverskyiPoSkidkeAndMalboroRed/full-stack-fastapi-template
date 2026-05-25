@@ -1,0 +1,57 @@
+%%{init: {"layout": "elk"}}%%
+%% Концептуальная модель интернет-магазина (нотация Чена)
+%% Прямоугольники — сущности, ромбы — связи (действия), метки на линиях — мощность
+flowchart LR
+    %% --- Сущности ---
+    CUSTOMER["Покупатель"]
+    PRODUCT["Товар"]
+    ORDER["Заказ"]
+    CARD["Платёжная карта"]
+    CATEGORY["Категория"]
+    BRAND["Бренд"]
+    SIZE["Размер"]
+
+    %% --- Связи (ромбы) ---
+    R_ORDER{"оформляет"}
+    R_CARD{"сохраняет"}
+    R_OWN{"владеет"}
+    R_CART{"кладёт в корзину"}
+    R_WISH{"добавляет в избранное"}
+    R_CONTAIN{"содержит"}
+    R_CAT{"объединяет"}
+    R_BRAND{"выпускает"}
+    R_SIZE{"характеризует"}
+
+    %% --- Соединения с мощностью ---
+    CUSTOMER ---|1| R_ORDER
+    R_ORDER ---|N| ORDER
+
+    CUSTOMER ---|1| R_CARD
+    R_CARD ---|N| CARD
+
+    CUSTOMER ---|1| R_OWN
+    R_OWN ---|N| PRODUCT
+
+    CUSTOMER ---|M| R_CART
+    R_CART ---|N| PRODUCT
+
+    CUSTOMER ---|M| R_WISH
+    R_WISH ---|N| PRODUCT
+
+    ORDER ---|M| R_CONTAIN
+    R_CONTAIN ---|N| PRODUCT
+
+    CATEGORY ---|1| R_CAT
+    R_CAT ---|N| PRODUCT
+
+    BRAND ---|1| R_BRAND
+    R_BRAND ---|N| PRODUCT
+
+    SIZE ---|1| R_SIZE
+    R_SIZE ---|N| PRODUCT
+
+    %% --- Стили ---
+    classDef entity fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#0d2137;
+    classDef rel fill:#fff8e1,stroke:#f9a825,stroke-width:1px,color:#3e2c00;
+    class CUSTOMER,PRODUCT,ORDER,CARD,CATEGORY,BRAND,SIZE entity;
+    class R_ORDER,R_CARD,R_OWN,R_CART,R_WISH,R_CONTAIN,R_CAT,R_BRAND,R_SIZE rel;

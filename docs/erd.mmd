@@ -1,0 +1,98 @@
+%%{init: {"layout": "elk"}}%%
+%% ERD: физическая схема PostgreSQL — точные имена таблиц, типы и ограничения
+erDiagram
+    user {
+        uuid id PK
+        varchar(255) email UK "indexed, not null"
+        boolean is_active "default true"
+        boolean is_superuser "default false"
+        varchar(255) full_name "nullable"
+        varchar(32) phone "nullable"
+        varchar(500) delivery_address "nullable"
+        varchar hashed_password "not null"
+        timestamptz created_at "default now()"
+    }
+    item {
+        uuid id PK
+        uuid owner_id FK "not null, ON DELETE CASCADE"
+        uuid category_id FK "nullable"
+        uuid size_id FK "nullable, ON DELETE SET NULL"
+        uuid brand_id FK "nullable, ON DELETE SET NULL"
+        varchar(255) title "not null"
+        varchar(255) description "nullable"
+        integer stock "default 0, >= 0"
+        numeric cost "numeric(8,2), nullable"
+        jsonb images "default '[]'"
+        timestamptz created_at "default now()"
+    }
+    category {
+        uuid id PK
+        varchar(255) name UK "indexed, not null"
+    }
+    size {
+        uuid id PK
+        varchar(255) name UK "indexed, not null"
+    }
+    brand {
+        uuid id PK
+        varchar(255) name UK "indexed, not null"
+    }
+    shop_order {
+        uuid id PK
+        uuid user_id FK "not null, indexed, ON DELETE CASCADE"
+        enum status "NEW|PROCESSED|PAID|SHIPPED|DELIVERED|RECEIVED|REFUNDED|CANCELLED, default NEW, indexed"
+        varchar(255) recipient_name "not null"
+        varchar(32) phone "not null"
+        varchar(1024) address "not null"
+        varchar(2000) comment "nullable"
+        numeric total "numeric(10,2), not null, default 0"
+        varchar(4) card_last4 "nullable"
+        varchar(500) cancellation_reason "nullable"
+        timestamptz paid_at "nullable"
+        timestamptz received_at "nullable"
+        timestamptz refunded_at "nullable"
+        timestamptz created_at "default now()"
+    }
+    orderitem {
+        uuid id PK
+        uuid order_id FK "not null, indexed, ON DELETE CASCADE"
+        uuid item_id FK "nullable, indexed, ON DELETE SET NULL"
+        varchar(255) title_snapshot "not null"
+        numeric price_snapshot "numeric(8,2), not null"
+        integer quantity "default 1, >= 1"
+    }
+    cartitem {
+        uuid id PK
+        uuid user_id FK "not null, indexed, ON DELETE CASCADE"
+        uuid item_id FK "not null, indexed, ON DELETE CASCADE"
+        integer quantity "default 1, 1..999"
+        timestamptz created_at "default now()"
+    }
+    wishlistitem {
+        uuid id PK
+        uuid user_id FK "not null, indexed, ON DELETE CASCADE"
+        uuid item_id FK "not null, indexed, ON DELETE CASCADE"
+        timestamptz created_at "default now()"
+    }
+    payment_card {
+        uuid id PK
+        uuid user_id FK "not null, indexed, ON DELETE CASCADE"
+        varchar(4) last4 "not null"
+        integer exp_month "not null"
+        integer exp_year "not null"
+        varchar(255) cardholder_name "not null"
+        timestamptz created_at "default now()"
+    }
+
+    user ||--o{ item : "owner_id (CASCADE)"
+    user ||--o{ shop_order : "user_id (CASCADE)"
+    user ||--o{ cartitem : "user_id (CASCADE)"
+    user ||--o{ wishlistitem : "user_id (CASCADE)"
+    user ||--o{ payment_card : "user_id (CASCADE)"
+    category |o--o{ item : "category_id"
+    size |o--o{ item : "size_id (SET NULL)"
+    brand |o--o{ item : "brand_id (SET NULL)"
+    item ||--o{ cartitem : "item_id (CASCADE) [UNIQUE user_id,item_id]"
+    item ||--o{ wishlistitem : "item_id (CASCADE) [UNIQUE user_id,item_id]"
+    item |o--o{ orderitem : "item_id (SET NULL)"
+    shop_order ||--o{ orderitem : "order_id (CASCADE)"
