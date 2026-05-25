@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 # Raw card input from the client. NEVER persisted as-is: only masked
-# fields (brand, last4, expiry, cardholder name) are stored.
+# fields (last4, expiry, cardholder name) are stored.
 # Card number / expiry / CVC accept any digits; only the cardholder name is
 # validated downstream (Latin letters).
 class PaymentCardCreate(SQLModel):
@@ -25,7 +25,6 @@ class PaymentCardCreate(SQLModel):
 
 # Masked, storable representation of a card.
 class PaymentCardBase(SQLModel):
-    brand: str = Field(max_length=32)
     last4: str = Field(max_length=4)
     exp_month: int
     exp_year: int

@@ -1049,7 +1049,7 @@ export const ordersCancelOrder = <ThrowOnError extends boolean = false>(options:
 /**
  * Pay Order
  * Pay for an order in NEW status using a saved card or new card data.
- * Raw card data (PAN/CVC) is never stored — only brand and last4 are kept.
+ * Raw card data (PAN/CVC) is never stored — only last4 is kept.
  */
 export const ordersPayOrder = <ThrowOnError extends boolean = false>(options: Options<OrdersPayOrderData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<OrdersPayOrderResponses, OrdersPayOrderErrors, ThrowOnError>({
@@ -1123,7 +1123,7 @@ export const paymentCardsReadPaymentCards = <ThrowOnError extends boolean = fals
 /**
  * Create Payment Card
  * Save a new card. Only masked data is stored — the PAN and CVC are
- * validated and immediately discarded.
+ * immediately discarded.
  */
 export const paymentCardsCreatePaymentCard = <ThrowOnError extends boolean = false>(options: Options<PaymentCardsCreatePaymentCardData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<PaymentCardsCreatePaymentCardResponses, PaymentCardsCreatePaymentCardErrors, ThrowOnError>({

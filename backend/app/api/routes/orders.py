@@ -41,7 +41,6 @@ def _serialize_order(order: Order) -> OrderPublic:
         paid_at=order.paid_at,
         received_at=order.received_at,
         refunded_at=order.refunded_at,
-        card_brand=order.card_brand,
         card_last4=order.card_last4,
         created_at=order.created_at,
         recipient_name=order.recipient_name,
@@ -221,7 +220,7 @@ def pay_order(
 ) -> Any:
     """
     Pay for an order in NEW status using a saved card or new card data.
-    Raw card data (PAN/CVC) is never stored — only brand and last4 are kept.
+    Raw card data (PAN/CVC) is never stored — only last4 is kept.
     """
     order = _get_owned_order(session=session, current_user=current_user, order_id=id)
     if order.status != OrderStatus.NEW:
@@ -233,7 +232,7 @@ def pay_order(
         )
         if not card:
             raise HTTPException(status_code=404, detail="Card not found")
-        brand, last4 = card.brand, card.last4
+        last4 = card.last4
     elif payload.card is not None:
         try:
             masked = mask_card(
@@ -244,7 +243,7 @@ def pay_order(
             )
         except CardValidationError as exc:
             raise HTTPException(status_code=400, detail=str(exc))
-        brand, last4 = masked.brand, masked.last4
+        last4 = masked.last4
         if payload.save_card:
             crud.create_payment_card(
                 session=session, user_id=current_user.id, masked=masked
@@ -252,7 +251,7 @@ def pay_order(
     else:
         raise HTTPException(status_code=400, detail="Укажите карту для оплаты")
 
-    updated = crud.pay_order(session=session, order=order, brand=brand, last4=last4)
+    updated = crud.pay_order(session=session, order=order, last4=last4)
     return _serialize_order(updated)
 
 

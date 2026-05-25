@@ -80,7 +80,6 @@ class Order(OrderBase, table=True):
         default=None,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
-    card_brand: str | None = Field(default=None, max_length=32)
     card_last4: str | None = Field(default=None, max_length=4)
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
@@ -107,7 +106,6 @@ class OrderPublic(OrderBase):
     paid_at: datetime | None = None
     received_at: datetime | None = None
     refunded_at: datetime | None = None
-    card_brand: str | None = None
     card_last4: str | None = None
     created_at: datetime | None = None
     items: list[OrderItemPublic] = []

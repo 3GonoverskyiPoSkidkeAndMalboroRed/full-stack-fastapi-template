@@ -910,17 +910,6 @@ export const OrderPublicSchema = {
             ],
             title: 'Refunded At'
         },
-        card_brand: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Card Brand'
-        },
         card_last4: {
             anyOf: [
                 {
@@ -1087,31 +1076,27 @@ export const PaymentCardCreateSchema = {
         card_number: {
             type: 'string',
             maxLength: 23,
-            minLength: 12,
+            minLength: 1,
             title: 'Card Number'
         },
         exp_month: {
             type: 'integer',
-            maximum: 12,
-            minimum: 1,
             title: 'Exp Month'
         },
         exp_year: {
             type: 'integer',
-            maximum: 2100,
-            minimum: 2000,
             title: 'Exp Year'
         },
         cvc: {
             type: 'string',
-            maxLength: 4,
-            minLength: 3,
+            maxLength: 8,
+            minLength: 1,
             title: 'Cvc'
         },
         cardholder_name: {
             type: 'string',
             maxLength: 255,
-            minLength: 2,
+            minLength: 1,
             title: 'Cardholder Name'
         }
     },
@@ -1122,27 +1107,17 @@ export const PaymentCardCreateSchema = {
 
 export const PaymentCardPublicSchema = {
     properties: {
-        brand: {
-            type: 'string',
-            maxLength: 32,
-            title: 'Brand'
-        },
         last4: {
             type: 'string',
             maxLength: 4,
-            minLength: 4,
             title: 'Last4'
         },
         exp_month: {
             type: 'integer',
-            maximum: 12,
-            minimum: 1,
             title: 'Exp Month'
         },
         exp_year: {
             type: 'integer',
-            maximum: 2100,
-            minimum: 2000,
             title: 'Exp Year'
         },
         cardholder_name: {
@@ -1169,7 +1144,7 @@ export const PaymentCardPublicSchema = {
         }
     },
     type: 'object',
-    required: ['brand', 'last4', 'exp_month', 'exp_year', 'cardholder_name', 'id'],
+    required: ['last4', 'exp_month', 'exp_year', 'cardholder_name', 'id'],
     title: 'PaymentCardPublic'
 } as const;
 

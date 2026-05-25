@@ -8,7 +8,7 @@ from sqlmodel import Session
 from app import crud
 from app.core.config import settings
 from app.models import Item, OrderStatus
-from app.payments import CardValidationError, detect_brand, mask_card
+from app.payments import CardValidationError, mask_card
 from tests.utils.order import create_random_order
 
 VISA = "4242424242424242"
@@ -33,11 +33,6 @@ def _new_card_payload() -> dict[str, object]:
 # --- pure helpers ---
 
 
-def test_detect_brand() -> None:
-    assert detect_brand(VISA) == "Visa"
-    assert detect_brand("5111111111111111") == "Mastercard"
-
-
 def test_mask_card_keeps_only_masked_fields() -> None:
     masked = mask_card(
         card_number="4242 4242 4242 4242",
@@ -46,7 +41,6 @@ def test_mask_card_keeps_only_masked_fields() -> None:
         cardholder_name="John Doe",
     )
     assert masked.last4 == "4242"
-    assert masked.brand == "Visa"
     assert not hasattr(masked, "card_number")
     assert not hasattr(masked, "cvc")
 
@@ -86,7 +80,6 @@ def test_create_card_stores_only_masked(
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["last4"] == "4242"
-    assert body["brand"] == "Visa"
     # full PAN / cvc must never be returned or stored
     assert "card_number" not in body
     assert "cvc" not in body

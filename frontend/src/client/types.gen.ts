@@ -495,10 +495,6 @@ export type OrderPublic = {
      */
     refunded_at?: string | null;
     /**
-     * Card Brand
-     */
-    card_brand?: string | null;
-    /**
      * Card Last4
      */
     card_last4?: string | null;
@@ -631,10 +627,6 @@ export type PaymentCardCreate = {
  * PaymentCardPublic
  */
 export type PaymentCardPublic = {
-    /**
-     * Brand
-     */
-    brand: string;
     /**
      * Last4
      */

@@ -360,10 +360,9 @@ def _restock_order(*, session: Session, order: Order) -> None:
             session.add(oi.item)
 
 
-def pay_order(*, session: Session, order: Order, brand: str, last4: str) -> Order:
+def pay_order(*, session: Session, order: Order, last4: str) -> Order:
     order.status = OrderStatus.PAID
     order.paid_at = datetime.now(timezone.utc)
-    order.card_brand = brand
     order.card_last4 = last4
     session.add(order)
     session.commit()
@@ -407,7 +406,6 @@ def create_payment_card(
 ) -> PaymentCard:
     card = PaymentCard(
         user_id=user_id,
-        brand=masked.brand,
         last4=masked.last4,
         exp_month=masked.exp_month,
         exp_year=masked.exp_year,

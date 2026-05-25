@@ -39,10 +39,10 @@ type CardForm = z.infer<typeof cardSchema>
 
 const NEW_CARD = "new"
 
-function cardLabel(brand: string, last4: string, m: number, y: number): string {
+function cardLabel(last4: string, m: number, y: number): string {
   const mm = String(m).padStart(2, "0")
   const yy = String(y).slice(-2)
-  return `${brand} •••• ${last4} · ${mm}/${yy}`
+  return `•••• ${last4} · ${mm}/${yy}`
 }
 
 export function PaymentForm({ orderId }: { orderId: string }) {
@@ -113,9 +113,7 @@ export function PaymentForm({ orderId }: { orderId: string }) {
               className="flex cursor-pointer items-center gap-3 rounded-md border p-3"
             >
               <RadioGroupItem value={c.id} />
-              <span>
-                {cardLabel(c.brand, c.last4, c.exp_month, c.exp_year)}
-              </span>
+              <span>{cardLabel(c.last4, c.exp_month, c.exp_year)}</span>
             </Label>
           ))}
           <Label className="flex cursor-pointer items-center gap-3 rounded-md border p-3">

@@ -51,7 +51,7 @@ type CardForm = z.infer<typeof cardSchema>
 function cardLabel(card: PaymentCardPublic): string {
   const mm = String(card.exp_month).padStart(2, "0")
   const yy = String(card.exp_year).slice(-2)
-  return `${card.brand} •••• ${card.last4} · ${mm}/${yy}`
+  return `•••• ${card.last4} · ${mm}/${yy}`
 }
 
 function AddCardDialog() {

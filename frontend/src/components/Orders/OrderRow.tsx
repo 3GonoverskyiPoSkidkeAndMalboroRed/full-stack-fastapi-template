@@ -129,7 +129,7 @@ export function OrderRow({ order }: OrderRowProps) {
             {order.card_last4 && (
               <div className="sm:col-span-2">
                 <span className="text-muted-foreground">Оплата: </span>
-                {order.card_brand} •••• {order.card_last4}
+                •••• {order.card_last4}
               </div>
             )}
             {order.cancellation_reason && (
